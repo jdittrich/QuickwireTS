@@ -19,7 +19,7 @@ type createRadioButtonListFigureParam = CreateFigureParam & {
  * @param {number} param.height
  */
 class RadioButtonListFigure extends Figure{
-    figureType = "RadioButtonListFigure";
+    name = "RadioButtonListFigure";
     #listEntriesRects = [];  //document rects of single list entries
 
     /**
@@ -150,7 +150,7 @@ class RadioButtonListFigure extends Figure{
         const rectJson = this.getRect().toJSON();
         const containedFiguresJson = this.getJsonOfContainedFigures();
         const rectFigureJson =  {
-            "type": this.figureType,
+            "type": this.name,
             "rect": rectJson,
             "containedFigures":containedFiguresJson,
             "radioButtons":this.getAttribute("radioButtons").toJSON()

@@ -8,7 +8,7 @@ import { findFiguresBelowPoint, findInnermostEnclosingFigure, findInnerMatches} 
 type CreateDrawingParam = CreateFigureParam;
 
 class Drawing extends Figure{
-    figureType = "Drawing";
+    name = "Drawing";
     isRoot = true;
 
     constructor(param:CreateDrawingParam){
@@ -78,20 +78,12 @@ class Drawing extends Figure{
        return figuresBelowPoint;
     }
     
-    // deleteAllFigures(){
-    //     const walkTreeAndDelete = (currentNode:Figure) => {
-    //         const containedFigures = currentNode.getContainedFigures();
-    //         containedFigures.forEach(containedFigure => walkTreeAndDelete(containedFigure)); //first traverse deep
-    //         containedFigures.forEach(containedFigure => currentNode.detachFigure(containedFigure));//after traversal is done, delete all children
-    //     }
-    //     walkTreeAndDelete(this);
-    // }
     toJSON(){
         const rectJson = this.getRect().toJSON();
         const containedFigureJson = this.getJsonOfContainedFigures();
 
         const drawingFigureJson =  {
-            "type":this.figureType,
+            "type":this.name,
             "rect": rectJson,
             "containedFigures":containedFigureJson,
         }

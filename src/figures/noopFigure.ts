@@ -12,6 +12,7 @@ class NoOpFigure extends Figure{
             }),
             containedFigures:[]
         });
+        this.name = "noOp";
     }
     //overwrite methods that do anything in base Figure
     drawFigure(ctx:CanvasRenderingContext2D):void{}

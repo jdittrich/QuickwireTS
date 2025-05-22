@@ -138,12 +138,10 @@ class LocalDragEvent extends LocalMouseEvent{
 const toolChangeEventName = "toolChange"; 
 
 class ToolChangeEvent extends Event{
-    tool = null;
-    name = null; 
-    constructor(tool:AbstractTool){
+    toolName:string = null; 
+    constructor(toolName:string){
         super(toolChangeEventName);
-        this.tool = tool;
-        this.name = tool.name;
+        this.toolName = toolName
     }
 }
 

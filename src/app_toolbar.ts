@@ -11,8 +11,15 @@ type AddLoadFileCallback = {
     (drawingView:DrawingView, drawingJson:object):void
 }
 
+type ToolData = {
+    tool:AbstractTool,
+    label?:string;
+    description?:string;
+    icon?:string
+}
 
-class ActionBar{
+
+class Actionbar{
     domElement:HTMLElement 
     drawingView: DrawingView
 
@@ -21,16 +28,12 @@ class ActionBar{
         this.domElement.className = "qwToolbar";
         this.drawingView = drawingView;
     }
-    addTool(label:string, tool:AbstractTool, tooltip:string){
-        const button = new ActionBarToolButton(label, this.drawingView, tool, tooltip);
-        this.domElement.append(button.domElement);
-    }
     addAction(label:string,callback:AddActionCallback, tooltip:string){
         const button = new ActionBarActionButton(label, this.drawingView, callback, tooltip);
         this.domElement.append(button.domElement);
     }
     addLoadFile(label:string,callback:AddLoadFileCallback, tooltip:string){
-        const button = new ToolbarLoadFileAsJsonButton(label, this.drawingView, callback, tooltip);
+        const button = new ActionbarLoadFileAsJsonButton(label, this.drawingView, callback, tooltip);
         this.domElement.append(button.domElement);
     }
 }
@@ -44,22 +47,9 @@ class ActionBarButton{
         htmlButton.setAttribute("value",label);
         htmlButton.setAttribute("title",tooltip);
         htmlButton.className = "qwToolbarButton";
-        htmlButton.style = "margin-right:2px; height:1.8rem";
         this.domElement = htmlButton;
     }
 }   
-
-class ActionBarToolButton extends ActionBarButton{
-    constructor(label:string, drawingView:DrawingView, tool:AbstractTool, tooltip:string){
-        super(label,tooltip);
-        
-        const changeTool = function(){
-            drawingView.changeTool(tool);
-        }
-        this.domElement.addEventListener("click", changeTool,false);
-    }
-
-}
 
 class ActionBarActionButton extends ActionBarButton{
     constructor(label:string, drawingView:DrawingView, callback:AddActionCallback, tooltip:string){
@@ -71,7 +61,7 @@ class ActionBarActionButton extends ActionBarButton{
     }
 }
 
-class ToolbarLoadFileAsJsonButton extends ActionBarButton{
+class ActionbarLoadFileAsJsonButton extends ActionBarButton{
     constructor(label:string, drawingView:DrawingView, callback:AddLoadFileCallback, tooltip:string){
         super(label, tooltip);
         this.domElement.setAttribute("type","file");
@@ -102,11 +92,18 @@ class ToolbarLoadFileAsJsonButton extends ActionBarButton{
 /**
  * Toolbar that can 
  */
-class ToolBar{
+
+
+
+type CreateToolButtonParam = ToolData & {
+    drawingView: DrawingView
+}
+
+class Toolbar{
     domElement = null;
     drawingView = null;
     selectedTool = ""
-    buttons = []
+    buttons:Array<ToolButton> = []
     constructor(drawingView){
         this.domElement = document.createElement("div");
         this.domElement.className = "qwToolbar";
@@ -114,67 +111,69 @@ class ToolBar{
         this.drawingView.addEventListener("toolChange",this.updateToolbar.bind(this))
     }
 
-    addToolButton(toolName){
-        const button = new ToolButton(toolName, this.drawingView);
+    addToolButton(addToolButtonParam:ToolData){
+        const button = new ToolButton({
+            ...addToolButtonParam,
+            drawingView:this.drawingView
+        });
         this.domElement.append(button.radiobuttonDom);
         this.domElement.append(button.labelDom);
         this.buttons.push(button)
     }
     updateToolbar(toolChangeEvent:ToolChangeEvent){
-        const buttonOfTool = this.buttons.find((button)=>button.toolName === toolChangeEvent.tool)
+        const buttonOfTool = this.buttons.find((button)=>button.toolName === toolChangeEvent.toolName)
         if (buttonOfTool){
             buttonOfTool.activate();
         } else {
-            console.log("No Button with name "+toolChangeEvent.tool.name+ "found.")
+            console.log("No Button with name "+toolChangeEvent.toolName+" found.")
         }
     }
 }
 
-type CreateToolButtonParam = {
-    toolName:string,
-    drawingView: DrawingView
-}
 
 class ToolButton{
     radiobuttonDom:HTMLInputElement
     labelDom:HTMLLabelElement
     
     #drawingView:DrawingView
-    #toolName:string
+    toolName:string
 
-    constructor(toolName:string, drawingView:DrawingView){
+    constructor(param:CreateToolButtonParam){
+        const {drawingView,label, description, icon} = param;
+        const toolName = param.tool.name;
         this.#drawingView = drawingView;
-        this.#toolName = toolName;
+        this.toolName = toolName;
 
-        const radiobutton = document.createElement("input");
-        const label = document.createElement("label");
+        const radiobuttonDom = document.createElement("input");
+        const labelDom = document.createElement("label");
         
         const radioId = "radio_"+toolName;
-        radiobutton.setAttribute("type","radio");
-        radiobutton.setAttribute("id",radioId);
-        radiobutton.setAttribute("name","tool");
+        radiobuttonDom.setAttribute("type","radio");
+        radiobuttonDom.setAttribute("id",radioId);
+        radiobuttonDom.setAttribute("name","tool");
+        
+        labelDom.setAttribute("for",radioId);
+        //labelDom.setAttribute("tabindex","0");
+        labelDom.setAttribute("aria-label",toolName)
+        labelDom.setAttribute("title", description ?? toolName)
+        labelDom.classList.add(icon+"_icon");
+        labelDom.textContent  = label ?? toolName;
 
-        label.setAttribute("for",radioId);
-        label.setAttribute("tabindex","0");
-        label.setAttribute("aria-label",toolName)
-        label.textContent  = toolName;
+        radiobuttonDom.addEventListener("input",this.buttonClicked.bind(this))
 
-        radiobutton.addEventListener("input",this.requestTool.bind(this))
-
-        this.radiobuttonDom = radiobutton;
-        this.labelDom = label;
+        this.radiobuttonDom = radiobuttonDom;
+        this.labelDom = labelDom;
         
     };
-    requestTool(e){
+    buttonClicked(e:InputEvent){
         console.log("requested")
         e.preventDefault();
-        this.#drawingView.changeTool(this.#toolName)
+        this.#drawingView.changeToolByName(this.toolName)
     };
-    activate(){
-        console.log("activated")
+    activate(){ //called by the toolBar 
+        console.log("activated");
         this.radiobuttonDom.checked = true;
     }
-
 }
 /*
 If I change tools by name (makes sense), 
@@ -199,4 +198,4 @@ This moves tool management into drawing view, but makes tools callable via a str
 
 */
 
-export {ActionBar as Toolbar, ActionBarActionButton as ToolbarActionButton, ActionBarToolButton as ToolbarToolButton, ToolbarLoadFileAsJsonButton}
+export {Toolbar, ToolButton, Actionbar , ActionBarActionButton, ActionbarLoadFileAsJsonButton, ToolData}

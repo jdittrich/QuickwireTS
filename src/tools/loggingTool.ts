@@ -6,6 +6,8 @@ import {Point} from "../data/point.js";
  * Simple logging tool for down and up events
  */
 class LoggingTool extends AbstractTool{
+    name = "logging";
+
     constructor(){
         super();
     }

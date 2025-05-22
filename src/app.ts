@@ -1,5 +1,5 @@
 import { Drawing } from "./drawing.js";
-import { DrawingView } from "./drawingView.js";
+import { DrawingView, DrawingViewParam} from "./drawingView.js";
 import { Point } from "./data/point.js";
 import { Rect } from "./data/rect.js";
 
@@ -9,8 +9,9 @@ import { RadioButtonListFigure } from "./figures/radioButtonListFigure.js";
 
 import { SelectionTool } from "./tools/selectionTool.js";
 import { CreateFigureTool } from "./tools/createFigureTool.js";
-import { Toolbar} from "./app_toolbar.js";
+import { Toolbar, ToolButton, Actionbar, ActionBarActionButton, ActionbarLoadFileAsJsonButton, ToolData} from "./app_toolbar.js";
 import { ToolChangeEvent, toolChangeEventName} from "./events.js";
+import { AbstractTool } from "./tools/abstractTool.js";
 
 
 /**
@@ -31,6 +32,7 @@ class App{
     #drawing: Drawing
     #drawingView: DrawingView
     toolbar:Toolbar
+    actionbar: Actionbar
 
     /**
      * @param {HTMLElement} container 
@@ -40,7 +42,7 @@ class App{
         //setup DOM
         this.#domContainer    = domContainer;
         
-        //create app container
+        //create app container. TODO: Move to private method, return DomFragment
         this.#appContainer = document.createElement("div");
         this.#appContainer.style.margin  = "0";
         this.#appContainer.style.padding  = "0";
@@ -53,6 +55,7 @@ class App{
         this.#horizontalBarContainer.style.padding = "0";
         this.#horizontalBarContainer.style.boxSizing;
         this.#horizontalBarContainer.style.width = "100%";
+        this.#horizontalBarContainer.classList.add("qwBarContainer");
         this.#appContainer.append(this.#horizontalBarContainer);
 
         this.#canvasContainer = document.createElement("div");
@@ -86,10 +89,7 @@ class App{
         this.#canvas.style.background = "lightgray";
         
         window.addEventListener("resize",this.#setCanvasSize.bind(this));
-        
-        //setup figureName to Class mapping
-        // const nameFigureClassMapper = new NameFigureClassMapper();
-        // nameFigureClassMapper.registerFromObject(nameFigureClassMap);
+
 
         //setup drawing view
         this.#drawing = new Drawing(
@@ -98,36 +98,52 @@ class App{
                 containedFigures:[]
             }
         );
-        this.#drawingView = new DrawingView(
+
+
+        const toolsData: ToolData[]   = [
             {
-                "ctx": this.#canvasCtx,
-                "ctxSize": new Point({
-                    x: this.#canvas.width,
-                    y: this.#canvas.height
-                }),
-                "drawing": this.#drawing,
-                //"nameFigureClassMapper": nameFigureClassMapper,
-                "requestEditorText":function(message,prefillText){
-                    const editedText = window.prompt(message,prefillText);
-                    if(editedText===null){
-                        throw new Error("Editing cancelled");
-                    };
-                    return editedText;
-                } 
+                tool: new SelectionTool(),
+                label:"selection tool", 
+                description:"pan or select figure and handles",
+                icon:"selectionTool"
+            },
+            {  
+                tool: new CreateFigureTool(RectFigure.createWithDefaultParameters()),
+                label: "Rectangle",
+                description: "create a rectangle figure",
+                icon:"rectangleTool"
+            },
+            {
+                tool: new CreateFigureTool(ButtonFigure.createWithDefaultParameters()),
+                label: "Button",
+                description:"create a button figure",
+                icon: "buttonTool"
+            },
+            {
+                tool: new CreateFigureTool(RadioButtonListFigure.createWithDefaultParameters()),
+                label: "Radio button list",
+                description: "create a list of radio buttons",
+                icon: "radioTool"
             }
-        );
+        
+        ]
+        
     
+        const drawingView = this.#setupDrawingView(toolsData)
+        this.#drawingView = drawingView;
+        const toolbar = this.#setupToolbar(toolsData);
+        const actionbar = this.#setupActionBar();
+        this.#horizontalBarContainer.append(toolbar.domElement);
+        this.#horizontalBarContainer.append(actionbar.domElement);
         
         this.#setCanvasSize();
-        this.#setupToolbar();
-        
-        //WIP setup events
         this.#drawingView.addEventListener(toolChangeEventName,e=>console.log("toolChanged?"))
         
         //for debugging
         // window.drawingView = this.#drawingView;
         // window.drawing = this.#drawing;
     }
+
 
     //#region: event handler
     #onMousedown(e:MouseEvent){
@@ -159,28 +175,47 @@ class App{
     #keyup(e:KeyboardEvent){
 
     }
+    #setupDrawingView(toolsData:ToolData[]){
+        const tools = toolsData.map(toolData => toolData.tool);
 
-    #setupToolbar(){
+        const drawingViewParam:DrawingViewParam =  {
+            "ctx": this.#canvasCtx,
+            "ctxSize": new Point({
+                x: this.#canvas.width,
+                y: this.#canvas.height
+            }),
+            "drawing": this.#drawing,
+            "requestEditorText":function(message,prefillText){
+                const editedText = window.prompt(message,prefillText);
+                if(editedText===null){
+                    throw new Error("Editing cancelled");
+                };
+                return editedText;
+            },
+            "tools": tools
+        }
+
+        const drawingView = new DrawingView(drawingViewParam);
+
+        return drawingView;
+    }
+
+    #setupToolbar(toolsData:ToolData[]):Toolbar{
         //tool definitions
-        this.#drawingView.changeTool(new SelectionTool());
 
-        this.toolbar = new Toolbar(this.#drawingView);
-        this.#horizontalBarContainer.append(this.toolbar.domElement);
-        
-        this.toolbar.addTool("selection", new SelectionTool(), "select, drag or change handles");
+        const toolbar = new Toolbar(this.#drawingView);
 
-        const rectFigureTemplate =  RectFigure.createWithDefaultParameters();
-        this.toolbar.addTool("newRect", new CreateFigureTool(rectFigureTemplate),"simple rectangle");
-        
-        const buttonFigureTemplate = ButtonFigure.createWithDefaultParameters();
-        this.toolbar.addTool("new Button", new CreateFigureTool(buttonFigureTemplate), "a button");
+        toolsData.forEach(toolData=>toolbar.addToolButton(toolData))
 
-        const experimentFigureFigureTemplate = RadioButtonListFigure.createWithDefaultParameters();
-        this.toolbar.addTool("new Radio", new CreateFigureTool(experimentFigureFigureTemplate), "RadioButtonList");
-        
-        this.toolbar.addAction("undo",function(drawingView){drawingView.undo()}, "undo last action");
-        this.toolbar.addAction("redo",function(drawingView){drawingView.redo()}, "redo undone action");
-        this.toolbar.addAction("save",function(drawingView){
+        return toolbar;
+    }
+
+    #setupActionBar():Actionbar{
+        const actionbar = new Actionbar(this.#drawingView);
+
+        actionbar.addAction("undo",function(drawingView){drawingView.undo()}, "undo last action");
+        actionbar.addAction("redo",function(drawingView){drawingView.redo()}, "redo undone action");
+        actionbar.addAction("save",function(drawingView){
             //getJSON and convert to string
             const drawingJson = drawingView.toJSON();
             const drawingJsonAsString = JSON.stringify(drawingJson);
@@ -202,10 +237,13 @@ class App{
             //free memory again
             URL.revokeObjectURL(fileUrl);
         }, "download current wireframe as json");
-        this.toolbar.addLoadFile("load",function(drawingView, drawingJson){
+        actionbar.addLoadFile("load",function(drawingView, drawingJson){
             drawingView.fromJSON(drawingJson);
         }, "create a wireframe from a json file");
+
+        return actionbar;
     }
+
     /**
      * sets canvas size in relation to its outer container and the devicePixelRatio
      * This ensures it is not blurry on high res displays. 

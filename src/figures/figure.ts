@@ -27,6 +27,7 @@ class Figure implements Drawable, Highlightable{
 
     isRoot = false;
 
+    name:string;
     /**
      * 
      * @param {object} param 

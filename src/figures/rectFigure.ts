@@ -16,7 +16,7 @@ type CreateRectFigureParam = CreateFigureParam;
  * @param {number} param.height
  */
 class RectFigure extends Figure{
-    figureType = "RectFigure";
+    name = "RectFigure";
 
     constructor(param:CreateRectFigureParam){
         super(param);
@@ -57,7 +57,7 @@ class RectFigure extends Figure{
     toJSON(){
         const containedFiguresJson = this.getJsonOfContainedFigures();
         const rectFigureJson =  {
-            "type":this.figureType,
+            "type":this.name,
             "rect":this.getRect().toJSON(),
             "containedFigures":containedFiguresJson
         }

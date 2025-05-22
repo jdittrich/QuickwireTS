@@ -14,7 +14,8 @@ import { Figure } from './figures/figure.js'
 import { Command } from './commands/command.js'
 import { Handle } from './handles/handle.js'
 import {jsonToFigure} from './figureFactory.js'
-import {Highlightable } from './interfaces.js'
+import {Highlightable, ToolManager, Previewer, Highlighter,SelectionManager, CommandManager } from './interfaces.js'
+import { SelectionTool } from './tools/selectionTool.js'
 /**
  * 
  * Gets events from app.
@@ -35,15 +36,12 @@ import {Highlightable } from './interfaces.js'
  *  zoom
  *  pan 
  */
-type ToolMap = {
-    [key:string]:AbstractTool;
-}
-type DrawingViewParameters = { 
+type DrawingViewParam = { 
     ctx: CanvasRenderingContext2D; 
     drawing: Drawing; 
     ctxSize: Point; 
     requestEditorText:Function;
-    tools:ToolMap
+    tools:Array<AbstractTool>
 }
 
 
@@ -53,7 +51,10 @@ type DrawingViewParameters = {
  * @see App
  *  
  */
-class DrawingView extends EventTarget{
+class DrawingView 
+extends EventTarget 
+implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager
+{
     #ctx:CanvasRenderingContext2D
     #transform:ViewTransform
     #ctxSize:Point;
@@ -64,10 +65,12 @@ class DrawingView extends EventTarget{
     
     drawing:Drawing
 
-    constructor(param:DrawingViewParameters){
+    constructor(param:DrawingViewParam){
         super();
-        const {ctx,drawing,ctxSize, requestEditorText} = param
+        const {ctx,drawing,ctxSize, requestEditorText, tools} = param
 
+        //register Tools
+        this.#registerTools(tools);
         //drawing
         this.#transform = new ViewTransform();
         this.setCtxSize(ctxSize);//needed to know which area to clear on redraws
@@ -254,36 +257,37 @@ class DrawingView extends EventTarget{
 
 
     //#region: tool management
-    #tool:AbstractTool;
-    #queuedTool: AbstractTool|null; 
-    #registerTools(){
+    #tools:Array<AbstractTool>=[];
+    #activeTool:AbstractTool;
+    //#queuedTool: AbstractTool|null; 
 
+    #registerTools(addTools:Array<AbstractTool>){
+        this.#tools.push(...addTools)
     }
     /*
-    requesting rather than immediately changing tools is needed, since changing a tool mid-action, 
-    e.g. at some point during drag yields unpredictable results, since the expected setup on mousedown 
-    would not take place.
+    Use this to change tools internally, i.e. by Drawing View or tools changing to other tools. 
     */
     changeTool(tool:AbstractTool):void{
-        //TODO: teardown (deactivate) old tool
-        tool.setDrawingView(this);
-        if(this.#mouseState === "down"){ //tool change requested in action, 
-            this.#queuedTool = tool; 
-        } else {
-            this.#tool = tool;
-            this.#queuedTool = null; 
+        if(this.#mouseState === "down"){ //guard
+            console.log("tool change requested while mouse was down.");
+            return; 
         }
-        this.dispatchEvent(new ToolChangeEvent(tool));
+
+        tool.setDrawingView(this);
+        this.#activeTool = tool;
+
+        this.dispatchEvent(new ToolChangeEvent(tool.name));
+        
     }
 
-    /**
-     * returns the currently active tool.
-     */
-    getTool(): AbstractTool{
-        return this.#tool;
+    /* 
+    Use this function when requesting tool changes from app.js
+    Tools need to be registered via #registerTools (called by constructor)
+    */
+    changeToolByName(toolName:string):void{
+        const newTool = this.#tools.find(tool=>tool.name === toolName);
+        this.changeTool(newTool);
     }
-
-
 
     //#region: events
     #mouseDownPoint:Point //to calculate drag distances
@@ -312,7 +316,7 @@ class DrawingView extends EventTarget{
             "previousPosition": this.#previousMousePosition.copy(),
             "view": this
         });
-        this.#lockedDragTool = this.#tool; 
+        this.#lockedDragTool = this.#activeTool; 
         this.#lockedDragTool.onMousedown(localMouseEvent);
         this.#previousMousePosition = mousePosition.copy();
     }
@@ -328,7 +332,7 @@ class DrawingView extends EventTarget{
             "view":this
         });
 
-        this.#tool.onMousemove(localMouseEvent);
+        this.#activeTool.onMousemove(localMouseEvent);
         
         if(this.#mouseDownPoint ){
             const localDragEvent = new LocalDragEvent({
@@ -394,7 +398,7 @@ class DrawingView extends EventTarget{
             "previousPosition": this.#previousMousePosition.copy(),
             "view": this
         })
-        this.#tool.onWheel(localMouseEvent,wheelDelta);
+        this.#activeTool.onWheel(localMouseEvent,wheelDelta);
         this.#previousMousePosition = mousePosition.copy();
     }
     
@@ -409,7 +413,7 @@ class DrawingView extends EventTarget{
     }
 
     #onHover(mouseEvent:LocalMouseEvent){
-        this.#tool.onHover(mouseEvent);
+        this.#activeTool.onHover(mouseEvent);
     }
 
     #onDragend(dragEvent:LocalDragEvent){
@@ -430,6 +434,15 @@ class DrawingView extends EventTarget{
         this.updateDrawing();
     }
 
+    undo():void{
+        this.#commandStack.undo();
+        this.updateDrawing();
+    }
+    redo():void{
+        this.#commandStack.redo();
+        this.updateDrawing();
+    }
+
     canUndo(): boolean{
         const canUndo = this.#commandStack.canUndo();
         return canUndo;
@@ -440,14 +453,6 @@ class DrawingView extends EventTarget{
         return canRedo;
     }
 
-    undo():void{
-        this.#commandStack.undo();
-        this.updateDrawing();
-    }
-    redo():void{
-        this.#commandStack.redo();
-        this.updateDrawing();
-    }
 
     //#region: selection
     select(figure:Figure):void{
@@ -455,7 +460,7 @@ class DrawingView extends EventTarget{
         this.updateDrawing();
     }
     clearSelection():void{
-        this.#selection.clear();
+        this.#selection.clearSelection();
         this.updateDrawing();
     }
     hasSelection():boolean{
@@ -492,9 +497,9 @@ class DrawingView extends EventTarget{
     }
 
     //#region: serialization/deserialization
-    getNameFigureClassMapper():NameFigureClassMapper{
-        return this.#nameFigureClassMapper;
-    }
+    // getNameFigureClassMapper():NameFigureClassMapper{
+    //     return this.#nameFigureClassMapper;
+    // }
 
     fromJSON(Json:Object):void{
         const drawing = jsonToFigure(Json);
@@ -511,4 +516,4 @@ class DrawingView extends EventTarget{
     }
 }
 
-export {DrawingView}
+export {DrawingView, DrawingViewParam}

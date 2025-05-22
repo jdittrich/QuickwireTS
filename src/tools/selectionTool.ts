@@ -77,6 +77,7 @@ class SelectionTool extends AbstractTool{
             }
         } else {
             throw new Error("one of the above conditions should always be the case");
+            
         }
     
     }
@@ -99,6 +100,7 @@ class SelectionTool extends AbstractTool{
             const dragTracker = new DragTracker(figureUnderCursor);
             this.setChildTool(dragTracker);
         } else {
+            this.setChildTool(new NoOpTool());
             throw new Error("one of the above conditions should always be the case");
         }
 

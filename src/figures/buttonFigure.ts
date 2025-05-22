@@ -11,7 +11,7 @@ type CreateButtonParam = CreateFigureParam & {
 }  
 
 class ButtonFigure extends Figure{
-    figureType = "ButtonFigure";
+    name = "ButtonFigure";
     #buttonLabel = "";
     #labelRect = new Rect({x:0,y:0,width:1,height:1});
 
@@ -101,7 +101,7 @@ class ButtonFigure extends Figure{
         const containedFigureJson = this.getJsonOfContainedFigures();
 
         const buttonFigureJson =  {
-            "type":this.figureType,
+            "type":this.name,
             "rect": rectJson,
             "label": this.getAttribute("label"),
             "containedFigures":containedFigureJson,

@@ -8,13 +8,14 @@ import { LocalDragEvent, LocalMouseEvent } from "../events.js";
 
 //Adds an element to the drawing
 class CreateFigureTool extends AbstractTool{
-    #figureToCreate:Readonly<Figure>
-    name = "createFigure"
+    #figureToCreate:Readonly<Figure>;
+    name:string = "";
+
     constructor(figureToCreate: Figure){
         super();
+        this.name = "createFigure"+"_"+figureToCreate.name;
         const frozenFigure = Object.freeze(figureToCreate); //so we don't accidentally mess with the figure. 
         this.#figureToCreate = frozenFigure;
-
     }
 
     onDragstart(event: LocalDragEvent){

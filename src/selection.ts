@@ -1,9 +1,9 @@
 import {Figure} from "./figures/figure.js"
+import { SelectionManager } from "./interfaces.js";
 
-class Selection{
+class Selection implements SelectionManager{
     #selectedFigure:Figure|null = null;
     constructor(){}
-
     /**
      * gets selected figure (if existing)
      */
@@ -15,18 +15,13 @@ class Selection{
         this.#selectedFigure = figure;
     }
 
-    clear():void{
+    clearSelection():void{
         this.#selectedFigure = null; 
     }
 
     hasSelection(): boolean{
         const hasSelection = !!this.#selectedFigure;
         return hasSelection;
-    }
-
-    isSelected(figure: Figure): boolean{
-        const isSelected = (figure === this.#selectedFigure);
-        return isSelected;
     }
 }
 
