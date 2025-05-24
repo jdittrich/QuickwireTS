@@ -56,6 +56,14 @@ class DeleteFigureHandle extends Handle{
         );
         drawingView.do(deleteFigureAndContainedCommand);
     }
+    getInteractions(){
+        return { 
+            cursor: "pointer",
+            helpText: "delete figure",
+            draggable: false, 
+            clickable: true 
+        };
+    }
 }
 
 export {DeleteFigureHandle}

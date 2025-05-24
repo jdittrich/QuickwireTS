@@ -4,6 +4,7 @@ import { Point } from "./data/point.js";
 import {ViewTransform} from "./transform.js";
 import { DrawingView } from "./drawingView.js";
 import { AbstractTool } from "./tools/abstractTool.js";
+import { InteractionAnnouncement } from "./interfaces.js";
 
 type LocalMouseEventParam = { 
     screenPosition: Point; 
@@ -138,6 +139,7 @@ class LocalDragEvent extends LocalMouseEvent{
 
 
 const toolChangeEventName = "toolChange"; 
+const interactionAnnouncementName = "interactionAnnouncement"
 
 class ToolChangeEvent extends Event{
     toolName:string = null; 
@@ -147,4 +149,19 @@ class ToolChangeEvent extends Event{
     }
 }
 
-export {LocalMouseEvent, LocalDragEvent, ToolChangeEvent, toolChangeEventName}
+class InteractionAnnouncementEvent extends Event implements InteractionAnnouncement{
+    cursor:string
+    draggable: boolean
+    clickable: boolean
+    helpText: string
+
+    constructor(interactions:InteractionAnnouncement){
+        super(interactionAnnouncementName);
+        this.cursor =    interactions.cursor ?? "default"
+        this.draggable = interactions.draggable ?? true 
+        this.clickable = interactions.clickable ?? true
+        this.helpText  = interactions.helpText ?? ""
+    }
+}
+
+export {LocalMouseEvent, LocalDragEvent, ToolChangeEvent, toolChangeEventName, InteractionAnnouncementEvent, interactionAnnouncementName}

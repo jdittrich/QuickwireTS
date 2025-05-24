@@ -6,6 +6,7 @@ import { SubclassShouldImplementError } from "../errors.js";
 import { Figure } from "../figures/figure.js";
 import { DrawingView } from "../drawingView.js";
 import { LocalDragEvent } from "../events.js";
+import {InteractionAnnouncement, InteractionInfoProvider} from "../interfaces.js"
 
 
 class ResizeHandle extends Handle{
@@ -67,6 +68,14 @@ class ResizeHandle extends Handle{
         const drawingView = this.getDrawingView();
         drawingView.endPreview();
     }
+    getDefaultInteractions(){
+        return { 
+            cursor: "nwse-resize",
+            helpText: "resize figure",
+            draggable: true, 
+            clickable: false 
+        };
+    }
 }
 
 class ResizeTopRightHandle extends ResizeHandle{
@@ -86,6 +95,13 @@ class ResizeTopRightHandle extends ResizeHandle{
         const changedTopRight = topRight.add(dragDocumentMovement);
         const changedRect = Rect.createFromCornerPoints(bottomLeft,changedTopRight); 
         return changedRect;
+    }
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "ne-resize"
+        };
     }
 }
 
@@ -107,6 +123,13 @@ class ResizeBottomRightHandle extends ResizeHandle{
         const changedRect = Rect.createFromCornerPoints(topLeft,changedBottomRight); 
         return changedRect;
     }
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "se-resize"
+        };
+    }
 }
 
 class ResizeBottomLeftHandle extends ResizeHandle{
@@ -127,6 +150,13 @@ class ResizeBottomLeftHandle extends ResizeHandle{
         const changedRect = Rect.createFromCornerPoints(topRight,changedBottomLeft); 
         return changedRect;
     }
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "sw-resize"
+        };
+    }
 }
 
 class ResizeTopLeftHandle extends ResizeHandle{
@@ -146,6 +176,13 @@ class ResizeTopLeftHandle extends ResizeHandle{
         const changedTopLeft = topLeft.add(dragDocumentMovement);
         const changedRect = Rect.createFromCornerPoints(bottomRight,changedTopLeft); 
         return changedRect;
+    }
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "ne-resize"
+        };
     }
 }
 

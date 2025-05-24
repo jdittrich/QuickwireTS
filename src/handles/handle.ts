@@ -4,9 +4,10 @@ import { Point } from "../data/point.js";
 import {Rect} from "../data/rect.js";
 import { SubclassShouldImplementError } from "../errors.js";
 import { LocalDragEvent, LocalMouseEvent } from "../events.js";
-import { Drawable, Highlightable } from "../interfaces.js";
+import { Drawable, Highlightable, InteractionInfoProvider, InteractionAnnouncement } from "../interfaces.js";
 
-class Handle implements Drawable, Highlightable{
+
+class Handle implements Drawable, Highlightable, InteractionInfoProvider {
     #figure:Figure
     #drawingView:DrawingView
 
@@ -93,6 +94,16 @@ class Handle implements Drawable, Highlightable{
     onMousedown(mouseEvent:LocalMouseEvent):void{ }
     onMouseup(mouseEvent:LocalMouseEvent):void{ }
     dragExit():void{}
+
+    //== announcer
+    getInteractions(){
+        return {
+            cursor:"pointer",
+            helpText:"a handle",
+            draggable:true,
+            clickable:true
+        }
+    }
 }
 
 export {Handle}

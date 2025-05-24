@@ -89,6 +89,15 @@ class Drawing extends Figure{
         }
         return drawingFigureJson;
     }
+
+    getInteractions(){
+        return { 
+            cursor: "default",
+            helpText: "the drawing background",
+            draggable: true, 
+            clickable: false 
+        };
+    }
 }
 
 export {Drawing}

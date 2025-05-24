@@ -5,7 +5,8 @@ import { RectConstraint} from '../data/rectConstraint.js';
 import {FigureAttributes} from './figureAttributes.js';
 import { Handle } from '../handles/handle.js';
 import { DrawingView } from '../drawingView.js';
-import { Drawable, Highlightable } from '../interfaces.js';
+import { Drawable, Highlightable, InteractionAnnouncement, InteractionInfoProvider } from '../interfaces.js';
+
 
 type CreateFigureParam = {
     rect:Rect;
@@ -18,7 +19,7 @@ type FigureJson = {
     type: String;
 }
 
-class Figure implements Drawable, Highlightable{
+class Figure implements Drawable, Highlightable, InteractionInfoProvider{
     #rect = null;
 
     #attributes = new FigureAttributes();
@@ -531,6 +532,15 @@ class Figure implements Drawable, Highlightable{
     // static fromJSON(JSON: FigureJson,nameFigureClassMapper: NameFigureClassMapper){
     //     throw new SubclassShouldImplementError("MainFigure","fromJSON");
     // }
+
+    getInteractions(): InteractionAnnouncement {
+        return {
+            clickable:false,
+            draggable: true,
+            cursor:"default",
+            helpText: "a figure"
+        }
+    }
 }
 
 export {Figure, CreateFigureParam, FigureJson}

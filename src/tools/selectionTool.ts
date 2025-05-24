@@ -7,6 +7,7 @@ import { NoOpTool } from './noopTool.js';
 import { Point } from '../data/point.js';
 import { Drawing } from '../drawing.js';
 import { NoOpFigure } from '../figures/noopFigure.js';
+import { InteractionInfoProvider } from '../interfaces.js';
 
 type HandleFound = {
     type:"handle";
@@ -27,7 +28,8 @@ type NothingFound = {
     value:NoOpFigure
 }
 
-type ElementUnderCursor = HandleFound | FigureFound | DrawingFound | NothingFound;
+// type ElementUnderCursor = HandleFound | FigureFound | DrawingFound | NothingFound;
+type ElementUnderCursor = Handle | Figure;
 
 class SelectionTool extends AbstractTool{
     #childTool = new NoOpTool();
@@ -49,60 +51,87 @@ class SelectionTool extends AbstractTool{
         const drawing = drawingView.drawing;
         const figureEnclosingPoint = drawing.findFigureEnclosingPoint(documentPoint);
         
-        if(!figureEnclosingPoint){ //outside of root figure
-            return {
-                type:"nothing",
-                value:new NoOpFigure()
-            }
+        // if(!figureEnclosingPoint){ //outside of root figure
+        //     return {
+        //         type:"nothing",
+        //         value:new NoOpFigure()
+        //     }
+        // }
+        if(!figureEnclosingPoint){
+            return new NoOpFigure();
         }
         //get handles from an already selected figure.
         const handles = drawingView.getHandles();
         const handleUnderPoint = handles.find(handle=> handle.isEnclosingPoint(documentPoint));
         
         if(handleUnderPoint){
-            //if we are over a handle,  keep selection, change handle
-            return {
-                type:"handle",
-                value:handleUnderPoint
-            }
-        } else if (figureEnclosingPoint === drawing){ //clicked document, but no movable figure
-            return {
-                type:"drawing",
-                value:drawing
-            }
-        } else if(figureEnclosingPoint){ //at least one figure under mouse
-            return {
-                type:"figure",
-                value:figureEnclosingPoint
-            }
+            return handleUnderPoint
+        } else if (figureEnclosingPoint){
+            return figureEnclosingPoint
         } else {
             throw new Error("one of the above conditions should always be the case");
-            
         }
+        // if(handleUnderPoint){
+        //     //if we are over a handle,  keep selection, change handle
+        //     return {
+        //         type:"handle",
+        //         value:handleUnderPoint
+        //     }
+        // } else if (figureEnclosingPoint === drawing){ //clicked document, but no movable figure
+        //     return {
+        //         type:"drawing",
+        //         value:drawing
+        //     }
+        // } else if(figureEnclosingPoint){ //at least one figure under mouse
+        //     return {
+        //         type:"figure",
+        //         value:figureEnclosingPoint
+        //     }
+        // } else {
+        //     throw new Error("one of the above conditions should always be the case");
+            
+        // }
     
     }
     onMousedown(event: LocalMouseEvent){
         const cursorPosition = event.getDocumentPosition();
         const elementUnderPoint = this.#whatIsUnderPoint(cursorPosition);
-        const type = elementUnderPoint.type;
+        const drawingView = this.getDrawingView();
+        const drawing = drawingView.drawing;
 
-        if(type === "handle"){
-            //if we are over a handle,  keep selection, change handle
-            const handleTracker = new HandleTracker(elementUnderPoint.value);
+        if(elementUnderPoint instanceof Handle){
+            const handleTracker = new HandleTracker(elementUnderPoint);
             this.setChildTool(handleTracker);
-        } else if (type === "drawing"){ //clicked document, but no movable figure
+        } else if (elementUnderPoint === drawing){
             const panTracker = new PanTracker();
             this.setChildTool(panTracker);
-        } else if(type === "figure"){ //at least one figure under mouse
-            //if we are over a figure, select and go do drag mode
-            const figureUnderCursor = elementUnderPoint.value;
-            event.drawingView.select(figureUnderCursor);
-            const dragTracker = new DragTracker(figureUnderCursor);
+        } else if (elementUnderPoint instanceof Figure){
+            event.drawingView.select(elementUnderPoint);
+            const dragTracker = new DragTracker(elementUnderPoint);
             this.setChildTool(dragTracker);
         } else {
             this.setChildTool(new NoOpTool());
             throw new Error("one of the above conditions should always be the case");
         }
+        // const type = elementUnderPoint.type;
+        // const value = elementUnderPoint.value;
+        // if(type === "handle"){
+        //     //if we are over a handle,  keep selection, change handle
+        //     const handleTracker = new HandleTracker(value);
+        //     this.setChildTool(handleTracker);
+        // } else if (type === "drawing"){ //clicked document, but no movable figure
+        //     const panTracker = new PanTracker();
+        //     this.setChildTool(panTracker);
+        // } else if(type === "figure"){ //at least one figure under mouse
+        //     //if we are over a figure, select and go do drag mode
+        //     const figureUnderCursor = elementUnderPoint.value;
+        //     event.drawingView.select(figureUnderCursor);
+        //     const dragTracker = new DragTracker(figureUnderCursor);
+        //     this.setChildTool(dragTracker);
+        // } else {
+        //     this.setChildTool(new NoOpTool());
+        //     throw new Error("one of the above conditions should always be the case");
+        // }
 
         this.#childTool.onMousedown(event);
     }
@@ -111,7 +140,8 @@ class SelectionTool extends AbstractTool{
         const cursorPosition = event.getDocumentPosition();
         const elementUnderPoint = this.#whatIsUnderPoint(cursorPosition);
 
-        drawingView.startHighlightOf(elementUnderPoint.value);
+        drawingView.startHighlightOf(elementUnderPoint);
+        drawingView.announceInteractionsOf(elementUnderPoint);
        
         event.drawingView.updateDrawing();
     }

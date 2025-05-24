@@ -1,7 +1,7 @@
 import { ViewTransform} from './transform.js'
 import {AbstractTool} from './tools/abstractTool.js'
 import { NoOpTool } from './tools/noopTool.js'
-import { LocalMouseEvent, LocalDragEvent } from './events.js'
+import { LocalMouseEvent, LocalDragEvent, InteractionAnnouncementEvent} from './events.js'
 import { ToolChangeEvent } from './events.js'
 import { NoOpFigure } from './figures/noopFigure.js'
 import { CommandStack } from './commands/commandStack.js'
@@ -14,7 +14,7 @@ import { Figure } from './figures/figure.js'
 import { Command } from './commands/command.js'
 import { Handle } from './handles/handle.js'
 import {jsonToFigure} from './figureFactory.js'
-import {Highlightable, ToolManager, Previewer, Highlighter,SelectionManager, CommandManager, ViewTransformerConversions } from './interfaces.js'
+import {Highlightable, ToolManager, Previewer, Highlighter,SelectionManager, CommandManager, ViewTransformerConversions, InteractionInfoProvider} from './interfaces.js'
 import { SelectionTool } from './tools/selectionTool.js'
 /**
  * 
@@ -515,6 +515,11 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     // getNameFigureClassMapper():NameFigureClassMapper{
     //     return this.#nameFigureClassMapper;
     // }
+    announceInteractionsOf(element:InteractionInfoProvider){
+        const interactions = element.getInteractions()
+        const interactionEvent = new InteractionAnnouncementEvent(interactions)
+        this.dispatchEvent(interactionEvent);
+    }
 
     fromJSON(Json:Object):void{
         const drawing = jsonToFigure(Json);

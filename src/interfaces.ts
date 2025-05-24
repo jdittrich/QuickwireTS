@@ -51,4 +51,18 @@ interface ViewTransformerConversions {
     documentToScreenDistance(documentDistance:Point):Point
     screenToDocumentDistance(screenDistance:Point):Point
 }
-export {Drawable,Highlightable, Highlighter, ToolManager, Previewer,  CommandManager, SelectionManager, ViewTransformerConversions}
+
+
+interface InteractionAnnouncement {
+    cursor?:     string,
+    helpText?:   string,
+    clickable?:  boolean
+    draggable?:  boolean
+    cursorDown?: string
+}
+
+interface InteractionInfoProvider {
+    getInteractions():InteractionAnnouncement
+}
+
+export {Drawable,Highlightable, Highlighter, ToolManager, Previewer,  CommandManager, SelectionManager, ViewTransformerConversions, InteractionInfoProvider, InteractionAnnouncement}

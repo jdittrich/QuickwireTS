@@ -98,6 +98,14 @@ class EditTextHandle extends Handle {
         )
         drawingView.do(changeTextCommand);
     }
+    getInteractions(){
+        return { 
+            cursor: "pointer;",
+            helpText: "edit text",
+            draggable: false, 
+            clickable: true 
+        };
+    }
 }
 
 export {EditTextHandle}

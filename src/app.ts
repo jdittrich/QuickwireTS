@@ -10,8 +10,9 @@ import { RadioButtonListFigure } from "./figures/radioButtonListFigure.js";
 import { SelectionTool } from "./tools/selectionTool.js";
 import { CreateFigureTool } from "./tools/createFigureTool.js";
 import { Toolbar, ToolButton, Actionbar, ActionBarActionButton, ActionbarLoadFileAsJsonButton, ToolData} from "./app_toolbar.js";
-import { ToolChangeEvent, toolChangeEventName} from "./events.js";
+import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEvent, toolChangeEventName} from "./events.js";
 import { AbstractTool } from "./tools/abstractTool.js";
+import { InteractionAnnouncement } from "./interfaces.js";
 
 
 /**
@@ -138,6 +139,7 @@ class App{
         
         this.#setCanvasSize();
         this.#drawingView.addEventListener(toolChangeEventName,this.#handleToolChange.bind(this));
+        this.#drawingView.addEventListener(interactionAnnouncementName, this.#handleInteractionAnnouncement.bind(this));
         
         //for debugging
         // window.drawingView = this.#drawingView;
@@ -309,11 +311,15 @@ class App{
     #handleToolChange(e:ToolChangeEvent){
         this.setCursor("cursor_tool_"+e.toolName)
     }
+    #handleInteractionAnnouncement(e:InteractionAnnouncementEvent){
+        this.setCursor("cursor_"+e.cursor);
+        this.#canvasContainer.setAttribute("title",e.helpText);
+    }
     /**Takes css cursor names*/
     setCursor(cursorName:string){
         console.log("set cursor to ", cursorName);
         this.#appContainer.classList.add(cursorName);
-        if(this.#previousCursorClass){
+        if(this.#previousCursorClass && (this.#previousCursorClass !== cursorName)){ //delete old cursor class, except if the new is the same as the old one
             this.#appContainer.classList.remove(this.#previousCursorClass);
         }
         this.#previousCursorClass = cursorName;    
