@@ -28,7 +28,15 @@ class CreateFigureCommand extends Command{
         this.drawingView = drawingView;
 
         const newFigureRect = Rect.createFromCornerPoints(cornerPoint1, cornerPoint2);
-        const {rectEnclosesFigures, rectEnclosedByFigure} = drawingView.drawing.findFiguresEnclosingAndEnclosed(newFigureRect);
+        
+        const changedRectInDrawing = drawingView.drawing.isEnclosingRect(newFigureRect);
+        if(!changedRectInDrawing){
+            throw Error("changedRect out of drawing−s bounds, aborting command");
+        }
+
+        const rectEnclosedByFigure:Figure   = drawingView.drawing.findFigureEnclosingRect(newFigureRect);
+        const rectEnclosesFigures:Figure[]  = drawingView.drawing.findEnclosedFigures(rectEnclosedByFigure,newFigureRect)
+
 
         //create figure
         //const nameFigureClassMapper = drawingView.getNameFigureClassMapper();
