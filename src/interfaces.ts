@@ -1,4 +1,5 @@
 import { Rect } from "./data/rect";
+import { Point } from "./data/point";
 import { AbstractTool } from "./tools/abstractTool";
 import { Figure } from "./figures/figure";
 import { Command } from "./commands/command";
@@ -41,4 +42,13 @@ interface SelectionManager{
     hasSelection():boolean;
     getSelection():Figure;
 }
-export {Drawable,Highlightable, Highlighter, ToolManager, Previewer,  CommandManager, SelectionManager}
+
+interface ViewTransformerConversions {
+    screenToDocumentPosition(screenPoint:Point):Point;
+    documentToScreenPosition(documentPoint:Point):Point;
+    screenToDocumentRect(screenRect:Rect):Rect;
+    documentToScreenRect(documentRect:Rect):Rect;
+    documentToScreenDistance(documentDistance:Point):Point
+    screenToDocumentDistance(screenDistance:Point):Point
+}
+export {Drawable,Highlightable, Highlighter, ToolManager, Previewer,  CommandManager, SelectionManager, ViewTransformerConversions}

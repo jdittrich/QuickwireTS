@@ -1,6 +1,7 @@
 import { Figure, CreateFigureParam } from "./figure.js";
 import { createAllResizeHandles } from '../handles/resizeHandle.js';
 import {EditTextHandle} from '../handles/editTextHandle.js';
+import {DuplicationHandle} from '../handles/duplicationHandle.js';
 import { DeleteFigureHandle } from "../handles/deleteFigureHandle.js";
 import { Rect } from "../data/rect.js";
 import { DrawingView } from "../drawingView.js";
@@ -60,9 +61,11 @@ class ButtonFigure extends Figure{
             attributeName:"label",
             textRect: this.#labelRect
         });
+        const duplicationHandle = new DuplicationHandle(this,drawingView);
         const deleteFigureHandle = new DeleteFigureHandle(this,drawingView)
         const resizeHandles  = createAllResizeHandles(this, drawingView);
         return [
+            duplicationHandle,
             deleteFigureHandle,
             textEditHandle,
             ...resizeHandles

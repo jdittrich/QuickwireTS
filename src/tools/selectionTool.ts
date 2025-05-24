@@ -138,6 +138,9 @@ class SelectionTool extends AbstractTool{
     dragExit(){
         this.#childTool.dragExit();
     }
+    onKeydown(): void {
+        console.log("selection tool key pressed");
+    }
 }
 
 // #region: Trackers

@@ -14,7 +14,7 @@ import { Figure } from './figures/figure.js'
 import { Command } from './commands/command.js'
 import { Handle } from './handles/handle.js'
 import {jsonToFigure} from './figureFactory.js'
-import {Highlightable, ToolManager, Previewer, Highlighter,SelectionManager, CommandManager } from './interfaces.js'
+import {Highlightable, ToolManager, Previewer, Highlighter,SelectionManager, CommandManager, ViewTransformerConversions } from './interfaces.js'
 import { SelectionTool } from './tools/selectionTool.js'
 /**
  * 
@@ -53,7 +53,7 @@ type DrawingViewParam = {
  */
 class DrawingView 
 extends EventTarget 
-implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager
+implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, ViewTransformerConversions
 {
     #ctx:CanvasRenderingContext2D
     #transform:ViewTransform
@@ -174,11 +174,14 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager
      * Makes the previewed Figure invisible so it looks as if you interact with the original figure
      * @see {getPreviewedFigure}
      */
-    startPreviewOf(figureToPreview: Figure):void{ //puts figure in preview
+    startPreviewOf(figureToPreview: Figure, hideOriginal:Boolean = true):void{ //puts figure in preview
         this.#previewedElement = figureToPreview;
         this.#previewElement = figureToPreview.copy(); //like: copy(this.stringClassMapper)
         this.#isPreviewing = true;
-        figureToPreview.setIsVisible(false);
+        if(hideOriginal){
+            figureToPreview.setIsVisible(false);
+        }
+        
     }
 
     endPreview():void{
@@ -232,6 +235,15 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager
         return pointOnScreen;
     }
 
+    documentToScreenDistance(documentDistance: Point): Point {
+         const screenDistance = this.#transform.documentToScreenDistance(documentDistance);
+         return screenDistance;
+    }
+
+    screenToDocumentDistance(screenDistance: Point): Point {
+        const documentDistance = this.#transform.screenToDocumentDistance(screenDistance);
+        return documentDistance;
+    }
     /**
      * Helper to transform a rect, defined in screen coordinates 
      * to transformed document coordinates.
@@ -420,6 +432,9 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager
         this.#lockedDragTool.onDragend(dragEvent);
         this.#lockedDragTool.dragExit();
     }
+
+    onKeyDown(){}
+    onKeyUp(){}
 
     isDragging(): boolean{
         return this.#dragging;

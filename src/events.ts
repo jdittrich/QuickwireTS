@@ -5,7 +5,7 @@ import {ViewTransform} from "./transform.js";
 import { DrawingView } from "./drawingView.js";
 import { AbstractTool } from "./tools/abstractTool.js";
 
-interface LocalMouseEventParam { 
+type LocalMouseEventParam = { 
     screenPosition: Point; 
     previousPosition: Point; 
     view: DrawingView; 
@@ -81,7 +81,7 @@ class LocalMouseEvent{
     }
 }
 
-interface LocalDragEventParam extends LocalMouseEventParam {
+type LocalDragEventParam =  LocalMouseEventParam & {
     downPoint: Point
 } 
 
@@ -134,6 +134,8 @@ class LocalDragEvent extends LocalMouseEvent{
         return documentDragMovement
     }
 }
+
+
 
 const toolChangeEventName = "toolChange"; 
 

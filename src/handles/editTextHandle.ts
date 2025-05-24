@@ -26,15 +26,37 @@ class EditTextHandle extends Handle {
         super(figure, drawingView);
         this.#attributeName = param.attributeName;
         this.#textRect = param.textRect;
-        // const image = new Image();
-        //image.src = "./src/static/text_16.png";
-
     }
 
     draw(ctx: CanvasRenderingContext2D){ 
         const {x,y,width,height} = this.getScreenRect();
-        ctx.fillStyle = "#DDD";
+        ctx.fillStyle = "#c3e7ee";
         ctx.fillRect(x,y,width,height);
+        ctx.strokeStyle = "#9bbac0";
+        ctx.strokeRect(x,y,width,height);
+
+        ctx.strokeStyle = "#000";
+        const xCenter = x+ (this.#size /2);
+        const cursorWidth = 2
+        const cursorHeight = 8
+        const topPos = y+((this.#size-cursorHeight)/2);
+        const bottomPos = topPos + cursorHeight;
+        //draw a little cursor
+        
+        ctx.beginPath(); // Start a new path
+        ctx.moveTo(xCenter-2,           topPos); 
+        ctx.lineTo(xCenter+cursorWidth, topPos);   //‾
+        ctx.stroke();
+
+        ctx.beginPath()
+        ctx.moveTo(xCenter,    topPos); 
+        ctx.lineTo(xCenter,    bottomPos); // | 
+        ctx.stroke();
+        
+        ctx.beginPath(); // Start a new path
+        ctx.moveTo(xCenter-2,  bottomPos);
+        ctx.lineTo(xCenter+cursorWidth, bottomPos);; //_
+        ctx.stroke();
     }
 
     /**

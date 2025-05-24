@@ -137,7 +137,7 @@ class App{
         this.#horizontalBarContainer.append(actionbar.domElement);
         
         this.#setCanvasSize();
-        this.#drawingView.addEventListener(toolChangeEventName,e=>console.log("toolChanged?"))
+        this.#drawingView.addEventListener(toolChangeEventName,this.#handleToolChange.bind(this));
         
         //for debugging
         // window.drawingView = this.#drawingView;
@@ -170,10 +170,10 @@ class App{
     }
 
     #keydown(e:KeyboardEvent){ //Note: Keyboard events are rather low level. Input events are high level, but only fire on input-ish elements
-
+        this.#drawingView.onKeyDown();
     }
     #keyup(e:KeyboardEvent){
-
+        this.#drawingView.onKeyUp();
     }
     #setupDrawingView(toolsData:ToolData[]){
         const tools = toolsData.map(toolData => toolData.tool);
@@ -305,17 +305,21 @@ class App{
     //WIP Request a cursor
     // encapsulates setting a cursor based on its name
     #cursor = "default";
-    #previousCursorClass = null;
+    #previousCursorClass:string = null;
+    #handleToolChange(e:ToolChangeEvent){
+        this.setCursor("cursor_tool_"+e.toolName)
+    }
     /**Takes css cursor names*/
     setCursor(cursorName:string){
+        console.log("set cursor to ", cursorName);
         this.#appContainer.classList.add(cursorName);
         if(this.#previousCursorClass){
             this.#appContainer.classList.remove(this.#previousCursorClass);
-            this.#previousCursorClass = cursorName;    
         }
+        this.#previousCursorClass = cursorName;    
     }
     getCursor():string{
-        return "";
+        return this.#cursor;
     }
 };
 

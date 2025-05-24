@@ -34,16 +34,17 @@ class ResizeHandle extends Handle{
     }
 
     onDragstart(dragEvent:LocalDragEvent):void{
-        dragEvent.drawingView.startPreviewOf(this.getFigure()); 
+        const drawingView = this.getDrawingView();
+        drawingView.startPreviewOf(this.getFigure()); 
     }
     onDrag(dragEvent:LocalDragEvent){
+        const drawingView = this.getDrawingView();
         const dragMovement = dragEvent.getDocumentDragMovement();
-        const previewFigure = dragEvent.drawingView.getPreviewedFigure();
+        const previewFigure = drawingView.getPreviewedFigure();
         const newRect = this.createChangedRect(dragMovement)
         previewFigure.setRect(newRect);
     }
     onDragend(dragEvent:LocalDragEvent){
-        
         const drawingView = this.getDrawingView();
 
         const dragMovement = dragEvent.getDocumentDragMovement();

@@ -1,5 +1,6 @@
 import { Point } from "./data/point.js";
 import { Rect } from "./data/rect.js";
+import { ViewTransformerConversions } from "./interfaces.js";
 
 import {mat2d, vec2} from "./libraries/glmatrix/index.js"
 
@@ -15,7 +16,7 @@ import {mat2d, vec2} from "./libraries/glmatrix/index.js"
  * I guess it makes sense when you read it right-to-left, but even then, passing a object-to-be-changed seems strange to me. 
  */
 
-class ViewTransform{
+class ViewTransform implements ViewTransformerConversions{
     #matrix:any //the current transform matrix; will be changed by setter methods and used to transform points
 
     /**
