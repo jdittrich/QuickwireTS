@@ -6,7 +6,7 @@ class NoOpFigure extends Figure{
         super({ //figure needs some data, so we make some.
             rect: new Rect({
                 x:0,
-                y:0,
+                y:0,    
                 width:1,
                 height:1
             }),

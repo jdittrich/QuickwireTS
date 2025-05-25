@@ -535,7 +535,7 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
 
     getInteractions(): InteractionAnnouncement {
         return {
-            clickable:false,
+            clickable: false,
             draggable: true,
             cursor:"default",
             helpText: "a figure"

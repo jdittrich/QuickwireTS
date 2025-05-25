@@ -100,7 +100,7 @@ class EditTextHandle extends Handle {
     }
     getInteractions(){
         return { 
-            cursor: "pointer;",
+            cursor: "pointer",
             helpText: "edit text",
             draggable: false, 
             clickable: true 
