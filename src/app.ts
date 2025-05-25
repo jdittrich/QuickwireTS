@@ -13,6 +13,7 @@ import { Toolbar, ToolButton, Actionbar, ActionBarActionButton, ActionbarLoadFil
 import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEvent, toolChangeEventName} from "./events.js";
 import { AbstractTool } from "./tools/abstractTool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
+import { ToggleFigure } from "./figures/toggleFigure.js";
 
 
 /**
@@ -125,6 +126,12 @@ class App{
                 label: "Radio button list",
                 description: "create a list of radio buttons",
                 icon: "radioTool"
+            },
+            {
+                tool: new CreateFigureTool(ToggleFigure.createWithDefaultParameters("checkbox")),
+                label:"Checkbox figure",
+                description: "Checkbox with label",
+                icon: "checkboxTool"
             }
         
         ]
