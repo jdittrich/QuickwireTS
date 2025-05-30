@@ -181,7 +181,7 @@ class ResizeTopLeftHandle extends ResizeHandle{
         const defaultInteractions = this.getDefaultInteractions()
         return { 
             ...defaultInteractions,
-            cursor: "ne-resize"
+            cursor: "nw-resize"
         };
     }
 }
