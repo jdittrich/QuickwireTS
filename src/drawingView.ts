@@ -41,7 +41,7 @@ type DrawingViewParam = {
     drawing: Drawing; 
     ctxSize: Point; 
     requestEditorText:Function;
-    tools:Array<AbstractTool>
+    tools:Array<{tool:AbstractTool, name:string}>
 }
 
 
@@ -269,11 +269,11 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
 
 
     //#region: tool management
-    #tools:Array<AbstractTool>=[];
+    #tools:Array<{tool:AbstractTool,name:string}>=[];
     #activeTool:AbstractTool;
     //#queuedTool: AbstractTool|null; 
 
-    #registerTools(addTools:Array<AbstractTool>){
+    #registerTools(addTools:Array<{tool:AbstractTool,name:string}>){
         this.#tools.push(...addTools)
     }
     /*
@@ -298,7 +298,7 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     */
     changeToolByName(toolName:string):void{
         const newTool = this.#tools.find(tool=>tool.name === toolName);
-        this.changeTool(newTool);
+        this.changeTool(newTool.tool);
     }
 
     //#region: events

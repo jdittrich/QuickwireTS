@@ -16,6 +16,7 @@ type ToolData = {
     label?:string;
     description?:string;
     icon?:string
+    name:string
 }
 
 
@@ -140,7 +141,7 @@ class ToolButton{
 
     constructor(param:CreateToolButtonParam){
         const {drawingView,label, description, icon} = param;
-        const toolName = param.tool.name;
+        const toolName = param.name;
         this.#drawingView = drawingView;
         this.toolName = toolName;
 

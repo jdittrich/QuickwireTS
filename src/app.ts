@@ -107,31 +107,36 @@ class App{
                 tool: new SelectionTool(),
                 label:"selection tool", 
                 description:"pan or select figure and handles",
-                icon:"selectionTool"
+                icon:"selectionTool",
+                name:"selectionTool"
             },
             {  
                 tool: new CreateFigureTool(RectFigure.createWithDefaultParameters()),
                 label: "Rectangle",
                 description: "create a rectangle figure",
-                icon:"rectangleTool"
+                icon:"rectangleTool",
+                name:"rectangleTool"
             },
             {
                 tool: new CreateFigureTool(ButtonFigure.createWithDefaultParameters()),
                 label: "Button",
                 description:"create a button figure",
-                icon: "buttonTool"
-            },
-            {
-                tool: new CreateFigureTool(RadioButtonListFigure.createWithDefaultParameters()),
-                label: "Radio button list",
-                description: "create a list of radio buttons",
-                icon: "radioTool"
+                icon: "buttonTool",
+                name: "buttonTool"
             },
             {
                 tool: new CreateFigureTool(ToggleFigure.createWithDefaultParameters("checkbox")),
                 label:"Checkbox figure",
                 description: "Checkbox with label",
-                icon: "checkboxTool"
+                icon: "checkboxTool",
+                name: "checkboxTool"
+            },
+            {
+                tool: new CreateFigureTool(ToggleFigure.createWithDefaultParameters("radio")),
+                label:"Radiobutton figure",
+                description: "Radiobutton with label",
+                icon: "radiobuttonTool",
+                name:"radiobuttonTool"
             }
         
         ]
@@ -185,7 +190,7 @@ class App{
         this.#drawingView.onKeyUp();
     }
     #setupDrawingView(toolsData:ToolData[]){
-        const tools = toolsData.map(toolData => toolData.tool);
+        const tools = toolsData.map((toolData) => {return {"tool":toolData.tool, "name":toolData.name}});
 
         const drawingViewParam:DrawingViewParam =  {
             "ctx": this.#canvasCtx,
