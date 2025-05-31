@@ -1,4 +1,4 @@
-import { Figure, CreateFigureParam } from "./figure.js";
+import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
 import { createAllResizeHandles } from '../handles/resizeHandle.js';
 import {EditTextHandle} from '../handles/editTextHandle.js';
 import {DuplicationHandle} from '../handles/duplicationHandle.js';
@@ -9,13 +9,16 @@ import { Handle } from "../handles/handle.js";
 
 type CreateButtonParam = CreateFigureParam & {
     label:String;
-}  
+}
+
+type ButtonFigureJson = FigureJson & {
+    label:string;
+}
 
 class ButtonFigure extends Figure{
     name = "ButtonFigure";
-    #buttonLabel = "";
-    #labelRect = new Rect({x:0,y:0,width:1,height:1});
-
+    #cachedLabelLength:number
+    #cachedLabelHeight: number
     constructor(param:CreateButtonParam){
         super(param);
         this.registerAttributes({"label":String});
@@ -30,102 +33,79 @@ class ButtonFigure extends Figure{
         return label;
     }
 
+    #getLabelRect():Rect{
+        const rect = this.getRect();
+        const center = rect.getCenter();
+        const labelY = center.y - ((this.#cachedLabelHeight)/2);
+        const labelX = center.x - (this.#cachedLabelLength/2);
+        const labelRect = new Rect({
+            x:labelX,
+            y:labelY,
+            width:this.#cachedLabelLength,
+            height:this.#cachedLabelHeight
+        });
+        return labelRect;
+    }
     drawFigure(ctx){
         const rect = this.getRect();
         const {width,height,x,y} = rect;
-        const center = rect.getCenter();
         const label = this.getAttribute("label");
         ctx.strokeStyle = "#040";
         ctx.strokeRect(x,y,width,height);
 
         // place label in center, use text width and height to find place of center
-        const metrics = ctx.measureText(label);
-        const labelY = center.y + ((metrics.hangingBaseline-metrics.ideographicBaseline)/2);
-        const labelX = center.x - (metrics.width/2);
-        ctx.fillText(label, labelX, labelY);
-
-        // store label rect
-        const labelHeight = metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
-        this.#labelRect = new Rect({
-            x:labelX,
-            y:labelY,
-            width:metrics.width,
-            height:labelHeight
-        });
+        const labelMetrics = ctx.measureText(label);
+        this.#cachedLabelHeight = labelMetrics.hangingBaseline - labelMetrics.ideographicBaseline;
+        this.#cachedLabelLength = labelMetrics.width;
         
+        const labelRect = this.#getLabelRect();
+        ctx.fillText(label, labelRect.x, labelRect.y+this.#cachedLabelHeight);
     }
 
     
     getHandles(drawingView:DrawingView):Handle[]{
+        const basicHandles =  super.getHandles(drawingView);
         const textEditHandle = new EditTextHandle(this,drawingView,{
             attributeName:"label",
-            textRect: this.#labelRect
+            textRect: this.#getLabelRect()
         });
-        const duplicationHandle = new DuplicationHandle(this,drawingView);
-        const deleteFigureHandle = new DeleteFigureHandle(this,drawingView)
-        const resizeHandles  = createAllResizeHandles(this, drawingView);
         return [
-            duplicationHandle,
-            deleteFigureHandle,
-            textEditHandle,
-            ...resizeHandles
+            ...basicHandles,
+            textEditHandle
         ];
     }
     
-
-
     /**
      * @see {Figure.toString}
     */
    toString(): string{
-        const {x,y,width,height} = this.getRect();
-        const containedFigures = this.getContainedFigures();
+        const baseString = super.toString();
         const label = this.getAttribute("label");
-        const type = this.constructor.name;
-        const buttonFigureString = `x:${x}, y:${y}, width:${width}, height:${height}, label:${label},number of contained figures:${containedFigures.length},type:${type}`;
+        const buttonFigureString = baseString+`label:${label}`;
         return buttonFigureString;
     }
-
-    copy(){
-        const baseParameters = this.copyBaseParameters();
-        const buttonFigureCopy = new ButtonFigure({
+    getParameters(){
+        const baseParameters = super.getParameters();
+        const buttonFigureParameters = {
             ...baseParameters,
-            label:this.getAttribute("label")
-        });
-        return buttonFigureCopy;
+            label: this.getAttribute("label")
+        }
+        return buttonFigureParameters;
     }
 
     /**
      * Serializes figure to JSON
      * @returns {object} as json
      */
-    toJSON(): object{
-        const rectJson = this.getRect().toJSON();
-        const containedFigureJson = this.getJsonOfContainedFigures();
+    toJSON(): ButtonFigureJson{
+        const baseJson = super.toJSON();
 
         const buttonFigureJson =  {
-            "type":this.name,
-            "rect": rectJson,
+            ...baseJson,
             "label": this.getAttribute("label"),
-            "containedFigures":containedFigureJson,
         }
         return buttonFigureJson;
     }
-
-    /**
-    * created a figure from a JSON
-    * @param {JSON} figureJson 
-    * @param {function} nameFigureClassMapper gets a string, returns the class 
-    */
-//    static fromJSON(figureJson,nameFigureClassMapper){
-//        const containedFigureObjects = super.createContainedFiguresFromJson(figureJson,nameFigureClassMapper);
-//        const buttonFigure = new ButtonFigure({
-//             "rect": Rect.fromJSON(figureJson.rect),
-//             "label":            figureJson.label,
-//             "containedFigures": containedFigureObjects
-//         });
-//         return buttonFigure;
-//     }
 
     static createWithDefaultParameters(){
         const buttonFigure = new ButtonFigure({

@@ -1,11 +1,11 @@
 import { createAllResizeHandles } from '../handles/resizeHandle.js';
 
-import {Figure, CreateFigureParam} from './figure.js'
+import {Figure, CreateFigureParam, FigureJson} from './figure.js'
 import { Rect } from '../data/rect.js';
 import { DrawingView } from '../drawingView.js';
 
 type CreateRectFigureParam = CreateFigureParam;
-
+type RectFigureJson = FigureJson;
 /**
  * Creates figure representing a simple rectangle
  * 
@@ -22,65 +22,37 @@ class RectFigure extends Figure{
         super(param);
     }
 
-
-
     drawFigure(ctx:CanvasRenderingContext2D){
         const {width,height,x,y} = this.getRect();
         ctx.strokeRect(x,y,width,height);
     }
 
     getHandles(drawingView:DrawingView){
-        const resizeHandles = createAllResizeHandles(this, drawingView);
-        return [...resizeHandles];
+        const basicHandles = super.getHandles(drawingView);
+        return [...basicHandles];
     }
-    
-    copy():RectFigure{
-        const baseParameters = this.copyBaseParameters();
-        const rectParameters ={
-            ...baseParameters
-        }
-        const rectFigureCopy = new RectFigure(rectParameters);
-        return rectFigureCopy;
+    getParameters():CreateRectFigureParam{
+        const baseParameters = super.getParameters();
+        const rectParameters = baseParameters;
+        return rectParameters;
     }
 
     /**
     * @see {Figure.toString}
     */
     toString():string{
-       const {x,y,width,height} = this.getRect();
-       const containedFigures = this.getContainedFigures();
-       const type = this.constructor.name;
-       const rectFigureString = `x:${x}, y:${y}, width:${width}, height:${height}, number of contained figures:${containedFigures.length},type:${type}`;
-       return rectFigureString;
+       const baseString = super.toString();
+       const rectString = baseString;
+       return rectString;
     }
     
-    toJSON(){
-        const containedFiguresJson = this.getJsonOfContainedFigures();
-        const rectFigureJson =  {
-            "type":this.name,
-            "rect":this.getRect().toJSON(),
-            "containedFigures":containedFiguresJson
-        }
+    toJSON():RectFigureJson{
+        const baseFigureJson = super.toJSON();
+        const rectFigureJson = baseFigureJson;
         return rectFigureJson;
     }
 
-    /**
-     * created a figure from a JSON
-     * @param {JSON} figureJson 
-     */
-    // static fromJSON(figureJson,nameFigureClassMapper){
-    //     const containedFigureObjects = super.createContainedFiguresFromJson(figureJson,nameFigureClassMapper);
-    //     const rectFigure = new RectFigure({
-    //         "rect": Rect.fromJSON(figureJson.rect),
-    //         "containedFigures": containedFigureObjects
-    //      });
-    //      return rectFigure;
-    // }
-
-    /**
-     * @returns {RectFigure}
-     */
-    static createWithDefaultParameters(){
+    static createWithDefaultParameters():RectFigure{
         const rectFigure = new RectFigure({
             rect: new Rect({
                 "x":0,

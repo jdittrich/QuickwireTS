@@ -4,6 +4,9 @@ import {Point} from '../data/point.js';
 import { RectConstraint} from '../data/rectConstraint.js';
 import {FigureAttributes} from './figureAttributes.js';
 import { Handle } from '../handles/handle.js';
+import { DuplicationHandle } from '../handles/duplicationHandle.js';
+import { createAllResizeHandles } from '../handles/resizeHandle.js';
+import { DeleteFigureHandle } from '../handles/deleteFigureHandle.js';
 import { DrawingView } from '../drawingView.js';
 import { Drawable, Highlightable, InteractionAnnouncement, InteractionInfoProvider } from '../interfaces.js';
 
@@ -26,9 +29,9 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
 
     #containedBy = null;
 
-    isRoot = false;
+    isRoot = false; //only overwritten by the Drawing subclass
 
-    name:string;
+    name:string = "baseFigure";
     /**
      * 
      * @param {object} param 
@@ -36,13 +39,6 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
      */
     constructor(param: CreateFigureParam){
         const rect = param.rect 
-        //NOTE: Do I still need to provide a Rect when I have a constraint?
-        /*const constraint = param.constraint ?? new RectConstraint({
-
-        })*/
-        if(rect.constructor !== Rect){
-            throw new TypeError("param.rect needs to be a Rect instance")
-        }
         this.setRect(rect);
         this.appendFigures(param.containedFigures ?? []);
     }
@@ -53,7 +49,7 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
      * a copy of the contained figures
      * @returns CreateFigureParam
      */
-    copyBaseParameters():CreateFigureParam{
+    getParameters():CreateFigureParam{
         const rectCopy = this.getRect().copy();
         const containedCopies = this.getContainedFigures().map(figure => figure.copy())
         const baseParameters = {
@@ -370,7 +366,7 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
 
         const containedFigures = this.getContainedFigures();
         containedFigures.forEach(figure=>figure.movePositionBy(moveBy));
-        //containedFigures.forEach(figure=>figure.updateRectFromConstraints()) //#constraint
+        //containedFigures.forEach(figure=>figure.updateRectFromConstraints()) //# For later when we have constraints
     }
     
     /**
@@ -381,28 +377,28 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
        return rectCopy;
     }
     //#region constraints
-    #constraint
-    /**
-     * @param {RectConstraint} constraints 
-     */
-    setConstraint(constraint){
-        this.#constraint = constraint;
-    }
-    getConstraint(){
-        return this.#constraint;
-    }
+    // #constraint
+    // /**
+    //  * @param {RectConstraint} constraints 
+    //  */
+    // setConstraint(constraint){
+    //     this.#constraint = constraint;
+    // }
+    // getConstraint(){
+    //     return this.#constraint;
+    // }
 
-    /**
-     * Collaboration: Will be called by outer container when it is resized
-     */
-    updateRectFromConstraint(){
-        const container = this.getContainer();
-        const containerRect = container.getRect();
-        const constraint = this.getConstraint();
+    // /**
+    //  * Collaboration: Will be called by outer container when it is resized
+    //  */
+    // updateRectFromConstraint(){
+    //     const container = this.getContainer();
+    //     const containerRect = container.getRect();
+    //     const constraint = this.getConstraint();
 
-        const newRect = constraint.deriveRect(containerRect);
-        this.changeRect(newRect);
-    }
+    //     const newRect = constraint.deriveRect(containerRect);
+    //     this.changeRect(newRect);
+    // }
 
 
     //#region Handles factory
@@ -425,7 +421,15 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
          * Or I pass a transform to the handle’s drawing method
          *  
          */
-        return []; //standard implementation is empty array, thus providing a common type. 
+        const duplicationHandle = new DuplicationHandle(this,drawingView);
+        const deleteFigureHandle = new DeleteFigureHandle(this,drawingView)
+        const resizeHandles  = createAllResizeHandles(this, drawingView);
+
+        return [
+            duplicationHandle,
+            deleteFigureHandle,
+            ...resizeHandles
+        ];
     }
 
     //#region hit tests.
@@ -464,43 +468,37 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
 
     //#region: copy
     copy():Figure{
-        // const figureJSON = this.toJSON();
-        // const constructor = this.constructor as unknown as any; //ugly, but whatever, see https://github.com/microsoft/TypeScript/issues/3841
-        // const newFigure = constructor.fromJSON(figureJSON,nameFigureClassMapper);
-        // return newFigure;
-        throw new SubclassShouldImplementError("toJSON","Figure");
+        const parameters = this.getParameters();
+        const constructor = this.constructor as unknown as any;
+        const newFigure =  new constructor(parameters);
+        return newFigure;
     }
 
-    /**
-     * Helper
-     * @returns {Array} with toJSONs of contained figures.
-     */
-    getJsonOfContainedFigures(): Array<Figure>{
-        const jsonOfContainedFigures = this.#containedFigures.map(figure=>figure.toJSON());
-        return jsonOfContainedFigures;
-    }
-
+    
     //#region serialization/deserialization
     /**
      * string serialization read by people, similar to python’s __str__
-     */
-    toString(){
-        throw new SubclassShouldImplementError("toString","Figure");
+    */
+   toString(){
+       const type = this.name;
+       const {x,y,width,height} = this.getRect();
+       const containedFigures = this.getContainedFigures();
+       const basicString = `x:${x}, y:${y}, width:${width}, height:${height},number of contained figures:${containedFigures.length}, type:${type} `
+       return basicString;
     }
-
+    
     /**
-     * JSON serialization for storage
-     * @returns {JSON}
+     * @returns {Array} with toJSONs of contained figures.
      */
-    toJSON(): object{
-        throw new SubclassShouldImplementError("toJSON","Figure");
+    #getJsonOfContainedFigures(): Array<FigureJson>{
+        const jsonOfContainedFigures = this.#containedFigures.map(figure=>figure.toJSON());
+        return jsonOfContainedFigures;
     }
-
     /**
      * Returns a JSON of the rectangle of the figure.
      * @returns {JSON}
      */
-    getJsonOfRect():object{
+    #getJsonOfRect():RectJson{
         const {x,y,width,height} = this.getRect();
         return {
             "x":x,
@@ -509,6 +507,22 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
             "height":height
         }
     }
+    /**
+     * JSON serialization for storage
+     * @returns {JSON}
+    */
+   toJSON(): FigureJson{
+       const containedFigureJson = this.#getJsonOfContainedFigures();
+        const rectJson = this.#getJsonOfRect();
+
+        const baseFigureJson:FigureJson = {
+            "rect": rectJson,
+            "containedFigures":containedFigureJson,
+            "type": this.name
+        }
+        return baseFigureJson
+    }
+
 
     /**
      * Helper

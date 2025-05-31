@@ -1,11 +1,13 @@
 import { Point } from './data/point.js';
 import { Rect } from './data/rect.js';
-import { Figure,CreateFigureParam } from './figures/figure.js';
+import { Figure,CreateFigureParam, FigureJson} from './figures/figure.js';
 import { findFiguresBelowPoint, findInnermostEnclosingFigure, findInnerMatches} from './hitTest.js';
 
 // the drawing contains other figures, so it is basically a composite figure
 
 type CreateDrawingParam = CreateFigureParam;
+
+type DrawingJson = FigureJson;
 
 class Drawing extends Figure{
     name = "Drawing";
@@ -78,14 +80,10 @@ class Drawing extends Figure{
        return figuresBelowPoint;
     }
     
-    toJSON(){
-        const rectJson = this.getRect().toJSON();
-        const containedFigureJson = this.getJsonOfContainedFigures();
-
+    toJSON():DrawingJson{
+        const baseJson = super.toJSON();
         const drawingFigureJson =  {
-            "type":this.name,
-            "rect": rectJson,
-            "containedFigures":containedFigureJson,
+            ...baseJson
         }
         return drawingFigureJson;
     }

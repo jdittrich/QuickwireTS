@@ -1,5 +1,6 @@
-import { Figure, CreateFigureParam } from "./figure.js";
+import { Figure, CreateFigureParam, FigureJson} from "./figure.js";
 import { Rect } from "../data/rect.js";
+import { Point } from "../data/point.js";
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
 import { createAllResizeHandles } from '../handles/resizeHandle.js';
@@ -14,6 +15,15 @@ type CreateToggleParam = CreateFigureParam & {
     isSelected:Boolean;
     toggleLook?:ToggleLook;
 }
+
+type ToggleFigureJson = FigureJson & {
+    isSelected:boolean,
+    label: string,
+    toggleLook:string,
+}
+/**
+ * WIP
+ */
 
 // class CheckboxFigure extends Figure{
 //     name = "CheckboxFigure";
@@ -159,6 +169,7 @@ type CreateToggleParam = CreateFigureParam & {
 // }
 
 class ToggleFigure extends Figure{
+    name = "ToggleFigure"
     #toggleFigureLook = null;
     toggleLook:ToggleLook
     constructor(param:CreateToggleParam){
@@ -172,6 +183,9 @@ class ToggleFigure extends Figure{
         switch(param.toggleLook){
             case "checkbox":
                 this.#toggleFigureLook = new ToogleCheckmarkLook(this)
+                break;
+            case "radio":
+                this.#toggleFigureLook = new ToogleRadioLook(this);
                 break;
             default:
                 throw new Error("no drawing strategy was found")
@@ -189,58 +203,50 @@ class ToggleFigure extends Figure{
         this.#toggleFigureLook.drawFigure(ctx);
     }
     getHandles(drawingView:DrawingView):Handle[]{
+        const basicHandles = super.getHandles(drawingView);
+
         const textEditHandle = new EditTextHandle(this,drawingView,{
             attributeName:"label",
             textRect: this.#toggleFigureLook.getLabelRect()
         });
         const toggleCheckboxHandle = new ToggleAttributeHandle(this,drawingView,this.#toggleFigureLook.getToggleRect(),"isSelected");
-        const duplicationHandle = new DuplicationHandle(this,drawingView);
-        const deleteFigureHandle = new DeleteFigureHandle(this,drawingView)
-        const resizeHandles  = createAllResizeHandles(this, drawingView);
         return [
-            duplicationHandle,
-            deleteFigureHandle,
+            ...basicHandles,
             textEditHandle,
             toggleCheckboxHandle,
-            ...resizeHandles
         ];
     }
     toString(): string{
-        const {x,y,width,height} = this.getRect();
-        const containedFigures = this.getContainedFigures();
+        const basicString = super.toString();
         const label = this.getAttribute("label");
         const look  = this.toggleLook;
-        const type = this.constructor.name;
-        const buttonFigureString = `x:${x}, y:${y}, width:${width}, height:${height}, label:${label},number of contained figures:${containedFigures.length},type:${type}, look:${look}`;
-        return buttonFigureString;
+        const type  = this.constructor.name;
+        const buttonFigureSpecificString = `label:${label},type:${type}, look:${look}`;
+        const fullString = basicString+buttonFigureSpecificString;
+        return fullString;
     }
-
-    copy(){
-        const baseParameters = this.copyBaseParameters();
-        const buttonFigureCopy = new ToggleFigure({
+    getParameters(){
+        const baseParameters = super.getParameters();
+        const toggleFigureParameters ={
             ...baseParameters,
             label:this.getAttribute("label"),
             isSelected:this.getAttribute("isSelected"),
             toggleLook: this.toggleLook
-        });
-        return buttonFigureCopy;
+        }
+        return toggleFigureParameters;
     }
-
     /**
      * Serializes figure to JSON
      * @returns {object} as json
      */
-    toJSON(): object{
-        const rectJson = this.getRect().toJSON();
-        const containedFigureJson = this.getJsonOfContainedFigures();
+    toJSON(): ToggleFigureJson{
+        const baseJson = super.toJSON();
 
         const toggleFigureJson =  {
-            "type":this.name,
-            "rect": rectJson,
-            "label": this.getAttribute("label"),
-            "isSelected": this.getAttribute("isSelected"),
-            "containedFigures":containedFigureJson,
-            "toggleLook":this.toggleLook
+            ...baseJson,
+            "label": this.getAttribute("label") as string,
+            "isSelected": this.getAttribute("isSelected") as boolean,
+            "toggleLook":this.toggleLook as string
         }
         return toggleFigureJson;
     }
@@ -275,19 +281,22 @@ so that handles can be placed next to them or over them
 class ToogleCheckmarkLook {
     #figure:ToggleFigure;
     #checkboxSize=16;
-    #cachedLableRect: Rect = new Rect({x:0,y:0,width:1,height:1}); 
-
+    #cachedLabelHeight = 10;
+    #cachedLabelWidth = 30;
     constructor(figure:ToggleFigure){
        this.#figure = figure;
     }
 
     drawFigure(ctx:CanvasRenderingContext2D):void{
+        const label      = this.#figure.getAttribute("label");
 
-        const label = this.#figure.getAttribute("label");
-        const labelRect = this.#calculateLableRect(ctx);
+        //update metrics
+        const labelMetrics = ctx.measureText(label);
+        this.#cachedLabelHeight = labelMetrics.hangingBaseline - labelMetrics.ideographicBaseline;
+        this.#cachedLabelWidth = labelMetrics.width;
+
         const toggleRect = this.getToggleRect();
-
-        ctx.strokeRect(toggleRect.x,toggleRect.y,this.#checkboxSize,this.#checkboxSize);
+        ctx.strokeRect(toggleRect.x,toggleRect.y,toggleRect.width, toggleRect.height);
 
         //optionally: draw checkmark
         if(this.#figure.getAttribute("isSelected")){
@@ -299,33 +308,110 @@ class ToogleCheckmarkLook {
         }
 
         //draw label
+        const labelRect = this.getLabelRect();
         ctx.fillStyle = "#000"
-        ctx.fillText(label, labelRect.left, labelRect.bottom);    
+        ctx.fillText(label, labelRect.left, labelRect.bottom); 
     }
-    getToggleRect():Rect{        
-        const figureRect = this.#figure.getRect();
-        const checkboxRect = new Rect({
-            x     :figureRect.x,
-            y     :figureRect.y,
-            width :this.#checkboxSize,
+    getToggleRect():Rect{
+        const centeredStartPoint = this.#centeredStartPoint();
+        const toggleRect = new Rect({
+            x:centeredStartPoint.x,
+            y:centeredStartPoint.y,
+            width:this.#checkboxSize,
             height:this.#checkboxSize
         });
-        return checkboxRect;
+        
+        return toggleRect;
+
     }
-    #calculateLableRect(ctx):Rect{
-        const label = this.#figure.getAttribute("label");
-        const metrics = ctx.measureText(label);
-        const labelWidth = metrics.width;
-        const labelHeight = metrics.hangingBaseline-metrics.ideographicBaseline;
-        const toggleRect = this.getToggleRect();
-        const labelXPos = toggleRect.x + toggleRect.width +5
-        const labelYPos = toggleRect.y + 10;
-        this.#cachedLableRect = new Rect({x:labelXPos, y: labelYPos, width: labelWidth, height:labelHeight});
-        return this.#cachedLableRect;
+    //The upper left corner point of a horizontally centered box of the height of this.#checkboxSize
+    #centeredStartPoint():Point{
+        const figureRect = this.#figure.getRect();
+        const figureCenter = figureRect.getCenter();
+        const centeredStartPoint = new Point({x:figureRect.x, y:figureCenter.y-(this.#checkboxSize/2) })
+        
+        return centeredStartPoint;
     }
     getLabelRect():Rect{
-        return this.#cachedLableRect;
+        const centeredStartPoint = this.#centeredStartPoint();
+        const labelRect = new Rect({
+            x:centeredStartPoint.x + this.#checkboxSize*1.5,
+            y:centeredStartPoint.y + (this.#cachedLabelHeight/2),
+            width:this.#cachedLabelWidth,
+            height:this.#cachedLabelHeight
+        });
+        return labelRect;
     }
 }
+
+class ToogleRadioLook {
+    #figure:ToggleFigure;
+    #checkboxSize=16;
+    #cachedLabelHeight = 10;
+    #cachedLabelWidth = 30;
+    constructor(figure:ToggleFigure){
+       this.#figure = figure;
+    }
+
+    drawFigure(ctx:CanvasRenderingContext2D):void{
+        const label      = this.#figure.getAttribute("label");
+        const radioRadius = 5;
+        const radioSelectionRadius = 3;
+
+        //update metrics
+        const labelMetrics = ctx.measureText(label);
+        this.#cachedLabelHeight = labelMetrics.hangingBaseline - labelMetrics.ideographicBaseline;
+        this.#cachedLabelWidth = labelMetrics.width;
+
+        const toggleRect = this.getToggleRect();
+        const radioCenter = toggleRect.getCenter();
+        const radioCircle = new Path2D(); 
+        radioCircle.arc(radioCenter.x, radioCenter.y, radioRadius, 0, 2 * Math.PI, false);
+
+        const radioSelection = new Path2D(); 
+        radioSelection.arc(radioCenter.x, radioCenter.y, radioSelectionRadius, 0, 2 * Math.PI, false);
+
+        ctx.stroke(radioCircle);
+        if(this.#figure.getAttribute("isSelected")){
+            ctx.fill(radioSelection);
+        }
+
+        //draw label
+        const labelRect = this.getLabelRect();
+        ctx.fillStyle = "#000"
+        ctx.fillText(label, labelRect.left, labelRect.bottom); 
+    }
+    getToggleRect():Rect{
+        const centeredStartPoint = this.#centeredStartPoint();
+        const toggleRect = new Rect({
+            x:centeredStartPoint.x,
+            y:centeredStartPoint.y,
+            width:this.#checkboxSize,
+            height:this.#checkboxSize
+        });
+        
+        return toggleRect;
+
+    }
+    //The upper left corner point of a horizontally centered box of the height of this.#checkboxSize
+    #centeredStartPoint():Point{
+        const figureRect = this.#figure.getRect();
+        const figureCenter = figureRect.getCenter();
+        const centeredStartPoint = new Point({x:figureRect.x, y:figureCenter.y-(this.#checkboxSize/2) })
+        
+        return centeredStartPoint;
+    }
+    getLabelRect():Rect{
+        const centeredStartPoint = this.#centeredStartPoint();
+        const labelRect = new Rect({
+            x:centeredStartPoint.x + this.#checkboxSize*1.5,
+            y:centeredStartPoint.y + (this.#cachedLabelHeight/2),
+            width:this.#cachedLabelWidth,
+            height:this.#cachedLabelHeight
+        });
+        return labelRect;
+    }
+}
+
 //export {CheckboxFigure, CreateCheckboxParam}
 export {ToggleFigure, CreateToggleParam}
