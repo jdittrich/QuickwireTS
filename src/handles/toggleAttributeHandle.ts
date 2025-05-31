@@ -4,7 +4,6 @@ import { Handle } from "./handle.js";
 import { Figure } from "../figures/figure.js";
 import { DrawingView } from "../drawingView.js";
 import { LocalMouseEvent } from "../events.js";
-import {RadioButtonListFigure} from "../figures/radioButtonListFigure.js";
 
 class ToggleAttributeHandle extends Handle{
     drawingView: DrawingView;
