@@ -1,5 +1,3 @@
-import { getConstructorName } from "../helpers/getConstructorName.js";
-
 /**
 
  * Manages Key/Value pairs.
