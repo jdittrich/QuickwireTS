@@ -9,7 +9,6 @@ import { Selection} from './selection.js';
 import { Point } from './data/point.js';
 import { Rect } from "./data/rect.js";
 import { Drawing } from './drawing.js'
-import { NameFigureClassMapper } from './_NameFigureClassMapper.js'
 import { Figure } from './figures/figure.js'
 import { Command } from './commands/command.js'
 import { Handle } from './handles/handle.js'
