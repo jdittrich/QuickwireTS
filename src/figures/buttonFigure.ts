@@ -25,7 +25,7 @@ class ButtonFigure extends Figure{
         this.setAttribute("label",param.label);
     };
 
-    setLabel(changedLabel:string){
+    #setLabel(changedLabel:string){
        this.setAttribute("label",changedLabel);
     }
     getLabel(){
@@ -46,7 +46,7 @@ class ButtonFigure extends Figure{
         });
         return labelRect;
     }
-    drawFigure(ctx){
+    drawFigure(ctx:CanvasRenderingContext2D){
         const rect = this.getRect();
         const {width,height,x,y} = rect;
         const label = this.getAttribute("label");

@@ -22,7 +22,7 @@ type FigureJson = {
     type: String;
 }
 
-class Figure implements Drawable, Highlightable, InteractionInfoProvider{
+abstract class Figure implements Drawable, Highlightable, InteractionInfoProvider{
     #rect = null;
 
     #attributes = new FigureAttributes();
@@ -65,6 +65,7 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
     /**
      * Called from other objects, interface to drawing operations.
      * Usually not overwritten by subclasses.
+     * Subclasses overwrite drawFigure
      * @param {CanvasRenderingContext2D} ctx 
      */
     draw(ctx: CanvasRenderingContext2D){
@@ -74,7 +75,6 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
             this.drawFigure(ctx);
             this.drawContainedFigures(ctx);
             ctx.restore()
-            
         }
     }
     drawHighlight(ctx: CanvasRenderingContext2D){
@@ -480,7 +480,7 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
      * string serialization read by people, similar to python’s __str__
     */
    toString(){
-       const type = this.name;
+       const type = this.name; 
        const {x,y,width,height} = this.getRect();
        const containedFigures = this.getContainedFigures();
        const basicString = `x:${x}, y:${y}, width:${width}, height:${height},number of contained figures:${containedFigures.length}, type:${type} `
@@ -518,7 +518,7 @@ class Figure implements Drawable, Highlightable, InteractionInfoProvider{
         const baseFigureJson:FigureJson = {
             "rect": rectJson,
             "containedFigures":containedFigureJson,
-            "type": this.name
+            "type": this.name 
         }
         return baseFigureJson
     }
