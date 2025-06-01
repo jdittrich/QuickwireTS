@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 8.4666665 8.4666666"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+   sodipodi:docname="buttonToolIIcon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="16.000001"
+     inkscape:cx="20.031249"
+     inkscape:cy="5.1562498"
+     inkscape:window-width="2560"
+     inkscape:window-height="1411"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1"
+     showguides="true">
+    <inkscape:grid
+       id="grid1"
+       units="mm"
+       originx="0"
+       originy="0"
+       spacingx="0.26458333"
+       spacingy="0.26458333"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true" />
+    <sodipodi:guide
+       position="0.82682286,4.216797"
+       orientation="0,-1"
+       id="guide1"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="4.2333331,3.2576825"
+       orientation="1,0"
+       id="guide2"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="opacity:1;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.265112;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       id="rect2"
+       width="7.0357342"
+       height="2.3807213"
+       x="0.71133196"
+       y="3.0264361" />
+    <path
+       style="font-weight:bold;font-size:2.20755px;line-height:1.25;font-family:Calibri;-inkscape-font-specification:'Calibri Bold';text-align:end;text-anchor:end;stroke-width:0.264582"
+       d="M 4.1657225,4.2413513 C 4.1696841,4.4829628 4.0916948,4.7559593 3.8690697,4.885922 3.6688875,5.0016606 3.4167051,5.0024039 3.1993485,4.9376788 2.9981626,4.8747988 2.8730981,4.6773152 2.8483337,4.4771768 2.8103606,4.214362 2.8288598,3.9078902 3.0277603,3.7084786 3.2184362,3.5227528 3.5165957,3.5039279 3.7635595,3.5675092 c 0.1951932,0.047606 0.3359674,0.2205679 0.3741443,0.4115956 0.020769,0.085754 0.027934,0.1742302 0.028019,0.2622465 z M 3.8653629,4.2564423 C 3.8649731,4.0916592 3.8428125,3.8872067 3.6770933,3.8037224 3.5108733,3.726211 3.2744991,3.7704628 3.1922059,3.946882 3.1131636,4.1192472 3.1218275,4.3200156 3.1605779,4.5016665 3.1889896,4.6387686 3.313577,4.7469116 3.4570306,4.744637 c 0.1463637,0.01792 0.3033159,-0.05552 0.357863,-0.1964191 0.039652,-0.09138 0.049362,-0.1932455 0.050469,-0.2917756 z"
+       id="text3"
+       aria-label="O" />
+    <path
+       style="font-weight:bold;font-size:2.20755px;line-height:1.25;font-family:Calibri;-inkscape-font-specification:'Calibri Bold';text-align:end;text-anchor:end;stroke-width:0.264583"
+       d="M 5.5449235,4.8632264 C 5.4942019,4.945315 5.3524697,4.9069672 5.2671425,4.8995982 5.2133059,4.8637162 5.1905518,4.7963514 5.1517741,4.7453666 5.0354263,4.5644012 4.9190784,4.3834358 4.8027307,4.2024704 c -0.00108,0.2242553 0.00217,0.4488233 -0.00164,0.6728824 -0.070245,0.057167 -0.197868,0.046719 -0.278052,0.00943 -0.014429,-0.069771 -0.00277,-0.1447625 -0.00653,-0.21665 0.00109,-0.3762424 -0.00218,-0.7527991 0.00164,-1.1288451 0.071635,-0.054893 0.1972414,-0.04556 0.2780519,-0.00943 0.01443,0.069771 0.00277,0.1447625 0.00653,0.21665 0,0.1325853 0,0.2651705 0,0.3977558 C 4.9469358,3.9395724 5.0865985,3.7310312 5.2336809,3.5287796 5.3188099,3.4939866 5.4466359,3.4835726 5.521528,3.5400816 5.517318,3.6246546 5.44261,3.6843606 5.3974972,3.7518164 5.2950097,3.8847833 5.1925223,4.0177502 5.0900349,4.1507171 c 0.143316,0.2173324 0.2919316,0.4315617 0.4319029,0.6508527 0.010025,0.01954 0.020061,0.039619 0.022986,0.061657 z"
+       id="text4"
+       aria-label="K" />
+  </g>
+</svg>
