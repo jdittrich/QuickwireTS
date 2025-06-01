@@ -55,7 +55,15 @@ class CreateFigureTool extends AbstractTool{
     dragExit(){
         const drawingView = this.getDrawingView();
         drawingView.endPreview();
-        drawingView.changeTool(new SelectionTool());
+
+        // this is tricky. If I sync it with the registered tools, I need the right string 
+        // of the selection tool. If I just do "changeTool" the "is it the same tool"- matching 
+        // in changeTool of drawingView wont match.
+        // try to find a better mechanism here, maybe by exporting at least the name, rather than having 
+        // any possible string?
+        // or I implicitly default-add selection tool (there is no way around it anyway?
+        drawingView.changeToolByName("selectionTool");
+        //drawingView.changeTool(new SelectionTool());
     }
 }
 
