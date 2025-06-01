@@ -8,9 +8,15 @@ The (to be implemented) collaboration model is based on cloning and changing oth
 
 QuickWire does not have stack management (send forward/backward); figures become children of their enclosing figures.
 
-### Running the code
+### Requirements
+* TypeScript 5.8+
 
-Run a http server (e.g. `python -m http.server`) ont he repo’s top level (where you find the index.html). That should be it – the code is buildless. 
+### Running the code
+On the repo’s top level (where the index.html is), run: 
+* A http server (e.g. `python -m http.server`) 
+* `npx tsc --watch` to compile the typescript code
+
+
 
 ### Architecture
 Old fashioned object oriented programming.
@@ -21,8 +27,8 @@ There is also no redraw management that restricts redraws to specific areas.
 
 ### Technology
 
-TypeScript using  ̀"erasableSyntaxOnly": true` option
+TypeScript using  ̀"erasableSyntaxOnly": true` option, which means that erasing all type info yields valid JavaScript code.
 
-### Libraries
+### Used Libraries
 
 * [glMatrix](https://glmatrix.net/), [MIT Licensed](https://github.com/toji/gl-matrix/blob/master/LICENSE.md)
