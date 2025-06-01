@@ -1,5 +1,5 @@
 import { ViewTransform} from './transform.js'
-import {AbstractTool} from './tools/abstractTool.js'
+import {Tool} from './tools/tool.js'
 import { NoOpTool } from './tools/noopTool.js'
 import { LocalMouseEvent, LocalDragEvent, InteractionAnnouncementEvent} from './events.js'
 import { ToolChangeEvent } from './events.js'
@@ -40,7 +40,7 @@ type DrawingViewParam = {
     drawing: Drawing; 
     ctxSize: Point; 
     requestEditorText:Function;
-    tools:Array<{tool:AbstractTool, name:string}>
+    tools:Array<{tool:Tool, name:string}>
 }
 
 
@@ -268,17 +268,17 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
 
 
     //#region: tool management
-    #tools:Array<{tool:AbstractTool,name:string}>=[];
-    #activeTool:AbstractTool;
+    #tools:Array<{tool:Tool,name:string}>=[];
+    #activeTool:Tool;
     //#queuedTool: AbstractTool|null; 
 
-    #registerTools(addTools:Array<{tool:AbstractTool,name:string}>){
+    #registerTools(addTools:Array<{tool:Tool,name:string}>){
         this.#tools.push(...addTools)
     }
     /*
     Use this to change tools internally, i.e. by Drawing View or tools changing to other tools. 
     */
-    changeTool(tool:AbstractTool):void{
+    changeTool(tool:Tool):void{
         if(this.#mouseState === "down"){ //guard
             console.log("tool change requested while mouse was down.");
             return; 
@@ -290,8 +290,6 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         if(matchingToolData){
             this.dispatchEvent(new ToolChangeEvent(matchingToolData.name));
         }
-        
-        
     }
 
     /* 

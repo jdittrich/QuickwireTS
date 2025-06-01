@@ -1,11 +1,11 @@
-import { AbstractTool } from "./abstractTool.js";
+import { Tool } from "./tool.js";
 import {LocalDragEvent, LocalMouseEvent} from '../events.js'
 import {Point} from "../data/point.js";
 
 /**
  * Simple logging tool for down and up events
  */
-class LoggingTool extends AbstractTool{
+class LoggingTool extends Tool{
     name = "logging";
 
     constructor(){

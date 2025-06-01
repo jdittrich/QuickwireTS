@@ -1,4 +1,4 @@
-    import {AbstractTool} from './abstractTool.js';
+import {Tool} from './tool.js';
 import {LocalDragEvent, LocalMouseEvent} from '../events.js';
 import {ChangeFigureRectCommand} from '../commands/changeRectCommand.js';
 import { Figure } from '../figures/figure.js';
@@ -31,18 +31,18 @@ type NothingFound = {
 // type ElementUnderCursor = HandleFound | FigureFound | DrawingFound | NothingFound;
 type ElementUnderCursor = Handle | Figure;
 
-class SelectionTool extends AbstractTool{
+class SelectionTool extends Tool{
     #childTool = new NoOpTool();
     name = "selection";
     constructor(){
         super();
     }
-    setChildTool(childTool:AbstractTool){
+    setChildTool(childTool:Tool){
         const drawingView = this.getDrawingView();
         this.#childTool = childTool;
         childTool.setDrawingView(drawingView);
     }
-    getChildTool():AbstractTool{
+    getChildTool():Tool{
         return this.#childTool;
     }
     #whatIsUnderPoint(documentPoint:Point):ElementUnderCursor{
@@ -178,7 +178,7 @@ class SelectionTool extends AbstractTool{
 // they thus do not have this.drawingView (but they can use the view from the event)
 
 
-class PanTracker extends AbstractTool{
+class PanTracker extends Tool{
     name="panTracker"
     #hasMoved = false
     /**
@@ -199,7 +199,7 @@ class PanTracker extends AbstractTool{
 
 }
 
-class DragTracker extends AbstractTool{
+class DragTracker extends Tool{
     name="dragTracker"
     #figureToDrag:Figure
 
@@ -267,7 +267,7 @@ class DragTracker extends AbstractTool{
     }
 }
 
-class HandleTracker extends AbstractTool{
+class HandleTracker extends Tool{
     name = "handleTracker"
     #handleToDrag = null
 

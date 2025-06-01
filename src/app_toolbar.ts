@@ -1,5 +1,5 @@
 import { DrawingView } from "./drawingView.js";
-import { AbstractTool } from "./tools/abstractTool.js";
+import { Tool } from "./tools/tool.js";
 import { ToolChangeEvent } from "./events.js";
 
 
@@ -12,7 +12,7 @@ type AddLoadFileCallback = {
 }
 
 type ToolData = {
-    tool:AbstractTool,
+    tool:Tool,
     label?:string;
     description?:string;
     icon?:string

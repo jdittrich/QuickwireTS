@@ -10,7 +10,7 @@ import { SelectionTool } from "./tools/selectionTool.js";
 import { CreateFigureTool } from "./tools/createFigureTool.js";
 import { Toolbar, ToolButton, Actionbar, ActionBarActionButton, ActionbarLoadFileAsJsonButton, ToolData} from "./app_toolbar.js";
 import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEvent, toolChangeEventName} from "./events.js";
-import { AbstractTool } from "./tools/abstractTool.js";
+import { Tool } from "./tools/tool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
 import { CheckmarkFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
 import { ParagraphFigure } from "./figures/ParagraphFigure.js";

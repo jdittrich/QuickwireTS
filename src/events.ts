@@ -3,7 +3,7 @@
 import { Point } from "./data/point.js";
 import {ViewTransform} from "./transform.js";
 import { DrawingView } from "./drawingView.js";
-import { AbstractTool } from "./tools/abstractTool.js";
+import { Tool } from "./tools/tool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
 
 type LocalMouseEventParam = { 

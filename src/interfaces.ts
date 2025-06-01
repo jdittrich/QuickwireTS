@@ -1,6 +1,6 @@
 import { Rect } from "./data/rect";
 import { Point } from "./data/point";
-import { AbstractTool } from "./tools/abstractTool";
+import { Tool } from "./tools/tool";
 import { Figure } from "./figures/figure";
 import { Command } from "./commands/command";
 
@@ -13,7 +13,7 @@ interface Highlightable{
 }
 
 interface ToolManager {
-    changeTool(tool:AbstractTool):void;
+    changeTool(tool:Tool):void;
     changeToolByName(toolname:string):void;
 }
 

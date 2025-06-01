@@ -16,7 +16,7 @@ import { DrawingView } from '../drawingView.js';
  * 
  * @see {DrawingView} which calls the tool methods and shows how the calling of the functions is implemented.
  */
-class AbstractTool{
+abstract class Tool{
     #drawingView = null;
     name = null;
     constructor(){
@@ -48,4 +48,4 @@ class AbstractTool{
     //what if there would be a cleanup method, called before a tool is switched out?
 }
 
-export {AbstractTool}
+export {Tool}

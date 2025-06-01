@@ -1,4 +1,4 @@
-import { AbstractTool } from "./abstractTool.js";
+import { Tool } from "./tool.js";
 import { CreateFigureCommand } from "../commands/createFigureCommand.js";
 import { SelectionTool } from "./selectionTool.js";
 import {Figure} from '../figures/figure.js';
@@ -7,7 +7,7 @@ import { Rect } from "../data/rect.js";
 import { LocalDragEvent, LocalMouseEvent } from "../events.js";
 
 //Adds an element to the drawing
-class CreateFigureTool extends AbstractTool{
+class CreateFigureTool extends Tool{
     #figureToCreate:Readonly<Figure>;
     name:string = "";
 
