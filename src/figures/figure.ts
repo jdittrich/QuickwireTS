@@ -1,7 +1,7 @@
 import { SubclassShouldImplementError } from '../errors.js';
 import {Rect,RectJson, RectParam } from '../data/rect.js';
 import {Point} from '../data/point.js';
-import { RectConstraint} from '../data/rectConstraint.js';
+//import { RectConstraint} from '../data/rectConstraint.js';
 import {FigureAttributes} from './figureAttributes.js';
 import { Handle } from '../handles/handle.js';
 import { DuplicationHandle } from '../handles/duplicationHandle.js';

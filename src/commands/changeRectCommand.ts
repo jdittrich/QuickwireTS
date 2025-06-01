@@ -15,7 +15,7 @@ import { Rect } from '../data/rect.js';
 import {Figure} from '../figures/figure.js';
 import {Command} from './command.js';
 import {findInnermostEnclosingFigure,findInnerMatches} from "../hitTest.js";
-import {RectConstraint} from "../data/rectConstraint.js";
+//import {RectConstraint} from "../data/rectConstraint.js";
 import { DrawingView } from '../drawingView.js';
 
 
