@@ -1,0 +1,20 @@
+.buttonTool_icon{
+    background-image: url(../tools/buttonToolIIcon.svg);
+}                 
+.rectangleTool_icon{
+    background-image:url(../tools/rectToolIcon.svg);
+}
+.radiobuttonTool_icon{
+    background-image:url(../tools/RadioButtonToolIcon.svg);
+} 
+
+.checkboxTool_icon {
+    background-image:url(../tools/CheckboxToolIcon.svg);
+}
+.selectionTool_icon {
+    background-image:url(../tools/SelectionToolIcon.svg);
+}
+
+.paragraphTool_icon {
+    background-image:url(../tools/ParagraphToolIcon.svg);
+}

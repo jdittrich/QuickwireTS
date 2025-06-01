@@ -1,0 +1,51 @@
+.qwBarContainer{
+        display: flex;
+        background: #ededed;
+        padding:2px;
+        border-bottom: 1px solid gray;
+}
+
+.qwToolbar{
+    display: flex;  
+}
+
+.qwToolbar > input + label{
+    background-color: rgb(237, 237, 237);
+    width:32px;
+    height:32px;
+    color:transparent;
+    background-color: #ededed;
+    border: 1px solid #ededed;
+    border-radius: 3px;
+    box-sizing: border-box;
+    margin-right:3px;
+}
+.qwToolbar > input + label:hover{
+    border-color:rgb(249, 186, 99);
+    background-color:#fbfbfb;
+}
+
+
+.qwToolbar > input:focus:active {
+    outline:none;
+}
+
+.qwToolbar > input:checked + label{
+    background-color: #fbfbfb;
+    border-color:rgb(243, 142, 0);
+}
+
+.qwToolbar > input[type=radio]{
+    appearance: none;
+    width:0;
+    margin:0
+
+}
+
+.qwToolbar > input[type=file]{
+}
+
+.qwToolbar > input[type=file]::file-selector-button{
+    height:2rem;
+}
+
