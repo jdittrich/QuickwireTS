@@ -287,8 +287,11 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
 
         tool.setDrawingView(this);
         this.#activeTool = tool;
-
-        this.dispatchEvent(new ToolChangeEvent(tool.name));
+        const matchingToolData = this.#tools.find(toolData=> toolData.tool === tool);
+        if(matchingToolData){
+            this.dispatchEvent(new ToolChangeEvent(matchingToolData.name));
+        }
+        
         
     }
 
