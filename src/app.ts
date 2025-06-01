@@ -5,7 +5,6 @@ import { Rect } from "./data/rect.js";
 
 import { RectFigure } from "./figures/rectFigure.js";
 import { ButtonFigure } from "./figures/buttonFigure.js";
-import { RadioButtonListFigure } from "./figures/radioButtonListFigure.js";
 
 import { SelectionTool } from "./tools/selectionTool.js";
 import { CreateFigureTool } from "./tools/createFigureTool.js";
@@ -13,7 +12,8 @@ import { Toolbar, ToolButton, Actionbar, ActionBarActionButton, ActionbarLoadFil
 import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEvent, toolChangeEventName} from "./events.js";
 import { AbstractTool } from "./tools/abstractTool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
-import { ToggleFigure } from "./figures/toggleFigure.js";
+import { CheckmarkFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
+import { ParagraphFigure } from "./figures/placeholderTextFigure.js";
 
 
 /**
@@ -125,19 +125,26 @@ class App{
                 name: "buttonTool"
             },
             {
-                tool: new CreateFigureTool(ToggleFigure.createWithDefaultParameters("checkbox")),
+                tool: new CreateFigureTool(CheckmarkFigure.createWithDefaultParameters()),
                 label:"Checkbox figure",
                 description: "Checkbox with label",
                 icon: "checkboxTool",
                 name: "checkboxTool"
             },
             {
-                tool: new CreateFigureTool(ToggleFigure.createWithDefaultParameters("radio")),
+                tool: new CreateFigureTool(RadiobuttonFigure.createWithDefaultParameters()),
                 label:"Radiobutton figure",
                 description: "Radiobutton with label",
                 icon: "radiobuttonTool",
                 name:"radiobuttonTool"
-            }
+            },
+            {
+                tool: new CreateFigureTool(ParagraphFigure.createWithDefaultParameters()),
+                label:"placeholder text figure",
+                description: "placeholder Text",
+                icon: "paragraphTool",
+                name:"paragraphTool"
+            },
         
         ]
         
@@ -153,7 +160,7 @@ class App{
         this.#drawingView.addEventListener(toolChangeEventName,this.#handleToolChange.bind(this));
         this.#drawingView.addEventListener(interactionAnnouncementName, this.#handleInteractionAnnouncement.bind(this));
         
-        //for debugging
+        ////if you need to access drawing/drawingView, uncomment these: 
         // window.drawingView = this.#drawingView;
         // window.drawing = this.#drawing;
     }
@@ -174,7 +181,7 @@ class App{
     }
     
     #onWheel(e:WheelEvent){
-       e.preventDefault();//otherwise everything browser-zooms in addition!
+       e.preventDefault();//otherwise everything browser-zooms in addition the the view zoom!
 
        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
         
