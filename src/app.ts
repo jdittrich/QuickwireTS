@@ -13,7 +13,7 @@ import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEv
 import { AbstractTool } from "./tools/abstractTool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
 import { CheckmarkFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
-import { ParagraphFigure } from "./figures/placeholderTextFigure.js";
+import { ParagraphFigure } from "./figures/ParagraphFigure.js";
 
 
 /**
