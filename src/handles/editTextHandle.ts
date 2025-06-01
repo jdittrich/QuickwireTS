@@ -66,7 +66,7 @@ class EditTextHandle extends Handle {
         const textRect = this.#textRect;
         const drawingView = this.getDrawingView();
         const {topRight} = textRect.getCorners();
-        const drawAnchor = topRight.add(new Point({x:2, y:0}));        
+        const drawAnchor = topRight.add(new Point({x:0, y:-2}));        
         const drawAnchorScreen = drawingView.documentToScreenPosition(drawAnchor);
         const screenRect = Rect.createFromCornerPoints(
             drawAnchorScreen,
