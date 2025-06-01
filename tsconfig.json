@@ -1,0 +1,18 @@
+{
+  "include": ["./src/**/*"],
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig to read more about this file */
+    "outDir": "./built",
+    "target": "ES2024",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+    "module": "ES2022",                                  /* Specify what module code is generated. */
+    "erasableSyntaxOnly": true,                          /* Do not allow runtime constructs that are not part of ECMAScript. */
+    "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
+    "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+    //"strict": true,                                      /* Enable all strict type-checking options. */
+    "allowJs": true,
+    "skipLibCheck": true,                                /* Skip type checking all .d.ts files. */
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    //"lib":["ES2023.Array"]
+  }
+}
