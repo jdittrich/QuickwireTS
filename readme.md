@@ -4,9 +4,9 @@
 
 QuickWire is a prototype for a small user interface wireframing app to facilitate conversations about UI design. If figma or penpot are for creating blueprints, QuickWire is for felt-pen sketches on a mid-sized sticky note. 
 
-The (to be implemented) collaboration model is based on cloning and changing other wireframes: Respond to a wireframe with a changed wirefame of your own. This avoids the need for real-time-collaboration mechanisms.
+The (to be implemented) collaboration model is based on copying  wireframes and then changing them. This avoids the need for real-time-collaboration mechanisms on one shared version.
 
-QuickWire does not have stack management (send forward/backward); figures become children of their enclosing figures.
+QuickWire does not have explicit stack management commands (send forward/backward), instead figures become children of their enclosing figures.
 
 ### Requirements
 * TypeScript 5.8+
