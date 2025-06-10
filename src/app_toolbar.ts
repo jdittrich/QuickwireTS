@@ -17,6 +17,7 @@ type ToolData = {
     description?:string;
     icon?:string
     name:string
+    isDefault?:boolean
 }
 
 
