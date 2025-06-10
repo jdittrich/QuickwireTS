@@ -19,7 +19,7 @@ class Drawing extends Figure{
     draw(ctx: CanvasRenderingContext2D){
         const {width, height} = this.getRect();
         ctx.save();
-        ctx.fillStyle = "#EEE";
+        ctx.fillStyle = "#FFF";
         ctx.fillRect(0,0,width,height);
         ctx.restore()
         this.drawContainedFigures(ctx);
