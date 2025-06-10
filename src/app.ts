@@ -12,7 +12,7 @@ import { Toolbar, ToolButton, Actionbar, ActionBarActionButton, ActionbarLoadFil
 import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEvent, toolChangeEventName} from "./events.js";
 import { Tool } from "./tools/tool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
-import { CheckmarkFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
+import { CheckboxFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
 import { ParagraphFigure } from "./figures/ParagraphFigure.js";
 
 
@@ -31,6 +31,7 @@ class App{
     #canvasContainer: HTMLElement
     #appContainer:HTMLElement
     #horizontalBarContainer: HTMLElement
+    #horizontalBarContainerHeight:number
     #drawing: Drawing
     #drawingView: DrawingView
     toolbar:Toolbar
@@ -41,34 +42,30 @@ class App{
      * @see  this.getLocalEventPosition
      */
     constructor(domContainer:HTMLElement){
+        // TODO reduce repeated boilerplate by assigning to shorter variables rather than this.#......
         //setup DOM
         this.#domContainer    = domContainer;
         
+
         //create app container. TODO: Move to private method, return DomFragment
         this.#appContainer = document.createElement("div");
-        this.#appContainer.style.margin  = "0";
-        this.#appContainer.style.padding  = "0";
-        this.#appContainer.style.width   = "100%";
-        this.#appContainer.style.height  = "600px";
+        this.#appContainer.style.cssText="margin:0; padding:0; width:100%; height:100%; display:flex; flex-direction:column";
         this.#domContainer.append(this.#appContainer);
         
+        this.#horizontalBarContainerHeight = 20;
+
         this.#horizontalBarContainer = document.createElement("div");
-        this.#horizontalBarContainer.style.margin = "0";
-        this.#horizontalBarContainer.style.padding = "0";
-        this.#horizontalBarContainer.style.boxSizing;
-        this.#horizontalBarContainer.style.width = "100%";
+        this.#horizontalBarContainer.style.cssText = "margin:0; padding:0; box-sizing:border-box; width:100%;"
+        this.#horizontalBarContainer.style.height = this.#horizontalBarContainerHeight+"px;";
         this.#horizontalBarContainer.classList.add("qwBarContainer");
         this.#appContainer.append(this.#horizontalBarContainer);
 
         this.#canvasContainer = document.createElement("div");
-        this.#canvasContainer.style.margin = "0";
-        this.#canvasContainer.style.padding = "0";
-        this.#canvasContainer.style.boxSizing ="border-box";
-        
+        this.#canvasContainer.style.cssText ="margin:0; padding:0; box-sizing: border-box;flex-grow:1";
+        this.#canvasContainer.style.width   = "100%";
         /*if we put this to content-dependent values (auto, fit-content etc.)
          it never shrinks again, only grows; thus a parent-dependent value like 100% */
-        this.#canvasContainer.style.width   = "100%";
-        this.#canvasContainer.style.height = "100%"; 
+        this.#canvasContainer.style.height = `calc(100% - ${this.#horizontalBarContainerHeight}px)`; 
         this.#appContainer.append(this.#canvasContainer);
         
         
@@ -108,7 +105,8 @@ class App{
                 label:"selection tool", 
                 description:"pan or select figure and handles",
                 icon:"selectionTool",
-                name:"selectionTool"
+                name:"selectionTool",
+                isDefault:true
             },
             {  
                 tool: new CreateFigureTool(RectFigure.createWithDefaultParameters()),
@@ -125,7 +123,7 @@ class App{
                 name: "buttonTool"
             },
             {
-                tool: new CreateFigureTool(CheckmarkFigure.createWithDefaultParameters()),
+                tool: new CreateFigureTool(CheckboxFigure.createWithDefaultParameters()),
                 label:"Checkbox figure",
                 description: "Checkbox with label",
                 icon: "checkboxTool",
@@ -160,6 +158,7 @@ class App{
         this.#drawingView.addEventListener(toolChangeEventName,this.#handleToolChange.bind(this));
         this.#drawingView.addEventListener(interactionAnnouncementName, this.#handleInteractionAnnouncement.bind(this));
         
+        this.#drawingView.changeToolByName("selectionTool");
         ////if you need to access drawing/drawingView, uncomment these: 
         // window.drawingView = this.#drawingView;
         // window.drawing = this.#drawing;
@@ -186,7 +185,7 @@ class App{
        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
         
        //Normalize to +1 (wheel moved to user), -1 (wheel moved from user) 
-       let wheelDelta = e.deltaY > 0 ? -1:1;   
+       let wheelDelta = e.deltaY > 0 ? 1:-1;   
        this.#drawingView.onWheel(eventPosRelativeToCanvas, wheelDelta)
     }
 
@@ -197,7 +196,7 @@ class App{
         this.#drawingView.onKeyUp();
     }
     #setupDrawingView(toolsData:ToolData[]){
-        const tools = toolsData.map((toolData) => {return {"tool":toolData.tool, "name":toolData.name}});
+        const tools = toolsData; // .map((toolData) => {return {"tool":toolData.tool, "name":toolData.name, isDefault}});
 
         const drawingViewParam:DrawingViewParam =  {
             "ctx": this.#canvasCtx,
@@ -213,7 +212,7 @@ class App{
                 };
                 return editedText;
             },
-            "tools": tools
+            "tools": tools,
         }
 
         const drawingView = new DrawingView(drawingViewParam);
