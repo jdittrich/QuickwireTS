@@ -3,7 +3,7 @@ import { Rect } from "./data/rect.js";
 import { RectFigure, CreateRectFigureParam } from "./figures/rectFigure.js";
 import { ButtonFigure, CreateButtonParam } from "./figures/buttonFigure.js";
 //import { RadioButtonListFigure, createRadioButtonListFigureParam } from "./figures/radioButtonListFigure.js";
-import { CheckmarkFigure,CreateCheckmarkParam, RadiobuttonFigure, CreateRadiobuttonParam} from "./figures/toggleFigure.js";
+import { CheckboxFigure,CreateCheckboxParam, RadiobuttonFigure, CreateRadiobuttonParam} from "./figures/toggleFigure.js";
 import { Drawing } from "./drawing.js";
 //adding a new figure: Import the figure, its parameter type as well as any value object types the object needs.
 
@@ -40,13 +40,13 @@ function jsonToFigure(figureJson):Figure{
             }
             return new RadiobuttonFigure(createToggleFigureParam)
             break;
-        case "CheckmarkFigure":
-            const createCheckmarkParam:CreateCheckmarkParam = {
+        case "CheckboxFigure":
+            const createCheckboxParam:CreateCheckboxParam = {
                 ...figureBaseParams,
                 isSelected:figureJson.isSelected,
                 label:figureJson.label
             }
-            return new CheckmarkFigure(createCheckmarkParam);
+            return new CheckboxFigure(createCheckboxParam);
             break;
         default: 
             throw new Error(`When Parsing Json: ${type} is not known`);
