@@ -10,11 +10,12 @@ import {InteractionAnnouncement, InteractionInfoProvider} from "../interfaces.js
 
 
 class ResizeHandle extends Handle{
+    size = 16;
     constructor(figure:Figure,drawingView:DrawingView){
         super(figure,drawingView);
     }
     getScreenRect(){
-        const size = this.getSize();
+        const size = this.size;
         const documentLocation = this.getLocation();
         const drawingView = this.getDrawingView();
         const screenLocation = drawingView.documentToScreenPosition(documentLocation);

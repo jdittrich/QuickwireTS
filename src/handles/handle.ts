@@ -49,15 +49,12 @@ class Handle implements Drawable, Highlightable, InteractionInfoProvider {
         const documentRect = this.#drawingView.screenToDocumentRect(screenRect);
         return documentRect;
     }
-    getSize():number{ //moveToResizeHandle
-        return 15;
-    }
     // == figure-like methods
         
     /**
      * Draws the handle on the rendering context
-     *      */
-    draw(ctx: CanvasRenderingContext2D){ //TODO: I think this can stay!
+     */ 
+    draw(ctx: CanvasRenderingContext2D){ 
         const screenRect = this.getScreenRect();
         const {x,y,width,height} = screenRect;
 

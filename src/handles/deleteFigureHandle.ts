@@ -4,7 +4,7 @@ import { Rect } from "../data/rect.js";
 
 class DeleteFigureHandle extends Handle{
     #figureToDelete = null;
-    #size = 16;
+    #size = 20;
 
     /**
      * 
@@ -17,7 +17,7 @@ class DeleteFigureHandle extends Handle{
 
     draw(ctx: CanvasRenderingContext2D):void{
         const {x,y,width,height} = this.getScreenRect();
-        ctx.fillStyle = "#cc0000";
+        ctx.fillStyle ="rgb(145, 60, 60)";
         ctx.fillRect(x,y,width,height);
         
         //draw an x

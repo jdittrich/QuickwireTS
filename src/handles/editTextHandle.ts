@@ -21,7 +21,7 @@ type EditTextHandleParam = {
 class EditTextHandle extends Handle {
     #attributeName:string
     #textRect:Rect
-    #size = 16;
+    #size = 20;
     constructor(figure:Figure, drawingView:DrawingView,param: EditTextHandleParam){
         super(figure, drawingView);
         this.#attributeName = param.attributeName;
@@ -37,14 +37,14 @@ class EditTextHandle extends Handle {
 
         ctx.strokeStyle = "#000";
         const xCenter = x+ (this.#size /2);
-        const cursorWidth = 2
-        const cursorHeight = 8
+        const cursorWidth = 4
+        const cursorHeight = height-8;
         const topPos = y+((this.#size-cursorHeight)/2);
         const bottomPos = topPos + cursorHeight;
         //draw a little cursor
         
         ctx.beginPath(); // Start a new path
-        ctx.moveTo(xCenter-2,           topPos); 
+        ctx.moveTo(xCenter-cursorWidth, topPos); 
         ctx.lineTo(xCenter+cursorWidth, topPos);   //‾
         ctx.stroke();
 
@@ -54,7 +54,7 @@ class EditTextHandle extends Handle {
         ctx.stroke();
         
         ctx.beginPath(); // Start a new path
-        ctx.moveTo(xCenter-2,  bottomPos);
+        ctx.moveTo(xCenter-cursorWidth,  bottomPos);
         ctx.lineTo(xCenter+cursorWidth, bottomPos);; //_
         ctx.stroke();
     }

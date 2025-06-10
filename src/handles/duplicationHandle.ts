@@ -11,22 +11,22 @@ import { DuplicateFigureCommand } from "../commands/duplicateFigureCommand.js";
  * Similar to the usual pressing of alt+drag, but without a key.
  */
 class DuplicationHandle extends Handle{
-    #size = 16;
+    #size = 20;
    
     constructor(figure:Figure,drawingView:DrawingView){
         super(figure,drawingView);
     }
-    draw(ctx){
+    draw(ctx:CanvasRenderingContext2D){
         const {x,y,width,height} = this.getScreenRect();
-        ctx.fillStyle = "#c3e7ee";
+        ctx.fillStyle ="rgb(230, 244, 247)";
         ctx.fillRect(x,y,width,height);
-        ctx.strokeStyle = "#9bbac0";
+        ctx.strokeStyle ="rgb(126, 155, 161)";
         ctx.strokeRect(x,y,width,height);
 
         //draw a little duplication icon:
-        ctx.strokeStyle = "#294145";
-        ctx.strokeRect(x+3, y+3,8,7);
-        ctx.strokeRect(x+5, y+5,8,7);
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(x+3, y+3,9,8);
+        ctx.strokeRect(x+8, y+8,9,8);
     }
     getScreenRect():Rect{
         const drawingView = this.getDrawingView();
