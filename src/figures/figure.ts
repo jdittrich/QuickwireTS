@@ -9,6 +9,7 @@ import { createAllResizeHandles } from '../handles/resizeHandle.js';
 import { DeleteFigureHandle } from '../handles/deleteFigureHandle.js';
 import { DrawingView } from '../drawingView.js';
 import { Drawable, Highlightable, InteractionAnnouncement, InteractionInfoProvider } from '../interfaces.js';
+import { FigureElement } from './figureElements.js';
 
 
 type CreateFigureParam = {
@@ -30,6 +31,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     #containedBy = null;
 
     isRoot = false; //only overwritten by the Drawing subclass
+
+    #figureElements:FigureElement[] = []
 
     name:string = "baseFigure";
     /**
@@ -57,6 +60,13 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
             containedFigures: containedCopies
         }
         return baseParameters;
+    }
+    //#region figureElements
+    addFigureElements(figureElements:FigureElement[]){
+        figureElements.forEach((element) =>{
+            this.#figureElements.push(element);
+//           element.register(this);
+        })
     }
 
     //#region: drawing 
@@ -98,7 +108,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @param {CanvasRenderingContext2D} ctx 
      */
     drawFigure(ctx: CanvasRenderingContext2D){
-        throw new SubclassShouldImplementError("drawFigure","CompositeFigure");
+        this.#figureElements.forEach(figureElement => figureElement.draw(ctx));
     }
 
     /**
@@ -425,10 +435,14 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         const deleteFigureHandle = new DeleteFigureHandle(this,drawingView)
         const resizeHandles  = createAllResizeHandles(this, drawingView);
 
+        const elementHandles = this.#figureElements.flatMap(figure=> figure.getHandles(drawingView));
+
+
         return [
             duplicationHandle,
             deleteFigureHandle,
-            ...resizeHandles
+            ...resizeHandles,
+            ...elementHandles
         ];
     }
 
