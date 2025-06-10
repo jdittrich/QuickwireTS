@@ -34,15 +34,19 @@ import { SelectionTool } from './tools/selectionTool.js'
  *  transform 
  *  zoom
  *  pan 
- */
+*/
+type NamedTool = {
+    tool:Tool,
+    name:string
+    isDefault?:boolean
+}
 type DrawingViewParam = { 
     ctx: CanvasRenderingContext2D; 
     drawing: Drawing; 
     ctxSize: Point; 
     requestEditorText:Function;
-    tools:Array<{tool:Tool, name:string}>
+    tools:Array<NamedTool>
 }
-
 
 /**
  * Manages the view, but none of the native UI or the event conversion (which is what app does)
@@ -59,7 +63,6 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     #ctxSize:Point;
     #commandStack = null;
     #selection    = null; 
-    #nameFigureClassMapper = null; 
     #requestEditorText  = null;
     
     drawing:Drawing
@@ -74,14 +77,13 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         this.#transform = new ViewTransform();
         this.setCtxSize(ctxSize);//needed to know which area to clear on redraws
         this.#ctx = ctx;
+        
+        
         this.drawing = drawing;
 
-        this.#requestEditorText = param.requestEditorText;
-        //this.#nameFigureClassMapper = nameFigureClassMapper;
+        this.#requestEditorText = requestEditorText;
         this.#commandStack = new CommandStack();
         this.#selection = new Selection();
-        this.changeTool(new NoOpTool())
-
         //first draw
         this.#drawAll()
     }
@@ -98,12 +100,19 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         this.#drawAll()
     }
     #drawAll():void{
-        this.#ctx.clearRect(0,0,this.#ctxSize.x,this.#ctxSize.y); //deletes all pixels
         const ctx = this.#ctx;
+        // Configs
+        //for some reason, setting the font works not if set in the constructor
+        // Playpen and Shantell are open fonts, ComicSans comes with Windows, Chalkboard with Mac. 
+        ctx.font = "16px 'Playpen Sans','Shantell Sans','Comic Sans MS','Chalkboard'"; 
         
+        // clear canvas
+        this.#ctx.clearRect(0,0,this.#ctxSize.x,this.#ctxSize.y);
+
+        //trigger draws
         this.#drawDrawing(ctx);
-        this.#drawHandles(ctx);
         this.#drawPreviews(ctx);
+        this.#drawHandles(ctx);
         this.#drawHighlightRects(ctx);
 
         // const offscreenCanvas = new OffscreenCanvas(this.#ctxSize.x, this.#ctxSize.y);
@@ -114,7 +123,7 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         ///…but for some reason this looked the same.
         
     }
-    #drawDrawing(ctx):void{
+    #drawDrawing(ctx:CanvasRenderingContext2D):void{
         const transArr = this.#transform.toArray();
         ctx.setTransform(transArr[0],transArr[1],transArr[2],transArr[3],transArr[4],transArr[5]); //zoom and pan
         this.drawing.draw(ctx);
@@ -268,12 +277,19 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
 
 
     //#region: tool management
-    #tools:Array<{tool:Tool,name:string}>=[];
+    #tools:Array<NamedTool>=[];
     #activeTool:Tool;
+    #defaultTool:Tool;
     //#queuedTool: AbstractTool|null; 
 
-    #registerTools(addTools:Array<{tool:Tool,name:string}>){
-        this.#tools.push(...addTools)
+    #registerTools(addTools:Array<NamedTool>){
+        this.#tools.push(...addTools);
+        const defaultNamedTool = addTools.find(namedTool=> namedTool.isDefault === true)
+        if(defaultNamedTool){
+            this.setDefaultToolByName(defaultNamedTool.name);
+        } else {
+            throw Error("One of the passed tools needs to be the default tool by giving in the property isDefault:true")
+        }
     }
     /*
     Use this to change tools internally, i.e. by Drawing View or tools changing to other tools. 
@@ -283,7 +299,6 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
             console.log("tool change requested while mouse was down.");
             return; 
         }
-
         tool.setDrawingView(this);
         this.#activeTool = tool;
         const matchingToolData = this.#tools.find(toolData=> toolData.tool === tool);
@@ -292,13 +307,29 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         }
     }
 
+    setDefaultToolByName(defaultToolName:string){
+        const defaultNamedTool = this.#tools.find(namedTool=> namedTool.name === defaultToolName);
+        if(defaultNamedTool){
+            this.#defaultTool = defaultNamedTool.tool;
+        } else {
+            throw Error(`requested a tool named ${defaultToolName}, but a registered tool with that name could not be found`);
+        }
+    }
+    changeToDefaultTool(){
+        this.changeTool(this.#defaultTool ?? new NoOpTool());
+    }
+
     /* 
     Use this function when requesting tool changes from app.js
     Tools need to be registered via #registerTools (called by constructor)
     */
     changeToolByName(toolName:string):void{
         const newTool = this.#tools.find(tool=>tool.name === toolName);
-        this.changeTool(newTool.tool);
+        if(newTool){
+            this.changeTool(newTool.tool);
+        } else {
+            console.log(`tool with name ${toolName} could not be found.`)
+        }
     }
 
     //#region: events
