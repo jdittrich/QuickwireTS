@@ -14,6 +14,8 @@ type RectJson = {
     x: number; 
 }
 
+type RectArray =[number,number,number,number];
+
 type RectCorners = {
     topRight:   Point;
     bottomRight:Point;
@@ -190,8 +192,23 @@ class Rect{
             "width": this.width
         }
     }
+    /** 
+     * @returns array with x,y,height,width
+     */
+    toArray():RectArray{
+        return [this.x,this.y,this.width, this.height];
+    }
+    static fromArray(rectArray:RectArray):Rect {
+        const rect = new Rect({
+            x:rectArray[0],
+            y:rectArray[1],
+            width:rectArray[2],
+            height:rectArray[3]
+        });
+        return rect;
+    }
 
-    static fromJSON(rectJson:RectJson){
+    static fromJSON(rectJson:RectJson):Rect{
         const {x,y,width,height} = rectJson;
         const rect = new Rect({
             "x":      x,
