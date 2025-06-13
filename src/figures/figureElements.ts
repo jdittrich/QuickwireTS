@@ -5,14 +5,21 @@ import { ToggleAttributeHandle } from "../handles/toggleAttributeHandle.js";
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
 import { RectConstraint, centeredStrategy } from "../data/rectConstraint.js";
+import { Label } from "../data/label.js";
+import { SingleSelectableLabelList } from "../data/singleSelectLabelList.js";
+import { Drawable } from "../interfaces.js";
+
+
+
+
 /**
  * An abstract class for graphical elements of figures, 
  * e.g. the handle on a scrollbar or the radio indicator of a radiobutton.
  * 
  */
-abstract class FigureElement{
+abstract class FigureElement implements Drawable{
     #figure
-    constructor(figure){
+    constructor(figure:Figure){
         this.#figure = figure;
         figure.addFigureElements([this]);
     }
@@ -112,12 +119,13 @@ type CreateLabelElementParam = {
     labelText?:string;
 }
 
-class LabelElement extends FigureElement{
+abstract class LabelElement extends FigureElement{
     cachedLabelWidth:number
     cachedLabelHeight:number
     attributeName:string;
     rectConstraint:RectConstraint;
     labelText:string
+    labelRect: Rect
     
     constructor(figure:Figure, param:CreateLabelElementParam){
         super(figure);
@@ -127,6 +135,7 @@ class LabelElement extends FigureElement{
         
         figure.registerAttributes({[param.attributeName]:String})
         this.setFigureAttribute(param.attributeName,param.labelText);
+        this.labelRect = new Rect({x:0,y:0,width:0,height:0});
     }
     getElementRect(): Rect {
         const figureRect = this.getFigureRect();
@@ -134,29 +143,9 @@ class LabelElement extends FigureElement{
         return rect;
     }
     getLabelRect():Rect {
-        const rectWidth = this.cachedLabelWidth;
-        const rectHeight = this.cachedLabelHeight;
-        const outerRect = this.getElementRect();
-
-        const labelRect = new Rect({
-            x: outerRect.x,
-            y: outerRect.y,
-            width:rectWidth,
-            height:rectHeight
-        })
-        return labelRect;
+        return this.labelRect
     }
-    draw(ctx:CanvasRenderingContext2D){
-        const label = this.getFigureAttribute(this.attributeName);
-        const labelMetrics = ctx.measureText(label);
-        this.cachedLabelHeight = labelMetrics.actualBoundingBoxAscent - labelMetrics.actualBoundingBoxDescent;
-        this.cachedLabelWidth = labelMetrics.width;
-        
-        const labelRect = this.getLabelRect();
-        ctx.fillStyle="#000"
-        ctx.fillText(label, labelRect.x, labelRect.y+labelRect.height
-        );
-    }
+    abstract draw(ctx:CanvasRenderingContext2D)
     getHandles(drawingView:DrawingView){
         const handle = new EditTextHandle(this.getFigure(),drawingView,{
             "attributeName":this.attributeName,
@@ -166,23 +155,76 @@ class LabelElement extends FigureElement{
     }
 }
 
-class CenteredLabelElement extends LabelElement {
-    constructor(figure:Figure, params){
-        super(figure, params);
-    }
-    getLabelRect():Rect {
-        const rectWidth = this.cachedLabelWidth;    
-        const rectHeight = this.cachedLabelHeight;
-        const outerRect = this.getElementRect();
-        const center=outerRect.getCenter();
-        const labelRect = new Rect({
-            x: center.x - ((this.cachedLabelWidth)/2),
-            y: outerRect.y+((outerRect.height-rectHeight)/2),
-            width:rectWidth,
-            height:rectHeight
-        });
-        return labelRect;
+class LabelElementLeftAligned extends LabelElement{
+    draw(ctx:CanvasRenderingContext2D){
+        const label = this.getFigureAttribute(this.attributeName);
+        const elementRect = this.getElementRect();
+        const labelRect = drawTextInRectLeft(ctx,elementRect,label);
+        this.labelRect = labelRect;
     }
 }
 
-export {CheckboxElement, RadioElement, LabelElement, CenteredLabelElement, CreateLabelElementParam, FigureElement}
+class LabelElementCentered extends LabelElement{
+    draw(ctx:CanvasRenderingContext2D){
+        const label = this.getFigureAttribute(this.attributeName);
+        const elementRect = this.getElementRect();
+        const labelRect = drawTextInRectCentered(ctx,elementRect,label);
+        this.labelRect = labelRect;
+    }
+}
+
+// Drawing text is tricky. You need to draw to know where it will be placed
+// even though I can measure text without drawing, it is usually best
+// to keep measuring and drawing together.
+// thus, I give the rect it may draw in (e.g. from here to the very right of the figure)
+// then I return the box it actually took up. 
+// NOTE: Must use a fixed textbox (not "actual" metrics) to avoid base line changes
+// of using UPPERCASE vs descendent characters like yjg
+function drawTextInRectCentered(ctx:CanvasRenderingContext2D,potentialSpaceRect:Rect,label:string):Rect{
+    const metrics = ctx.measureText(label);
+    const baselineToTopEdge = metrics.fontBoundingBoxAscent;
+    const baselineToBottomEdge = metrics.fontBoundingBoxDescent;
+    const height = baselineToTopEdge + baselineToBottomEdge;
+    const width = metrics.width;
+    const center = potentialSpaceRect.getCenter();
+
+
+    const textRect = new Rect({
+        x:center.x-(width/2),
+        y:center.y-(height/2),
+        width:width,
+        height:height
+    });
+
+    //text is defined by baseline position, which we derive from the rect
+    const startPointY = textRect.y + baselineToTopEdge;
+    ctx.fillStyle = "#000";
+    ctx.fillText(label,textRect.x,startPointY);
+
+    return textRect; 
+}
+
+function drawTextInRectLeft(ctx,potentialSpaceRect:Rect,label):Rect{
+    const metrics = ctx.measureText(label);
+    const baselineToTopEdge = metrics.fontBoundingBoxAscent;
+    const baselineToBottomEdge = metrics.fontBoundingBoxDescent;
+    const height = baselineToTopEdge + baselineToBottomEdge;
+    const width = metrics.width;
+    const center = potentialSpaceRect.getCenter();
+
+    const textRect = new Rect({
+        x:potentialSpaceRect.x,
+        y:center.y-(height/2),
+        width:width,
+        height:height
+    });
+
+    //text is defined by baseline position, which we derive from the rect
+    const startPointY = textRect.y + baselineToTopEdge;
+
+    ctx.fillText(label,textRect.x,startPointY);
+
+    return textRect;
+}
+
+export {CheckboxElement, RadioElement, LabelElement, LabelElementCentered, LabelElementLeftAligned, CreateLabelElementParam, FigureElement}

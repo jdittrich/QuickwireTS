@@ -103,12 +103,13 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         ctx.clip(); //prevent drawing outside of figure boundaries
     }
     /**
-     * To be overwritten by subclasses.
-     * Called only internally by draw.
      * @param {CanvasRenderingContext2D} ctx 
      */
     drawFigure(ctx: CanvasRenderingContext2D){
-        this.#figureElements.forEach(figureElement => figureElement.draw(ctx));
+        //dunno if that is great, it means I need to write a super() 
+        // at the bottom of the draw function, lest the elements might be overwritten 
+        // by background
+        //this.#figureElements.forEach(figureElement => figureElement.draw(ctx));
     }
 
     /**

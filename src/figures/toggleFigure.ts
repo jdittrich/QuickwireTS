@@ -6,7 +6,7 @@ import { Handle } from "../handles/handle.js";
 import { EditTextHandle} from '../handles/editTextHandle.js';
 import { ToggleAttributeHandle } from "../handles/toggleAttributeHandle.js";
 
-import { CheckboxElement, RadioElement ,  LabelElement } from "./figureElements.js";
+import { CheckboxElement, RadioElement ,  LabelElementLeftAligned, FigureElement } from "./figureElements.js";
 import { RectConstraint } from "../data/rectConstraint.js";
 
 //=========================
@@ -29,24 +29,27 @@ class CheckboxFigure extends Figure{
     name="CheckboxFigure"
     #labelAttrName = "label";
     #isSelectedAttrName = "isSelected";
+    #checkboxElement:FigureElement;
+    #labelElement: FigureElement;
 
     constructor(param:CreateCheckboxParam){
         super(param);
 
-        new CheckboxElement(this,{
+        this.#checkboxElement = new CheckboxElement(this,{
             attributeName:this.#isSelectedAttrName,
-            isSelected:true,
+            isSelected:param.isSelected,
             rectConstraint: new RectConstraint({vertical:[null,16,null], horizontal:[0,16,null]})
         });
 
-        new LabelElement(this,{
+        this.#labelElement = new LabelElementLeftAligned(this,{
             attributeName:this.#labelAttrName,
             rectConstraint: new RectConstraint({vertical:[null,16,null], horizontal:[16+10,null,0]}),
-            labelText: "a checkbox!"
+            labelText: param.label
         });
     }
     drawFigure(ctx: CanvasRenderingContext2D): void {
-        super.drawFigure(ctx);
+        this.#checkboxElement.draw(ctx);
+        this.#labelElement.draw(ctx);
     }
     getHandles(drawingView: DrawingView): Handle[] {
         const handles = super.getHandles(drawingView);
@@ -99,27 +102,29 @@ type CreateRadiobuttonParam = CreateToggleParam;
 type RadiobuttonFigureJson = ToggleFigureJson
 
 class RadiobuttonFigure extends Figure{
-    name="RadiobuttonFigure"
+    name="RadiobuttonFigure";
     #labelAttrName = "label";
     #isSelectedAttrName = "isSelected";
-
+    #radioElement:FigureElement;
+    #labelElement: FigureElement;
     constructor(param:CreateCheckboxParam){
         super(param);
 
-        new RadioElement(this,{
+        this.#radioElement = new RadioElement(this,{
             attributeName:this.#isSelectedAttrName,
-            isSelected:true,
+            isSelected:param.isSelected,
             rectConstraint: new RectConstraint({vertical:[null,16,null], horizontal:[0,16,null]})
         });
 
-        new LabelElement(this,{
+        this.#labelElement = new LabelElementLeftAligned(this,{
             attributeName:this.#labelAttrName,
             rectConstraint: new RectConstraint({vertical:[null,16,null], horizontal:[16+10,null,0]}),
-            labelText: "a radiobutton!"
+            labelText: param.label
         });
     }
     drawFigure(ctx: CanvasRenderingContext2D): void {
-        super.drawFigure(ctx);
+        this.#radioElement.draw(ctx);
+        this.#labelElement.draw(ctx);
     }
     getHandles(drawingView: DrawingView): Handle[] {
         const handles = super.getHandles(drawingView);

@@ -2,7 +2,7 @@ import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
 import { Rect } from "../data/rect.js";
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
-import { CreateLabelElementParam,CenteredLabelElement } from "./figureElements.js";
+import { CreateLabelElementParam,LabelElementCentered, FigureElement } from "./figureElements.js";
 import { RectConstraint } from "../data/rectConstraint.js";
 
 type CreateButtonParam = CreateFigureParam & {
@@ -18,7 +18,7 @@ class ButtonFigure extends Figure{
     name = "ButtonFigure";
 
     labelAttrName:string = "label";
-    
+    #centeredLabelElement: FigureElement;
     constructor(param:CreateButtonParam){
         super(param);
         const labelConstraint = new RectConstraint({vertical:[null,16,null], horizontal:[4,null,4]})
@@ -27,7 +27,7 @@ class ButtonFigure extends Figure{
             attributeName:this.labelAttrName,
             labelText: param.label
         }
-        new CenteredLabelElement(this,createLabelElementParam);
+        this.#centeredLabelElement = new LabelElementCentered(this,createLabelElementParam);
     };
 
     drawFigure(ctx:CanvasRenderingContext2D){
@@ -48,7 +48,7 @@ class ButtonFigure extends Figure{
         ctx.fill();
         
         //draws label
-        super.drawFigure(ctx);
+        this.#centeredLabelElement.draw(ctx);
     }
 
     

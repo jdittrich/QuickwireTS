@@ -1,5 +1,5 @@
-/**
 
+/**
  * Manages Key/Value pairs.
  * Any possible key and its type must be registered before setting it via register, like this: register({"isSelected":Boolean})
  */
@@ -20,7 +20,7 @@ class FigureAttributes{
     /**
      * Registers additional allowed keys.
      * Usually called in constructor.
-     * @param {object} attributeTypes - having Key:Constructor pairs, i.e.  
+     * @param {object} attributeTypes - having Key:Constructor pairs, i.e.  ({"label":String});
      */
     register(attributeTypes){
         //entries returns an array of [key,value]
