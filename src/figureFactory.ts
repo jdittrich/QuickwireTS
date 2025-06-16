@@ -4,7 +4,12 @@ import { RectFigure, CreateRectFigureParam } from "./figures/rectFigure.js";
 import { ButtonFigure, CreateButtonParam } from "./figures/buttonFigure.js";
 //import { RadioButtonListFigure, createRadioButtonListFigureParam } from "./figures/radioButtonListFigure.js";
 import { CheckboxFigure,CreateCheckboxParam, RadiobuttonFigure, CreateRadiobuttonParam} from "./figures/toggleFigure.js";
+import { CreateParagraphFigureParam, ParagraphFigure } from "./figures/ParagraphFigure.js";
+import {HorizontalTabsFigure, CreateHorizontalTabsParam} from "./figures/horizontalTabsFigure.js"
 import { Drawing } from "./drawing.js";
+import { SingleSelectLabelList } from "./data/singleSelectLabelList.js";
+import { CreateLabelElementParam } from "./figures/figureElements.js";
+import { CreateLabelFigureParam, LabelFigure } from "./figures/labeledFigure.js";
 //adding a new figure: Import the figure, its parameter type as well as any value object types the object needs.
 
 function jsonToFigure(figureJson):Figure{
@@ -48,6 +53,25 @@ function jsonToFigure(figureJson):Figure{
             }
             return new CheckboxFigure(createCheckboxParam);
             break;
+        case "ParagraphFigure":
+            const createParagraphFigureParam:CreateParagraphFigureParam = {
+                ...figureBaseParams
+            }
+            return new ParagraphFigure(createParagraphFigureParam);
+            break;
+        case "HorizontalTabsFigure":
+            const createHorizontalTabsParam:CreateHorizontalTabsParam = {
+                ...figureBaseParams,
+                selectableLabels:SingleSelectLabelList.fromJSON(figureJson.selectableLabels)
+            }
+            return new HorizontalTabsFigure(createHorizontalTabsParam);
+            break;
+        case "LabelFigure":
+            const createLabelFigureParam:CreateLabelFigureParam = {
+                ...figureBaseParams,
+                label: figureJson.label
+            }
+            return new LabelFigure(createLabelFigureParam);
         default: 
             throw new Error(`When Parsing Json: ${type} is not known`);
     }

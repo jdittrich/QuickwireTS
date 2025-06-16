@@ -5,8 +5,8 @@ import { ToggleAttributeHandle } from "../handles/toggleAttributeHandle.js";
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
 import { RectConstraint, centeredStrategy } from "../data/rectConstraint.js";
-import { Label } from "../data/label.js";
-import { SingleSelectableLabelList } from "../data/singleSelectLabelList.js";
+import { SingleSelectLabelList } from "../data/singleSelectLabelList.js";
+import {EditSelectableListHandle} from "../handles/editTextHandle.js";
 import { Drawable } from "../interfaces.js";
 
 
@@ -16,6 +16,11 @@ import { Drawable } from "../interfaces.js";
  * An abstract class for graphical elements of figures, 
  * e.g. the handle on a scrollbar or the radio indicator of a radiobutton.
  * 
+ * It combines: 
+ * - Figure, 
+ * - a figure attribute (identified by name), 
+ * - a handle to change the attribute
+ * - a drawing method that visualized the element
  */
 abstract class FigureElement implements Drawable{
     #figure
@@ -49,11 +54,14 @@ type CreateToggleElementParam = {
     isSelected:boolean;
 }
 
-//draws a toggleable checkbox
-class ToggleElement extends FigureElement{
+/**
+ * Base class for elements that can be toggled, like 
+ * radio buttons (⦿,◯) or checkboxes (☑,☐)
+ */
+abstract class ToggleElement extends FigureElement{
     rectConstraint:RectConstraint;
     attributeName:string;
-    constructor(figure, param:CreateToggleElementParam){
+    constructor(figure:Figure, param:CreateToggleElementParam){
         super(figure);
         this.rectConstraint = param.rectConstraint;
         this.attributeName = param.attributeName;
@@ -66,17 +74,19 @@ class ToggleElement extends FigureElement{
         const ownRect = this.rectConstraint.deriveRect(figureRect);
         return ownRect;
     }
-    draw(ctx){
-
-    }
+    abstract draw(ctx:CanvasRenderingContext2D)
     getHandles(drawingView): Handle[] {
         const handle = new ToggleAttributeHandle(this.getFigure(),drawingView,this.getElementRect(),this.attributeName);
         return [handle];
     }
 }
 
+/**
+ * Draws the toggleable check box (not the label!)
+ * which looks like ☑ or ☐
+ */
 class CheckboxElement extends ToggleElement {
-    draw(ctx){
+    draw(ctx:CanvasRenderingContext2D){
         const rect = this.getElementRect();
         const isChecked = this.getFigureAttribute(this.attributeName);
         ctx.strokeRect(...rect.toArray());
@@ -90,11 +100,15 @@ class CheckboxElement extends ToggleElement {
     }
 }
 
+/**
+ * Draws the toggleable radio button (not the label!)
+ * which looks like ⦿ or ◯
+ */
 class RadioElement extends ToggleElement {
     constructor(figure:Figure, param:CreateToggleElementParam){
         super(figure,param);
     }
-    draw(ctx){
+    draw(ctx:CanvasRenderingContext2D){
         const radioRadius = 5;
         const radioSelectionRadius = 3;
         const radioCenter = this.getElementRect().getCenter();
@@ -173,13 +187,82 @@ class LabelElementCentered extends LabelElement{
     }
 }
 
+
+type CreateSingleSelectElementParam = {
+    rectConstraint:RectConstraint;
+    attributeName:string;
+    labelText:SingleSelectLabelList;
+}
+
+class HorizontalTabsElement extends FigureElement{
+    attributeName:string;
+    rectConstraint:RectConstraint;
+    labelRect: Rect;
+    constructor(figure:Figure, param:CreateSingleSelectElementParam){
+        super(figure)
+        this.rectConstraint = param.rectConstraint;
+        figure.registerAttributes({[param.attributeName]:SingleSelectLabelList})
+        this.attributeName = param.attributeName;
+        this.setFigureAttribute(param.attributeName,param.labelText);
+        this.labelRect = new Rect({x:0,y:0,width:0,height:0});
+    }
+    getElementRect():Rect {
+        const figureRect = this.getFigureRect();
+        const ownRect = this.rectConstraint.deriveRect(figureRect);
+        return ownRect;
+    }
+    getTabWidth(){
+        const elementRect = this.getElementRect();
+        const singleSelectLabels = this.getFigureAttribute(this.attributeName);
+        const labelCount = singleSelectLabels.labels.length;
+        const width =  elementRect.width/labelCount;
+        return width;
+    }
+    draw(ctx:CanvasRenderingContext2D):void{
+        const {labels, selectedIndex} = this.getFigureAttribute(this.attributeName);
+        const elementRect = this.getElementRect();
+        const tabWidth = this.getTabWidth();
+        let leftmost = elementRect.x;
+        labels.forEach((label,index)=>{
+            const currentRect = new Rect({x:leftmost,y:elementRect.y,width:tabWidth,height:elementRect.height})
+            drawTextInRectCentered(ctx,currentRect,label);
+            ctx.beginPath()
+            ctx.roundRect(...currentRect.toArray(), [10, 10, 0, 0]);
+            ctx.stroke();
+            if(index === selectedIndex){
+                ctx.save()
+                ctx.lineWidth = 10;
+                ctx.beginPath()
+                ctx.moveTo(currentRect.left, currentRect.bottom);
+                ctx.lineTo(currentRect.right,currentRect.bottom);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            leftmost = currentRect.right;
+        });
+    }
+    getHandles(drawingView: DrawingView): Handle[] {
+        const parsableTextEditHandle = new EditSelectableListHandle(
+            this.getFigure(),
+            drawingView,
+            {
+                "attributeName":this.attributeName,
+                "textRect": this.getElementRect()
+            });
+        return [parsableTextEditHandle];
+    }
+}
+
+
+
 // Drawing text is tricky. You need to draw to know where it will be placed
 // even though I can measure text without drawing, it is usually best
 // to keep measuring and drawing together.
 // thus, I give the rect it may draw in (e.g. from here to the very right of the figure)
 // then I return the box it actually took up. 
 // NOTE: Must use a fixed textbox (not "actual" metrics) to avoid base line changes
-// of using UPPERCASE vs descendent characters like yjg
+// if actual is used the word "race" has another box than "face" or "rage" (due to ascendend/descendend letters)
 function drawTextInRectCentered(ctx:CanvasRenderingContext2D,potentialSpaceRect:Rect,label:string):Rect{
     const metrics = ctx.measureText(label);
     const baselineToTopEdge = metrics.fontBoundingBoxAscent;
@@ -227,4 +310,15 @@ function drawTextInRectLeft(ctx,potentialSpaceRect:Rect,label):Rect{
     return textRect;
 }
 
-export {CheckboxElement, RadioElement, LabelElement, LabelElementCentered, LabelElementLeftAligned, CreateLabelElementParam, FigureElement}
+export {
+    CheckboxElement, 
+    RadioElement,
+    LabelElement,
+    LabelElementCentered,
+    LabelElementLeftAligned,
+    CreateLabelElementParam,
+    CreateSingleSelectElementParam,
+    HorizontalTabsElement,
+    FigureElement
+
+}

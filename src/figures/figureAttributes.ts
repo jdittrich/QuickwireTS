@@ -46,7 +46,7 @@ class FigureAttributes{
         const actualConstructor = value.constructor;
         
         if(expectedConstructor !== actualConstructor){
-            throw new Error(`Mismatch between expected constructor ${expectedConstructor.name} and actual constructor of value, ${expectedConstructor.name}`);
+            throw new Error(`Mismatch between expected constructor ${expectedConstructor.name} and actual constructor of value, ${actualConstructor.name}`);
         } 
     }
 }

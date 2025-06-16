@@ -18,3 +18,11 @@
 .paragraphTool_icon {
     background-image:url(../tools/ParagraphToolIcon.svg);
 }
+
+.tabsTool_icon {
+    background-image:url(../tools/TabsToolIcon.svg);
+}
+
+.labelTool_icon {
+    background-image:url(../tools/LabelToolIcon.svg);
+}

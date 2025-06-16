@@ -12,6 +12,7 @@ import {Point} from "../data/point.js";
 import { Figure } from "../figures/figure.js";
 import { DrawingView } from "../drawingView.js";
 import { LocalMouseEvent } from "../events.js";
+import { SingleSelectLabelList } from "../data/singleSelectLabelList.js";
 
 type EditTextHandleParam = {
     attributeName:string;
@@ -19,13 +20,13 @@ type EditTextHandleParam = {
 }
 
 class EditTextHandle extends Handle {
-    #attributeName:string
-    #textRect:Rect
+    attributeName:string
+    textRect:Rect
     #size = 20;
     constructor(figure:Figure, drawingView:DrawingView,param: EditTextHandleParam){
         super(figure, drawingView);
-        this.#attributeName = param.attributeName;
-        this.#textRect = param.textRect;
+        this.attributeName = param.attributeName;
+        this.textRect = param.textRect;
     }
 
     draw(ctx: CanvasRenderingContext2D){ 
@@ -63,7 +64,7 @@ class EditTextHandle extends Handle {
      * @returns {Rect} the coordinates of the handle on screen
      */
     getScreenRect(): Rect{
-        const textRect = this.#textRect;
+        const textRect = this.textRect;
         const drawingView = this.getDrawingView();
         const {topRight} = textRect.getCorners();
         const drawAnchor = topRight.add(new Point({x:0, y:-2}));        
@@ -81,7 +82,7 @@ class EditTextHandle extends Handle {
     onMousedown(mouseEvent: LocalMouseEvent){
         const drawingView = this.getDrawingView();
         const figure      = this.getFigure();
-        const currentText = figure.getAttribute(this.#attributeName);
+        const currentText = figure.getAttribute(this.attributeName);
         let newText = ""
         try{
             newText = drawingView.requestEditorText("Edit label",currentText);
@@ -91,7 +92,7 @@ class EditTextHandle extends Handle {
         const changeTextCommand = new ChangeAttributeCommand(
             {   
                 figure:figure,
-                attribute: this.#attributeName,
+                attribute: this.attributeName,
                 value: newText
             },
             drawingView
@@ -108,4 +109,35 @@ class EditTextHandle extends Handle {
     }
 }
 
-export {EditTextHandle}
+//TODO:
+class EditSelectableListHandle extends EditTextHandle{
+    constructor(figure:Figure, drawingView:DrawingView,param: EditTextHandleParam){
+        super(figure, drawingView, param);
+    }
+    onMousedown(mouseEvent: LocalMouseEvent){
+        const drawingView = this.getDrawingView();
+        const figure      = this.getFigure();
+        const currentSingleSelectList = figure.getAttribute(this.attributeName); //IDEA: have a toString/fromString on the data attribute?
+        const currentText = currentSingleSelectList.toString();
+        let newText = ""
+        try{
+            newText = drawingView.requestEditorText("Edit label",currentText);
+        } catch {
+            return;
+        }
+        
+        const updatedSingleSelectList = SingleSelectLabelList.fromString(newText);
+
+        const changeParseableTextCommand = new ChangeAttributeCommand(
+            {   
+                figure:figure,
+                attribute: this.attributeName,
+                value: updatedSingleSelectList
+            },
+            drawingView
+        )
+        drawingView.do(changeParseableTextCommand);
+    }
+}
+
+export {EditTextHandle,EditSelectableListHandle}

@@ -14,7 +14,8 @@ import { Tool } from "./tools/tool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
 import { CheckboxFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
 import { ParagraphFigure } from "./figures/ParagraphFigure.js";
-
+import { HorizontalTabsFigure } from "./figures/horizontalTabsFigure.js";
+import { LabelFigure } from "./figures/labeledFigure.js";
 
 /**
  * App is responsible for bridging between 
@@ -143,6 +144,20 @@ class App{
                 icon: "paragraphTool",
                 name:"paragraphTool"
             },
+            {
+                tool: new CreateFigureTool(HorizontalTabsFigure.createWithDefaultParameters()),
+                label:"horizontal tabs figure",
+                description:"horizontal tabs",
+                icon: "tabsTool",
+                name:"tabsTool"
+            },
+            {
+                tool: new CreateFigureTool(LabelFigure.createWithDefaultParameters()),
+                label:"label figure",
+                description:"label figure",
+                icon:"labelTool",
+                name:"labelTool"
+            }
         
         ]
         
