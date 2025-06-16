@@ -48,7 +48,8 @@ class CreateFigureCommand extends Command{
     }
     do(){
         console.log("appending figures:", this.#appendFigures);
-        this.#newFigure.setRect(this.#newFigureRect);
+        //this.#newFigure.setRect(this.#newFigureRect);
+        this.#newFigure.changeRect(this.#newFigureRect);
         this.#toContainer.appendFigure(this.#newFigure);
         this.#newFigure.appendFigures(this.#appendFigures); 
         

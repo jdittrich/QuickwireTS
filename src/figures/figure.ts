@@ -42,7 +42,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      */
     constructor(param: CreateFigureParam){
         const rect = param.rect 
-        this.setRect(rect);
+        this.#setRect(rect);
         this.appendFigures(param.containedFigures ?? []);
     }
     
@@ -337,10 +337,10 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     }
     
     /**
-     * Only to be called internally
+     * Low level, only to be called internally. It won't move contained figures.
      * @param {Rect} rect 
      */
-    setRect(rect: Rect){
+    #setRect(rect: Rect){
         this.#rect = rect.copy(); 
     }
 
@@ -352,7 +352,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @param {Point} point1 
      * @param {Point} point2 
      */
-    setRectByPoints(point1: Point,point2: Point){
+    changeRectByPoints(point1: Point,point2: Point){
         const newRect = Rect.createFromCornerPoints(point1, point2);
         this.changeRect(newRect);
     }
@@ -367,13 +367,13 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     changeRect(changedRect:Rect){
         const oldRect = this.getRect();
         if(!oldRect){
-            this.setRect(changedRect);
+            this.#setRect(changedRect);
             return;
         }
         const oldPosition = oldRect.getPosition();
         const newPosition = changedRect.getPosition();
         const moveBy = oldPosition.offsetTo(newPosition);
-        this.setRect(changedRect);
+        this.#setRect(changedRect);
 
         const containedFigures = this.getContainedFigures();
         containedFigures.forEach(figure=>figure.movePositionBy(moveBy));

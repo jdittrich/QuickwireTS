@@ -67,10 +67,9 @@ class DuplicationHandle extends Handle{
     }
     onDrag(dragEvent:LocalDragEvent){
         const drawingView = this.getDrawingView();
-        const dragMovement = dragEvent.getDocumentDragMovement();
         const previewFigure = drawingView.getPreviewedFigure();
-        const newPreviewFigureRect = this.#createChangedRect(dragMovement);
-        previewFigure.setRect(newPreviewFigureRect);
+        const dragMovement = dragEvent.getDocumentMovement();
+        previewFigure.movePositionBy(dragMovement);
     }
     onDragend(dragEvent:LocalDragEvent){
         //check if copy can be placed

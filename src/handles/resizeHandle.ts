@@ -44,7 +44,8 @@ class ResizeHandle extends Handle{
         const dragMovement = dragEvent.getDocumentDragMovement();
         const previewFigure = drawingView.getPreviewedFigure();
         const newRect = this.createChangedRect(dragMovement)
-        previewFigure.setRect(newRect);
+        //previewFigure.setRect(newRect);
+        previewFigure.changeRect(newRect);
     }
     onDragend(dragEvent:LocalDragEvent){
         const drawingView = this.getDrawingView();

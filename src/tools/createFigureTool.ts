@@ -26,7 +26,7 @@ class CreateFigureTool extends Tool{
         const currentMousePoint = event.getDocumentPosition(); 
         const documentMouseDownPoint = event.getMousedownDocumentPosition();
         const previewedFigure = event.drawingView.getPreviewedFigure();
-        previewedFigure.setRectByPoints(documentMouseDownPoint,currentMousePoint);
+        previewedFigure.changeRectByPoints(documentMouseDownPoint,currentMousePoint);
         event.drawingView.updateDrawing();
     }
 

@@ -43,7 +43,7 @@ class DuplicateFigureCommand implements Command, Undoable{
         this.#appendFigures= rectEnclosesFigures;
     }
     do(): void {
-        this.#duplicateFigure.setRect(this.#duplicateFigureRect);
+        this.#duplicateFigure.changeRect(this.#duplicateFigureRect);
         this.#toContainer.appendFigure(this.#duplicateFigure);
         this.#duplicateFigure.appendFigures(this.#appendFigures); 
         this.#drawingView.select(this.#duplicateFigure);
