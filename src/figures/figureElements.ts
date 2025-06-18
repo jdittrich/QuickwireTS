@@ -21,9 +21,13 @@ import { Drawable } from "../interfaces.js";
  * - a figure attribute (identified by name), 
  * - a handle to change the attribute
  * - a drawing method that visualized the element
+ * 
+ * Note: I am not sure how much I like this pattern. It provides composability for complex figures
+ * It also introduces a lot of indirections, particularly since it registers itself to its figure
+ * in its constructor, so mere creation of the object creates a link between the two. 
  */
 abstract class FigureElement implements Drawable{
-    #figure
+    #figure:Figure
     constructor(figure:Figure){
         this.#figure = figure;
         figure.addFigureElements([this]);
