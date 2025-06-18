@@ -1,11 +1,13 @@
-import {Figure, CreateFigureParam} from "./figures/figure.js";
 import { Rect } from "./data/rect.js";
+
+import {Figure, CreateFigureParam} from "./figures/figure.js";
 import { RectFigure, CreateRectFigureParam } from "./figures/rectFigure.js";
 import { ButtonFigure, CreateButtonParam } from "./figures/buttonFigure.js";
-//import { RadioButtonListFigure, createRadioButtonListFigureParam } from "./figures/radioButtonListFigure.js";
 import { CheckboxFigure,CreateCheckboxParam, RadiobuttonFigure, CreateRadiobuttonParam} from "./figures/toggleFigure.js";
 import { CreateParagraphFigureParam, ParagraphFigure } from "./figures/ParagraphFigure.js";
-import {HorizontalTabsFigure, CreateHorizontalTabsParam} from "./figures/horizontalTabsFigure.js"
+import { HorizontalTabsFigure, CreateHorizontalTabsParam } from "./figures/horizontalTabsFigure.js"
+import { DropdownFigure, CreateDropdownParam } from "./figures/dropdownFigure.js";
+
 import { Drawing } from "./drawing.js";
 import { SingleSelectLabelList } from "./data/singleSelectLabelList.js";
 import { CreateLabelElementParam } from "./figures/figureElements.js";
@@ -72,6 +74,12 @@ function jsonToFigure(figureJson):Figure{
                 label: figureJson.label
             }
             return new LabelFigure(createLabelFigureParam);
+        case "DropdownFigure":
+            const createDropdownFigureParam:CreateDropdownParam = {
+                ...figureBaseParams,
+                label: figureJson.label
+            }
+            return new DropdownFigure(createDropdownFigureParam);
         default: 
             throw new Error(`When Parsing Json: ${type} is not known`);
     }

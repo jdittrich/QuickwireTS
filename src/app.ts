@@ -16,6 +16,7 @@ import { CheckboxFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
 import { ParagraphFigure } from "./figures/ParagraphFigure.js";
 import { HorizontalTabsFigure } from "./figures/horizontalTabsFigure.js";
 import { LabelFigure } from "./figures/labeledFigure.js";
+import { DropdownFigure } from "./figures/dropdownFigure.js";
 
 /**
  * App is responsible for bridging between 
@@ -157,6 +158,13 @@ class App{
                 description:"label figure",
                 icon:"labelTool",
                 name:"labelTool"
+            },
+            {
+                tool: new CreateFigureTool(DropdownFigure.createWithDefaultParameters()),
+                label:"dropdown figure",
+                description:"dropdown figure",
+                icon:"dropdownTool",
+                name:"dropdownTool"
             }
         
         ]

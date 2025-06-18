@@ -26,3 +26,7 @@
 .labelTool_icon {
     background-image:url(../tools/LabelToolIcon.svg);
 }
+
+.dropdownTool_icon {
+    background-image:url(../tools/DropdownToolIcon.svg);
+}

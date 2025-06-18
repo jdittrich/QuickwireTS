@@ -11,6 +11,7 @@
 .cursor_tool_paragraphTool{cursor:url(../tools/ParagraphToolCursor.svg)     4 4, crosshair;}
 .cursor_tool_paragraphTool{cursor:url(../tools/TabsToolCursor.svg)     4 4, crosshair;}
 .cursor_tool_labelTool{cursor:url(../tools/LabelToolCursor.svg)     4 4, crosshair;}
+.cursor_tool_dropdownTool{cursor:url(../tools/DropdownToolCursor.svg)     4 4, crosshair;}
 
 
 .cursor_se-resize{
