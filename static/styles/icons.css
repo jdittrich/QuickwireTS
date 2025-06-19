@@ -1,32 +1,10 @@
-.buttonTool_icon{
-    background-image: url(../tools/buttonToolIIcon.svg);
-}                 
-.rectangleTool_icon{
-    background-image:url(../tools/rectToolIcon.svg);
-}
-.radiobuttonTool_icon{
-    background-image:url(../tools/RadioButtonToolIcon.svg);
-} 
-
-.checkboxTool_icon {
-    background-image:url(../tools/CheckboxToolIcon.svg);
-}
-.selectionTool_icon {
-    background-image:url(../tools/SelectionToolIcon.svg);
-}
-
-.paragraphTool_icon {
-    background-image:url(../tools/ParagraphToolIcon.svg);
-}
-
-.tabsTool_icon {
-    background-image:url(../tools/TabsToolIcon.svg);
-}
-
-.labelTool_icon {
-    background-image:url(../tools/LabelToolIcon.svg);
-}
-
-.dropdownTool_icon {
-    background-image:url(../tools/DropdownToolIcon.svg);
-}
+.buttonTool_icon     { background-image: url(../tools/buttonToolIIcon.svg);   }
+.rectangleTool_icon  { background-image:url(../tools/rectToolIcon.svg);       }
+.radiobuttonTool_icon{ background-image:url(../tools/RadioButtonToolIcon.svg);} 
+.checkboxTool_icon   { background-image:url(../tools/CheckboxToolIcon.svg);   }
+.selectionTool_icon  { background-image:url(../tools/SelectionToolIcon.svg);  }
+.paragraphTool_icon  { background-image:url(../tools/ParagraphToolIcon.svg);  }
+.tabsTool_icon       { background-image:url(../tools/TabsToolIcon.svg);       }
+.labelTool_icon      { background-image:url(../tools/LabelToolIcon.svg);      }
+.dropdownTool_icon   { background-image:url(../tools/DropdownToolIcon.svg);   }
+.headlineTool_icon   { background-image:url(../tools/HeadlineToolIcon.svg);   }

@@ -3,34 +3,24 @@
 .cursor_grab        {cursor:grab;}
 .cursor_grabbing    {cursor: grabbing;}
 
-.cursor_tool_selection     {cursor:default;}
-.cursor_tool_buttonTool  {cursor:url(../tools/buttonToolCursor.svg)          4 4, crosshair;}
-.cursor_tool_rectangleTool    {cursor:url(../tools/rectToolCursor.svg)            4 4, crosshair;}
-.cursor_tool_radiobuttonTool{cursor:url(../tools/RadioButtonToolCursor.svg)     4 4, crosshair;}
-.cursor_tool_checkboxTool{cursor:url(../tools/CheckboxToolCursor.svg)     4 4, crosshair;}
-.cursor_tool_paragraphTool{cursor:url(../tools/ParagraphToolCursor.svg)     4 4, crosshair;}
-.cursor_tool_paragraphTool{cursor:url(../tools/TabsToolCursor.svg)     4 4, crosshair;}
-.cursor_tool_labelTool{cursor:url(../tools/LabelToolCursor.svg)     4 4, crosshair;}
-.cursor_tool_dropdownTool{cursor:url(../tools/DropdownToolCursor.svg)     4 4, crosshair;}
+.cursor_tool_selection      {cursor:default;}
+.cursor_tool_buttonTool     {cursor:url(../tools/buttonToolCursor.svg)      4 4, crosshair;}
+.cursor_tool_rectangleTool  {cursor:url(../tools/rectToolCursor.svg)        4 4, crosshair;}
+.cursor_tool_radiobuttonTool{cursor:url(../tools/RadioButtonToolCursor.svg) 4 4, crosshair;}
+.cursor_tool_checkboxTool   {cursor:url(../tools/CheckboxToolCursor.svg)    4 4, crosshair;}
+.cursor_tool_paragraphTool  {cursor:url(../tools/ParagraphToolCursor.svg)   4 4, crosshair;}
+.cursor_tool_paragraphTool  {cursor:url(../tools/TabsToolCursor.svg)        4 4, crosshair;}
+.cursor_tool_labelTool      {cursor:url(../tools/LabelToolCursor.svg)       4 4, crosshair;}
+.cursor_tool_dropdownTool   {cursor:url(../tools/DropdownToolCursor.svg)    4 4, crosshair;}
+.cursor_tool_headlineTool   {cursor:url(../tools/HeadlineToolCursor.svg)    4 4, crosshair;}
 
+.cursor_se-resize{cursor:se-resize;}
 
-.cursor_se-resize{
-    cursor:se-resize;
-}
+.cursor_sw-resize{cursor:sw-resize;}
 
-.cursor_sw-resize{
-    cursor:sw-resize;
-}
+.cursor_ne-resize{cursor:ne-resize;}
 
-.cursor_ne-resize{
-    cursor:ne-resize;
-}
+.cursor_nw-resize{cursor:nw-resize;}
 
-.cursor_nw-resize{
-    cursor:nw-resize;
-}
-
-.cursor_undefined {
-    /*cursor:wait;*/
-}
+.cursor_undefined{}
 
