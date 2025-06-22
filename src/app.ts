@@ -15,7 +15,7 @@ import { InteractionAnnouncement } from "./interfaces.js";
 import { CheckboxFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
 import { ParagraphFigure } from "./figures/ParagraphFigure.js";
 import { HorizontalTabsFigure } from "./figures/horizontalTabsFigure.js";
-import { LabelFigure } from "./figures/labeledFigure.js";
+import { HeadlineFigure, LabelFigure } from "./figures/labeledFigure.js";
 import { DropdownFigure } from "./figures/dropdownFigure.js";
 
 /**
@@ -88,8 +88,10 @@ class App{
         this.#canvas.addEventListener("keyup",     this.#keyup.bind(this));
         
         this.#canvas.style.background = "lightgray";
-        
+
+        // enable redraw of canvas when it changes size
         window.addEventListener("resize",this.#setCanvasSize.bind(this));
+
 
 
         //setup drawing view
@@ -100,7 +102,10 @@ class App{
             }
         );
 
-
+        // this is both used to register tools on the view and 
+        // make these tools accessible via a toolbar with icons and cursors 
+        // for the icons/cursors to work, you also need to map the names to css classes in 
+        // cursors.css, icons.css located at static/styles/
         const toolsData: ToolData[]   = [
             {
                 tool: new SelectionTool(),
@@ -165,23 +170,38 @@ class App{
                 description:"dropdown figure",
                 icon:"dropdownTool",
                 name:"dropdownTool"
+            },
+            {
+                tool: new CreateFigureTool(HeadlineFigure.createWithDefaultParameters()),
+                label:"headline figure",
+                description: "headline figure",
+                icon: "headlineTool",
+                name:"headlineTool"
             }
-        
         ]
         
-    
+        
         const drawingView = this.#setupDrawingView(toolsData)
         this.#drawingView = drawingView;
-        const toolbar = this.#setupToolbar(toolsData);
-        const actionbar = this.#setupActionBar();
+
+        const toolbar = this.#setupToolbar(toolsData); //selection tool and creating different figures
+        const actionbar = this.#setupActionBar(); //action bar has download/upload, undo/redo
+        
         this.#horizontalBarContainer.append(toolbar.domElement);
         this.#horizontalBarContainer.append(actionbar.domElement);
         
         this.#setCanvasSize();
+
+        // get notified when the tool changes
         this.#drawingView.addEventListener(toolChangeEventName,this.#handleToolChange.bind(this));
-        this.#drawingView.addEventListener(interactionAnnouncementName, this.#handleInteractionAnnouncement.bind(this));
+        // get notified when the cursor is over a figure or handle
+        this.#drawingView.addEventListener(interactionAnnouncementName, this.#handleInteractionAnnouncement.bind(this)); 
         
-        this.#drawingView.changeToolByName("selectionTool");
+        this.#drawingView.changeToolByName("selectionTool"); //TODO: changeToDefaultTool();
+
+        
+
+
         ////if you need to access drawing/drawingView, uncomment these: 
         // window.drawingView = this.#drawingView;
         // window.drawing = this.#drawing;
@@ -219,8 +239,13 @@ class App{
         this.#drawingView.onKeyUp();
     }
     #setupDrawingView(toolsData:ToolData[]){
-        const tools = toolsData; // .map((toolData) => {return {"tool":toolData.tool, "name":toolData.name, isDefault}});
-
+        const tools = toolsData; 
+        
+        // we need to find computed direction here and pass it to canvas
+        // so it can be set on drawingView’s drawAll. 
+        // Like the font attribute it does not work if set before drawing. 
+        const textDirection = getComputedStyle(this.#canvas).direction as "ltr"|"rtl";
+        
         const drawingViewParam:DrawingViewParam =  {
             "ctx": this.#canvasCtx,
             "ctxSize": new Point({
@@ -228,6 +253,7 @@ class App{
                 y: this.#canvas.height
             }),
             "drawing": this.#drawing,
+            "textDirection": textDirection,
             "requestEditorText":function(message,prefillText){
                 const editedText = window.prompt(message,prefillText);
                 if(editedText===null){

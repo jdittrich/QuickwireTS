@@ -43,7 +43,8 @@ type NamedTool = {
 type DrawingViewParam = { 
     ctx: CanvasRenderingContext2D; 
     drawing: Drawing; 
-    ctxSize: Point; 
+    ctxSize: Point;
+    textDirection:"rtl"|"ltr"
     requestEditorText:Function;
     tools:Array<NamedTool>
 }
@@ -64,12 +65,13 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     #commandStack = null;
     #selection    = null; 
     #requestEditorText  = null;
-    
+    #textDirection = null; 
+
     drawing:Drawing
 
     constructor(param:DrawingViewParam){
         super();
-        const {ctx,drawing,ctxSize, requestEditorText, tools} = param
+        const {ctx,drawing,ctxSize, textDirection, requestEditorText, tools} = param
 
         //register Tools
         this.#registerTools(tools);
@@ -77,7 +79,7 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         this.#transform = new ViewTransform();
         this.setCtxSize(ctxSize);//needed to know which area to clear on redraws
         this.#ctx = ctx;
-        
+        this.#textDirection = textDirection;
         
         this.drawing = drawing;
 
@@ -105,6 +107,7 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         //for some reason, setting the font works not if set in the constructor
         // Playpen and Shantell are open fonts, ComicSans comes with Windows, Chalkboard with Mac. 
         ctx.font = "16px 'Playpen Sans','Shantell Sans','Comic Sans MS','Chalkboard'"; 
+        ctx.direction = this.#textDirection;
         
         // clear canvas
         this.#ctx.clearRect(0,0,this.#ctxSize.x,this.#ctxSize.y);
