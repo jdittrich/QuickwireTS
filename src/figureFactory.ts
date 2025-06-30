@@ -4,13 +4,12 @@ import {Figure, CreateFigureParam} from "./figures/figure.js";
 import { RectFigure, CreateRectFigureParam } from "./figures/rectFigure.js";
 import { ButtonFigure, CreateButtonParam } from "./figures/buttonFigure.js";
 import { CheckboxFigure,CreateCheckboxParam, RadiobuttonFigure, CreateRadiobuttonParam} from "./figures/toggleFigure.js";
-import { CreateParagraphFigureParam, ParagraphFigure } from "./figures/ParagraphFigure.js";
+import { CreateParagraphFigureParam, ParagraphFigure } from "./figures/paragraphFigure.js";
 import { HorizontalTabsFigure, CreateHorizontalTabsParam } from "./figures/horizontalTabsFigure.js"
 import { DropdownFigure, CreateDropdownParam } from "./figures/dropdownFigure.js";
 
 import { Drawing } from "./drawing.js";
 import { SingleSelectLabelList } from "./data/singleSelectLabelList.js";
-import { CreateLabelElementParam } from "./figures/figureElements.js";
 import { CreateLabelFigureParam, LabelFigure } from "./figures/labeledFigure.js";
 //adding a new figure: Import the figure, its parameter type as well as any value object types the object needs.
 

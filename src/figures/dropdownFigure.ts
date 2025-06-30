@@ -6,7 +6,10 @@ import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
 import { Rect } from "../data/rect.js";
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
-import { CreateLabelElementParam, FigureElement, LabelElementLeftAligned } from "./figureElements.js";
+
+import { FigureElement } from "./figureElements/figureElement.js";
+import { CreateLabelElementParam } from "./figureElements/labelElement.js";
+import { LabelElementLeftAligned } from "./figureElements/labelElementLeftAligned.js";
 import { RectConstraint } from "../data/rectConstraint.js";
 
 type CreateDropdownParam = CreateFigureParam & {
@@ -30,8 +33,8 @@ class DropdownFigure extends Figure{
     
     constructor(param:CreateDropdownParam){
         super(param);
-        this.#buttonConstraint         = new RectConstraint({vertical:[1,null,1],horizontal:[null,30,0]}); //will be used relative to the figure rect.
-        this.#chevronInButtonConstraint = new RectConstraint({vertical:[null,8,null],horizontal:[8,null,8]}); //will be used relative to button rect
+        this.#buttonConstraint         = new RectConstraint({vertical:[1,null,1],horizontal:[null,24,0]}); //will be used relative to the figure rect.
+        this.#chevronInButtonConstraint = new RectConstraint({vertical:[null,8,null],horizontal:[6,null,6]}); //will be used relative to button rect
         
         const labelConstraint  = new RectConstraint({vertical:[null,16,null], horizontal:[10,null,16]})
         const createLabelElementParam:CreateLabelElementParam = {
@@ -52,7 +55,9 @@ class DropdownFigure extends Figure{
 
         //draw button
         const buttonRect = this.#buttonConstraint.deriveRect(figureRect);
-        ctx.strokeRect(...buttonRect.toArray());
+        ctx.moveTo(buttonRect.left,buttonRect.top-1)
+        ctx.lineTo(buttonRect.left,buttonRect.bottom+1)
+        ctx.stroke();
 
         //drawChevron
         const chevronRect = this.#chevronInButtonConstraint.deriveRect(buttonRect);

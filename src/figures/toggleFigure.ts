@@ -6,7 +6,11 @@ import { Handle } from "../handles/handle.js";
 import { EditTextHandle} from '../handles/editTextHandle.js';
 import { ToggleAttributeHandle } from "../handles/toggleAttributeHandle.js";
 
-import { CheckboxElement, RadioElement ,  LabelElementLeftAligned, FigureElement } from "./figureElements.js";
+
+import { RadioElement } from "./figureElements/toggleElementRadio.js";
+import { CheckboxToggleElement } from "./figureElements/toggleElementCheckbox.js";
+import { LabelElementLeftAligned } from "./figureElements/labelElementLeftAligned.js";
+import { FigureElement } from "./figureElements/figureElement.js";
 import { RectConstraint } from "../data/rectConstraint.js";
 
 //=========================
@@ -35,10 +39,10 @@ class CheckboxFigure extends Figure{
     constructor(param:CreateCheckboxParam){
         super(param);
 
-        this.#checkboxElement = new CheckboxElement(this,{
+        this.#checkboxElement = new CheckboxToggleElement(this,{
             attributeName:this.#isSelectedAttrName,
             isSelected:param.isSelected,
-            rectConstraint: new RectConstraint({vertical:[null,16,null], horizontal:[0,16,null]})
+            rectConstraint: new RectConstraint({vertical:[null,12,null], horizontal:[2,12,null]})
         });
 
         this.#labelElement = new LabelElementLeftAligned(this,{

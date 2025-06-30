@@ -1,7 +1,7 @@
 import { Rect } from "../data/rect.js";
 import { RectConstraint } from "../data/rectConstraint.js";
 import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
-import { HorizontalTabsElement, CreateSingleSelectElementParam } from "./figureElements.js";
+import { HorizontalTabsElement, CreateSingleSelectElementParam } from "./figureElements/singleSelectElement.js";
 import { Handle } from "../handles/handle.js";
 import { SingleSelectLabelList, SingleSelectLabelListJson } from "../data/singleSelectLabelList.js";
 import { DrawingView } from "../drawingView.js";

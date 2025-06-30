@@ -2,7 +2,9 @@ import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
 import { Rect } from "../data/rect.js";
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
-import { CreateLabelElementParam,LabelElementCentered, FigureElement } from "./figureElements.js";
+import { FigureElement } from "./figureElements/figureElement.js";
+import { CreateLabelElementParam, LabelElement } from "./figureElements/labelElement.js";
+import { LabelElementCentered } from "./figureElements/labelElementCenterAligned.js";
 import { RectConstraint } from "../data/rectConstraint.js";
 
 type CreateButtonParam = CreateFigureParam & {

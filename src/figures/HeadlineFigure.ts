@@ -1,38 +1,34 @@
-import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
-import { Rect } from "../data/rect.js";
-import { DrawingView } from "../drawingView.js";
-import { Handle } from "../handles/handle.js";
+import { Figure } from "./figure.js";
 import { RectConstraint } from "../data/rectConstraint.js";
 import { FigureElement } from "./figureElements/figureElement.js";
 import { CreateLabelElementParam } from "./figureElements/labelElement.js";
-import { LabelElementLeftAligned } from "./figureElements/labelElementLeftAligned.js";
+import { CreateLabelFigureParam, LabelFigureJson } from "./labeledFigure.js";
+import { HeadlineElement } from "./figureElements/labelElementHeadline.js";
+import { DrawingView } from "../drawingView.js";
+import { Handle } from "../handles/handle.js";
+import { Rect } from "../data/rect.js";
 
-type CreateLabelFigureParam = CreateFigureParam & {
-    label:string;
-}
+type CreateHeadlineFigureParam = CreateLabelFigureParam;
+type HeadlineFigureJson = LabelFigureJson;
 
-type LabelFigureJson = FigureJson & {
-    label:string;
-}
-
-class LabelFigure extends Figure {
-    name = "LabelFigure";
+class HeadlineFigure extends Figure{
+    name = "HeadlineFigure";
     labelAttrName:string = "label";
-    #leftAlignedLabelElement: FigureElement;
-    constructor(param:CreateLabelFigureParam){
+    #headlineLabelElement: FigureElement;
+    constructor(param:CreateHeadlineFigureParam){
         super(param);
-        const labelConstraint = new RectConstraint({vertical:[null,16,null], horizontal:[4,null,4]})
+        const labelConstraint = new RectConstraint({vertical:[0,null,0], horizontal:[4,null,4]})
         const createLabelElementParam:CreateLabelElementParam = {
             rectConstraint:labelConstraint,
             attributeName:this.labelAttrName,
             labelText: param.label
         }
-        this.#leftAlignedLabelElement = new LabelElementLeftAligned(this,createLabelElementParam);
+        this.#headlineLabelElement = new HeadlineElement(this,createLabelElementParam);
     };
 
-    drawFigure(ctx:CanvasRenderingContext2D){
+    drawFigure(ctx:CanvasRenderingContext2D){              
         //draws label
-        this.#leftAlignedLabelElement.draw(ctx);
+        this.#headlineLabelElement.draw(ctx);
     }
 
     
@@ -74,7 +70,7 @@ class LabelFigure extends Figure {
     }
 
     static createWithDefaultParameters(){
-        const labelFigure = new LabelFigure({
+        const headlineFigure = new HeadlineFigure({
             "rect": new Rect({
                 "x":0,
                 "y":0,
@@ -83,8 +79,8 @@ class LabelFigure extends Figure {
             }),
             label:"Label"
         });
-        return labelFigure;
+        return headlineFigure;
     }
 }
 
-export {LabelFigure, LabelFigureJson, CreateLabelFigureParam}
+export {HeadlineFigure, CreateHeadlineFigureParam, HeadlineFigureJson}

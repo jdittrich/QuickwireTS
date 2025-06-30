@@ -9,7 +9,7 @@ import { createAllResizeHandles } from '../handles/resizeHandle.js';
 import { DeleteFigureHandle } from '../handles/deleteFigureHandle.js';
 import { DrawingView } from '../drawingView.js';
 import { Drawable, Highlightable, InteractionAnnouncement, InteractionInfoProvider } from '../interfaces.js';
-import { FigureElement } from './figureElements.js';
+import { FigureElement } from './figureElements/figureElement.js';
 
 
 type CreateFigureParam = {
@@ -62,11 +62,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         return baseParameters;
     }
     //#region figureElements
-    addFigureElements(figureElements:FigureElement[]){
-        figureElements.forEach((element) =>{
-            this.#figureElements.push(element);
-//           element.register(this);
-        })
+    addFigureElement(figureElement:FigureElement){
+        this.#figureElements.push(figureElement);
     }
 
     //#region: drawing 

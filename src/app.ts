@@ -13,9 +13,10 @@ import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEv
 import { Tool } from "./tools/tool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
 import { CheckboxFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
-import { ParagraphFigure } from "./figures/ParagraphFigure.js";
+import { ParagraphFigure } from "./figures/paragraphFigure.js";
 import { HorizontalTabsFigure } from "./figures/horizontalTabsFigure.js";
-import { HeadlineFigure, LabelFigure } from "./figures/labeledFigure.js";
+import { LabelFigure } from "./figures/labeledFigure.js";
+import { HeadlineFigure } from "./figures/HeadlineFigure.js";
 import { DropdownFigure } from "./figures/dropdownFigure.js";
 
 /**
