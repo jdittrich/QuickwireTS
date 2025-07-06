@@ -16,13 +16,22 @@ class Drawing extends Figure{
     constructor(param:CreateDrawingParam){
         super(param);
     }
-    draw(ctx: CanvasRenderingContext2D){
+
+    //seems this was all implemented before drawFigure was split up from draw?
+    // commented out on 6.7.25, remove if it runs fine. 
+    // draw(ctx: CanvasRenderingContext2D){ 
+    //     const {width, height} = this.getRect();
+    //     ctx.save();
+    //     ctx.fillStyle = "#FFF";
+    //     ctx.fillRect(0,0,width,height);
+    //     ctx.restore()
+    //     this.drawContainedFigures(ctx);
+    // }
+
+    drawFigure(ctx: CanvasRenderingContext2D) {
         const {width, height} = this.getRect();
-        ctx.save();
         ctx.fillStyle = "#FFF";
         ctx.fillRect(0,0,width,height);
-        ctx.restore()
-        this.drawContainedFigures(ctx);
     }
     //#region hit tests
 
