@@ -103,11 +103,6 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @param {CanvasRenderingContext2D} ctx 
      */
     abstract drawFigure(ctx: CanvasRenderingContext2D)
-        //dunno if that is great, it means I need to write a super() 
-        // at the bottom of the draw function, lest the elements might be overwritten 
-        // by background
-        //this.#figureElements.forEach(figureElement => figureElement.draw(ctx));
-    
 
     /**
      * Not to be overwritten by subclasses.
