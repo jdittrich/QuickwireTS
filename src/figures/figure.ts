@@ -80,8 +80,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
             ctx.save()
             this.#clipFigure(ctx);
             this.drawFigure(ctx);
-            this.drawContainedFigures(ctx);
             ctx.restore()
+            this.drawContainedFigures(ctx);
         }
     }
     drawHighlight(ctx: CanvasRenderingContext2D){
@@ -102,12 +102,12 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     /**
      * @param {CanvasRenderingContext2D} ctx 
      */
-    drawFigure(ctx: CanvasRenderingContext2D){
+    abstract drawFigure(ctx: CanvasRenderingContext2D)
         //dunno if that is great, it means I need to write a super() 
         // at the bottom of the draw function, lest the elements might be overwritten 
         // by background
         //this.#figureElements.forEach(figureElement => figureElement.draw(ctx));
-    }
+    
 
     /**
      * Not to be overwritten by subclasses.
@@ -361,12 +361,20 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * but e.g. currently previewed elements can also set it directly 
      * (since they have no outer element to be constrainted by)
      */
-    changeRect(changedRect:Rect){
+    changeRect(changedRect:Rect){ //:Rect
+       
+
+        // set a new rect
         const oldRect = this.getRect();
+
+        // I guess this is here to prevent wild changes to nested objects on first rect assignment.
+        // but I wonder where that happens? 
         if(!oldRect){
             this.#setRect(changedRect);
             return;
         }
+
+        //change child rects accordingly
         const oldPosition = oldRect.getPosition();
         const newPosition = changedRect.getPosition();
         const moveBy = oldPosition.offsetTo(newPosition);
@@ -377,6 +385,28 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         //containedFigures.forEach(figure=>figure.updateRectFromConstraints()) //# For later when we have constraints
     }
     
+    /**
+     *
+     * The rect that is suggested might not be set directly:
+     * Maybe constraints apply. This function takes the suggested Rect and 
+     * derives the actually used rect from it.
+     * 
+     * Included as public method to be overridden by derived classes.
+     */
+
+    /*
+    deriveFromSuggestedRect(rect:Rect):Rect{
+        // I can just use a normal rect constraint here.
+        // I need to set it in the constructor.
+        // maybe it is a pre-made constraint like horizontallyResizableConstraint or the like? 
+        // It should probably stick to top/left so it does not move around vertically
+        //
+        // the default mechanism however, is just returning the same rect.
+        // Oh, wait... or I just set the constraint for every figure, in the constructor,
+        // this method (or even suggestRect directly) just grabs that!
+    }
+    */
+
     /**
     * @returns {Rect} 
     */
