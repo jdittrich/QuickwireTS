@@ -78,8 +78,8 @@ function getLeftRight(outerRect:Rect,metrics:PlacementMetrics,horizontalAlign:"l
         case "center":
             const {x:horizontalCenter} = outerRect.getCenter();
             return {
-                left:  Math.floor(horizontalCenter -(width/2)),
-                right: Math.floor(horizontalCenter +(width/2))
+                left:  (horizontalCenter -(width/2)),
+                right: (horizontalCenter +(width/2))
             } 
             break;
         case "right":
@@ -111,8 +111,8 @@ function getTopBottom(outerRect:Rect,metrics:PlacementMetrics,verticalAlign:"top
         case "center":
             const {y:verticalCenter} = outerRect.getCenter();
             return {
-                top:Math.floor(verticalCenter - (height/2)),
-                bottom: Math.floor(verticalCenter + (height/2))
+                top:(verticalCenter - (height/2)),
+                bottom:(verticalCenter + (height/2))
             }
         case "right":
             return {
