@@ -1,5 +1,5 @@
 import { Figure } from "./figure.js";
-import { RectConstraint } from "../data/rectConstraint.js";
+import { RectConstraint, SizeConstraint } from "../data/rectConstraint.js";
 import { FigureElement } from "./figureElements/figureElement.js";
 import { CreateLabelElementParam } from "./figureElements/labelElement.js";
 import { CreateLabelFigureParam, LabelFigureJson } from "./labeledFigure.js";
@@ -8,6 +8,8 @@ import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
 import { Rect } from "../data/rect.js";
 
+import {createLeftRightResizeHandles} from "../handles/resizeHandle.js"
+
 type CreateHeadlineFigureParam = CreateLabelFigureParam;
 type HeadlineFigureJson = LabelFigureJson;
 
@@ -15,6 +17,9 @@ class HeadlineFigure extends Figure{
     name = "HeadlineFigure";
     labelAttrName:string = "label";
     #headlineLabelElement: FigureElement;
+
+    sizeConstraint: SizeConstraint = new SizeConstraint(50,null);
+
     constructor(param:CreateHeadlineFigureParam){
         super(param);
         const labelConstraint = new RectConstraint({vertical:[0,null,0], horizontal:[4,null,4]})
@@ -26,7 +31,7 @@ class HeadlineFigure extends Figure{
         this.#headlineLabelElement = new HeadlineElement(this,createLabelElementParam);
     };
 
-    drawFigure(ctx:CanvasRenderingContext2D){              
+    drawFigure(ctx:CanvasRenderingContext2D){
         //draws label
         this.#headlineLabelElement.draw(ctx);
     }
@@ -34,7 +39,8 @@ class HeadlineFigure extends Figure{
     
     getHandles(drawingView:DrawingView):Handle[]{
         const handles =  super.getHandles(drawingView);
-        return handles;
+        const lrHandles = createLeftRightResizeHandles(this,drawingView)
+        return [...handles, ...lrHandles];
     }
     
    /**

@@ -1,17 +1,14 @@
 import { Figure, CreateFigureParam, FigureJson} from "./figure.js";
 import { Rect } from "../data/rect.js";
-import { Point } from "../data/point.js";
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
-import { EditTextHandle} from '../handles/editTextHandle.js';
-import { ToggleAttributeHandle } from "../handles/toggleAttributeHandle.js";
-
+import { createLeftRightResizeHandles } from "../handles/resizeHandle.js";
 
 import { RadioElement } from "./figureElements/toggleElementRadio.js";
 import { CheckboxToggleElement } from "./figureElements/toggleElementCheckbox.js";
 import { LabelElementLeftAligned } from "./figureElements/labelElementLeftAligned.js";
 import { FigureElement } from "./figureElements/figureElement.js";
-import { RectConstraint } from "../data/rectConstraint.js";
+import { RectConstraint, SizeConstraint } from "../data/rectConstraint.js";
 
 //=========================
 type CreateToggleParam = CreateFigureParam & {
@@ -36,6 +33,8 @@ class CheckboxFigure extends Figure{
     #checkboxElement:FigureElement;
     #labelElement: FigureElement;
 
+    sizeConstraint: SizeConstraint = new SizeConstraint(32,null);
+
     constructor(param:CreateCheckboxParam){
         super(param);
 
@@ -56,8 +55,9 @@ class CheckboxFigure extends Figure{
         this.#labelElement.draw(ctx);
     }
     getHandles(drawingView: DrawingView): Handle[] {
-        const handles = super.getHandles(drawingView);
-        return handles;
+        const handles =  super.getHandles(drawingView);
+        const resizeHandles = createLeftRightResizeHandles(this,drawingView);
+        return [...handles,...resizeHandles];
     }
     getParameters(): CreateCheckboxParam {
         const baseParameters = super.getParameters();
@@ -111,6 +111,8 @@ class RadiobuttonFigure extends Figure{
     #isSelectedAttrName = "isSelected";
     #radioElement:FigureElement;
     #labelElement: FigureElement;
+    sizeConstraint: SizeConstraint = new SizeConstraint(32,null);
+
     constructor(param:CreateCheckboxParam){
         super(param);
 
@@ -131,8 +133,9 @@ class RadiobuttonFigure extends Figure{
         this.#labelElement.draw(ctx);
     }
     getHandles(drawingView: DrawingView): Handle[] {
-        const handles = super.getHandles(drawingView);
-        return handles;
+        const handles =  super.getHandles(drawingView);
+        const resizeHandles = createLeftRightResizeHandles(this,drawingView);
+        return [...handles,...resizeHandles];
     }
     getParameters(): CreateRadiobuttonParam {
         const baseParameters = super.getParameters();

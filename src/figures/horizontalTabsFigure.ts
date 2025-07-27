@@ -1,8 +1,9 @@
 import { Rect } from "../data/rect.js";
-import { RectConstraint } from "../data/rectConstraint.js";
+import { RectConstraint, SizeConstraint } from "../data/rectConstraint.js";
 import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
 import { HorizontalTabsElement, CreateSingleSelectElementParam } from "./figureElements/singleSelectElement.js";
 import { Handle } from "../handles/handle.js";
+import { createLeftRightResizeHandles } from "../handles/resizeHandle.js";
 import { SingleSelectLabelList, SingleSelectLabelListJson } from "../data/singleSelectLabelList.js";
 import { DrawingView } from "../drawingView.js";
 
@@ -19,11 +20,14 @@ class HorizontalTabsFigure extends Figure{
 
     labelsAttrName:string = "selectableLabels";
     tabsElement:HorizontalTabsElement
+
+    sizeConstraint: SizeConstraint = new SizeConstraint(32,null);
+
     constructor(param:CreateHorizontalTabsParam){
         super(param);
         const horizontalTabsParam:CreateSingleSelectElementParam = {
             attributeName:this.labelsAttrName,
-            rectConstraint:new RectConstraint({vertical:[0,null,0], horizontal:[0,null,0]}),
+            rectConstraint:new RectConstraint({vertical:[2,null,2], horizontal:[2,null,2]}),
             labelText: param.selectableLabels
         }
         this.tabsElement = new HorizontalTabsElement(this,horizontalTabsParam);
@@ -36,7 +40,8 @@ class HorizontalTabsFigure extends Figure{
     
     getHandles(drawingView:DrawingView):Handle[]{
         const handles =  super.getHandles(drawingView);
-        return handles;
+        const resizeHandles = createLeftRightResizeHandles(this,drawingView);
+        return [...handles,...resizeHandles];
     }
     
    /**

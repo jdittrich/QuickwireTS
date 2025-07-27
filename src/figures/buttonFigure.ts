@@ -4,8 +4,9 @@ import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
 import { FigureElement } from "./figureElements/figureElement.js";
 import { CreateLabelElementParam, LabelElement } from "./figureElements/labelElement.js";
+import { createLeftRightResizeHandles } from "../handles/resizeHandle.js";
 import { LabelElementCentered } from "./figureElements/labelElementCenterAligned.js";
-import { RectConstraint } from "../data/rectConstraint.js";
+import { RectConstraint, SizeConstraint } from "../data/rectConstraint.js";
 
 type CreateButtonParam = CreateFigureParam & {
     label:string;
@@ -21,6 +22,7 @@ class ButtonFigure extends Figure{
 
     labelAttrName:string = "label";
     #centeredLabelElement: FigureElement;
+    sizeConstraint: SizeConstraint = new SizeConstraint(32,null);
     constructor(param:CreateButtonParam){
         super(param);
         const labelConstraint = new RectConstraint({vertical:[null,16,null], horizontal:[4,null,4]})
@@ -56,7 +58,8 @@ class ButtonFigure extends Figure{
     
     getHandles(drawingView:DrawingView):Handle[]{
         const handles =  super.getHandles(drawingView);
-        return handles;
+        const resizeHandles = createLeftRightResizeHandles(this,drawingView);
+        return [...handles,...resizeHandles];
     }
     
    /**

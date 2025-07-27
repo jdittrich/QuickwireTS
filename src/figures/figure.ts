@@ -10,7 +10,7 @@ import { DeleteFigureHandle } from '../handles/deleteFigureHandle.js';
 import { DrawingView } from '../drawingView.js';
 import { Drawable, Highlightable, InteractionAnnouncement, InteractionInfoProvider } from '../interfaces.js';
 import { FigureElement } from './figureElements/figureElement.js';
-
+import { SizeConstraint } from '../data/rectConstraint.js';
 
 type CreateFigureParam = {
     rect:Rect;
@@ -33,6 +33,11 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     isRoot = false; //only overwritten by the Drawing subclass
 
     #figureElements:FigureElement[] = []
+
+    //overwrite this with another Rect constraint to e.g. have figures with fixed height.
+    sizeConstraint:SizeConstraint = SizeConstraint.createNullConstraint();
+    
+    // suggestedSize: Point = new Point(...); //accessible from the outside e.g. for the create tool. Size constraint might override suggestion. 
 
     name:string = "baseFigure";
     /**
@@ -79,9 +84,13 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         if(this.getIsVisible()){
             ctx.save()
             this.#clipFigure(ctx);
+
+            ctx.save();
             this.drawFigure(ctx);
             ctx.restore()
-            this.drawContainedFigures(ctx);
+
+            this.drawContainedFigures(ctx); //will be clipped, but not inherit e.g. strokes from the figure
+            ctx.restore()
         }
     }
     drawHighlight(ctx: CanvasRenderingContext2D){
@@ -102,7 +111,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     /**
      * @param {CanvasRenderingContext2D} ctx 
      */
-    abstract drawFigure(ctx: CanvasRenderingContext2D)
+    abstract drawFigure(ctx: CanvasRenderingContext2D):void
 
     /**
      * Not to be overwritten by subclasses.
@@ -356,24 +365,24 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * but e.g. currently previewed elements can also set it directly 
      * (since they have no outer element to be constrainted by)
      */
-    changeRect(changedRect:Rect){ //:Rect
-       
-
+    changeRect(suggestedRect:Rect){ //:Rect
         // set a new rect
         const oldRect = this.getRect();
 
         // I guess this is here to prevent wild changes to nested objects on first rect assignment.
         // but I wonder where that happens? 
-        if(!oldRect){
-            this.#setRect(changedRect);
-            return;
-        }
+        // UPDATE: I tried and it does not seem to happen. Commenting out and seeing...
+        // if(!oldRect){
+        //     this.#setRect(changedRect);
+        //     return;
+        // }
 
         //change child rects accordingly
+        const newRect = this.sizeConstraint.deriveRect(suggestedRect);
         const oldPosition = oldRect.getPosition();
-        const newPosition = changedRect.getPosition();
+        const newPosition = newRect.getPosition();
         const moveBy = oldPosition.offsetTo(newPosition);
-        this.#setRect(changedRect);
+        this.#setRect(newRect);
 
         const containedFigures = this.getContainedFigures();
         containedFigures.forEach(figure=>figure.movePositionBy(moveBy));
@@ -456,15 +465,12 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
          */
         const duplicationHandle = new DuplicationHandle(this,drawingView);
         const deleteFigureHandle = new DeleteFigureHandle(this,drawingView)
-        const resizeHandles  = createAllResizeHandles(this, drawingView);
 
         const elementHandles = this.#figureElements.flatMap(figure=> figure.getHandles(drawingView));
-
 
         return [
             duplicationHandle,
             deleteFigureHandle,
-            ...resizeHandles,
             ...elementHandles
         ];
     }

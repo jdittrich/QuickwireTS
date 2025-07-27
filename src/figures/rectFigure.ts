@@ -29,7 +29,8 @@ class RectFigure extends Figure{
 
     getHandles(drawingView:DrawingView){
         const basicHandles = super.getHandles(drawingView);
-        return [...basicHandles];
+        const resizeHandles = createAllResizeHandles(this,drawingView)
+        return [...basicHandles, ...resizeHandles];
     }
     getParameters():CreateRectFigureParam{
         const baseParameters = super.getParameters();

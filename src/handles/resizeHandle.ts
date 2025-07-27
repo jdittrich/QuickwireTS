@@ -9,7 +9,7 @@ import { LocalDragEvent } from "../events.js";
 import {InteractionAnnouncement, InteractionInfoProvider} from "../interfaces.js"
 
 
-class ResizeHandle extends Handle{
+abstract class ResizeHandle extends Handle{
     size = 16;
     constructor(figure:Figure,drawingView:DrawingView){
         super(figure,drawingView);
@@ -28,12 +28,9 @@ class ResizeHandle extends Handle{
         }) 
         return screenRect;
     }
-    getLocation():Point{
-        throw new SubclassShouldImplementError("getLocation","ResizeHandle");
-    }
-    createChangedRect(point:Point):Rect{ 
-        throw new SubclassShouldImplementError("createChangedRect", "ResizeHandle");
-    }
+    abstract getLocation():Point
+
+    abstract createChangedRect(point:Point):Rect
 
     onDragstart(dragEvent:LocalDragEvent):void{
         const drawingView = this.getDrawingView();
@@ -188,7 +185,67 @@ class ResizeTopLeftHandle extends ResizeHandle{
     }
 }
 
+class ResizeLeftHandle extends ResizeHandle{
+    constructor(figure:Figure,drawingView:DrawingView){
+        super(figure,drawingView);
+    }
+    getLocation(){
+        const figure = this.getFigure();
+        const rect = figure.getRect();
+        const center = rect.getCenter();
+        const leftCenter = new Point({x:rect.left, y:center.y});
+        return leftCenter;
+    }
+    createChangedRect(dragDocumentMovement:Point){
+        const figure = this.getFigure();
+        const rect = figure.getRect();
+        const leftRightMovement = new Point({x:dragDocumentMovement.x,y:0})
+        const {topLeft,bottomRight} = rect.getCorners();
+        const changedTopLeft = topLeft.add(leftRightMovement);
+        const changedRect = Rect.createFromCornerPoints(bottomRight,changedTopLeft); 
+        return changedRect;
+    }
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "e-resize"
+        };
+    }
+}
+
+class ResizeRightHandle extends ResizeHandle{
+    constructor(figure:Figure,drawingView:DrawingView){
+        super(figure,drawingView);
+    }
+    getLocation(){
+        const figure = this.getFigure();
+        const rect = figure.getRect();
+        const center = rect.getCenter();
+        const rightCenter = new Point({x:rect.right, y:center.y});
+        return rightCenter;
+    }
+    createChangedRect(dragDocumentMovement:Point){
+        const figure = this.getFigure();
+        const rect = figure.getRect();
+        const leftRightMovement = new Point({x:dragDocumentMovement.x,y:0})
+        const {topLeft,bottomRight} = rect.getCorners();
+        const changedBottomRight = bottomRight.add(leftRightMovement);
+        const changedRect = Rect.createFromCornerPoints(topLeft,changedBottomRight); 
+        return changedRect;
+    }
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "w-resize"
+        };
+    }
+}
+
 //Helper functions to create collections of handles
+//TODO: rename: createCornerHandles
+//TODO: add: Create leftRightHandles (for fixed hight elements)
 /**
  * Generates standard set of resize handles 
  */
@@ -200,4 +257,10 @@ function createAllResizeHandles(figure: Figure,drawingView: DrawingView): Resize
     return [brHandle,trHandle,blHandle,tlHandle];
 }
 
-export {ResizeHandle, createAllResizeHandles}
+function createLeftRightResizeHandles(figure:Figure,drawingView:DrawingView): ResizeHandle[]{
+    const rHandle = new ResizeRightHandle(figure,drawingView);
+    const lHandle = new ResizeLeftHandle(figure,drawingView);
+    return [rHandle,lHandle];
+}
+
+export {ResizeHandle, createAllResizeHandles,createLeftRightResizeHandles}

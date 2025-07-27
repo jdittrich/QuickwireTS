@@ -6,11 +6,11 @@ import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
 import { Rect } from "../data/rect.js";
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
-
 import { FigureElement } from "./figureElements/figureElement.js";
 import { CreateLabelElementParam } from "./figureElements/labelElement.js";
 import { LabelElementLeftAligned } from "./figureElements/labelElementLeftAligned.js";
-import { RectConstraint } from "../data/rectConstraint.js";
+import { RectConstraint, SizeConstraint } from "../data/rectConstraint.js";
+import { createLeftRightResizeHandles } from "../handles/resizeHandle.js";
 
 type CreateDropdownParam = CreateFigureParam & {
     label:string;
@@ -28,13 +28,14 @@ class DropdownFigure extends Figure{
     
     #buttonConstraint: RectConstraint;
     #chevronInButtonConstraint: RectConstraint;
-
     #leftAlignedLabelElement: FigureElement;
-    
+
+    sizeConstraint: SizeConstraint = new SizeConstraint(32,null);
+
     constructor(param:CreateDropdownParam){
         super(param);
         this.#buttonConstraint         = new RectConstraint({vertical:[1,null,1],horizontal:[null,24,0]}); //will be used relative to the figure rect.
-        this.#chevronInButtonConstraint = new RectConstraint({vertical:[null,8,null],horizontal:[6,null,6]}); //will be used relative to button rect
+        this.#chevronInButtonConstraint = new RectConstraint({vertical:[null,6,null],horizontal:[6,null,6]}); //will be used relative to button rect
         
         const labelConstraint  = new RectConstraint({vertical:[null,16,null], horizontal:[10,null,16]})
         const createLabelElementParam:CreateLabelElementParam = {
@@ -71,7 +72,8 @@ class DropdownFigure extends Figure{
     
     getHandles(drawingView:DrawingView):Handle[]{
         const handles =  super.getHandles(drawingView);
-        return handles;
+        const resizeHandles = createLeftRightResizeHandles(this,drawingView);
+        return [...handles,...resizeHandles];
     }
     
    /**

@@ -2,7 +2,8 @@ import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
 import { Rect } from "../data/rect.js";
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
-import { RectConstraint } from "../data/rectConstraint.js";
+import { createLeftRightResizeHandles } from "../handles/resizeHandle.js";
+import { RectConstraint, SizeConstraint } from "../data/rectConstraint.js";
 import { FigureElement } from "./figureElements/figureElement.js";
 import { CreateLabelElementParam } from "./figureElements/labelElement.js";
 import { LabelElementLeftAligned } from "./figureElements/labelElementLeftAligned.js";
@@ -19,6 +20,9 @@ class LabelFigure extends Figure {
     name = "LabelFigure";
     labelAttrName:string = "label";
     #leftAlignedLabelElement: FigureElement;
+
+    sizeConstraint: SizeConstraint = new SizeConstraint(32,null);
+
     constructor(param:CreateLabelFigureParam){
         super(param);
         const labelConstraint = new RectConstraint({vertical:[null,16,null], horizontal:[4,null,4]})
@@ -38,7 +42,8 @@ class LabelFigure extends Figure {
     
     getHandles(drawingView:DrawingView):Handle[]{
         const handles =  super.getHandles(drawingView);
-        return handles;
+        const resizeHandles = createLeftRightResizeHandles(this,drawingView);
+        return [...handles,...resizeHandles];
     }
     
    /**

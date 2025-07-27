@@ -22,8 +22,6 @@ class NoOpFigure extends Figure{
     getHandles(drawingView: DrawingView): Handle[] {
         return []
     }
-    
-
 }
 
 export {NoOpFigure}
