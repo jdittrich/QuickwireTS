@@ -23,6 +23,7 @@ interface Previewer {
     endPreview():void;
 }
 
+
 interface Highlighter{
     startHighlightOf(element:Highlightable):void;
     endHighlight():void;
@@ -52,7 +53,9 @@ interface ViewTransformerConversions {
     screenToDocumentDistance(screenDistance:Point):Point
 }
 
-
+/**
+ * defines possible interactions/features
+ */
 interface InteractionAnnouncement {
     cursor?:     string,
     helpText?:   string,
@@ -61,6 +64,9 @@ interface InteractionAnnouncement {
     cursorDown?: string
 }
 
+/**
+ * Returns which interactions are possible with the element, typically on mouseover
+ */
 interface InteractionInfoProvider {
     getInteractions():InteractionAnnouncement
 }

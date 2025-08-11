@@ -17,7 +17,7 @@ import {mat2d, vec2} from "./libraries/glmatrix/index.js"
  */
 
 class ViewTransform implements ViewTransformerConversions{
-    #matrix:any //the current transform matrix; will be changed by setter methods and used to transform points
+    #matrix:[number,number,number,number,number,number] //the current transform matrix
 
     /**
      * Calling without parameters creates an identity matrix via default values

@@ -25,7 +25,7 @@ class ChangeFigureRectCommand extends Command{
     #changedRect:Rect
     #oldRect:Rect
     #appendFigures:Figure[]
-    #figuresNotContainedAnymore:Figure[]
+    //#figuresNotContainedAnymore:Figure[]
 
     constructor(param:CreateChangeFigureRectParam, drawingView:DrawingView){
         super();
@@ -37,9 +37,9 @@ class ChangeFigureRectCommand extends Command{
         this.#oldRect = figure.getRect();
         this.#changedRect = changedRect;
 
-        const oldPosition = this.#oldRect.getPosition();
-        const newPosition = this.#changedRect.getPosition();
-        const positionChange = oldPosition.offsetTo(newPosition);
+        // const oldPosition = this.#oldRect.getPosition();
+        // const newPosition = this.#changedRect.getPosition();
+        // const positionChange = oldPosition.offsetTo(newPosition);
 
         //find new container and enclosed figures at new position/size of rectangle
         const drawing = drawingView.drawing;

@@ -22,5 +22,8 @@
 
 .cursor_nw-resize{cursor:nw-resize;}
 
+.cursor_e-resize{cursor:e-resize;}
+.cursor_w-resize{cursor:w-resize;}
+
 .cursor_undefined{}
 

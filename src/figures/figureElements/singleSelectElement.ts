@@ -43,7 +43,7 @@ class HorizontalTabsElement extends FigureElement{
         const elementRect = this.getElementRect();
         const tabWidth = this.getTabWidth();
         let leftmost = elementRect.x;
-        labels.forEach((label,index)=>{
+        labels.forEach((label:string,index:number)=>{
             const currentRect = new Rect({x:leftmost,y:elementRect.y,width:tabWidth,height:elementRect.height})
             const textOptions:TextOptions = {
                 ...defaultTextOptions,
@@ -52,11 +52,11 @@ class HorizontalTabsElement extends FigureElement{
             }
             drawTextInRect(ctx,label,currentRect,textOptions);
             ctx.beginPath()
-            ctx.roundRect(...currentRect.toArray(), [10, 10, 0, 0]);
+            ctx.roundRect(...currentRect.toArray(), [5, 5, 0, 0]);
             ctx.stroke();
             if(index === selectedIndex){
                 ctx.save()
-                ctx.lineWidth = 10;
+                ctx.lineWidth = 6;
                 ctx.beginPath()
                 ctx.moveTo(currentRect.left, currentRect.bottom);
                 ctx.lineTo(currentRect.right,currentRect.bottom);

@@ -49,11 +49,4 @@ class MoveCommand implements Command, Undoable {
     redo(){
 
     }
-    static preview(param:MoveCommandParameters,previewer:FigurePreviewer){
-
-    }
-}
-
-class FigurePreviewer extends Figure{
-    
 }

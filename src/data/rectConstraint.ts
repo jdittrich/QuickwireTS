@@ -146,7 +146,12 @@ class RectConstraint{
             return innerRect;
     }
 
-
+    /**
+     * Creates constraint that derives a rect of same dimensions as passed. 
+     */
+    static createNullConstraint(){
+        return new RectConstraint({vertical:[0,null,0],horizontal:[0,null,0]});
+    }
     /**
      * Creates a constraint based on two rects and passing for 
      * the vertical and horizontal dimension 
@@ -184,5 +189,30 @@ class RectConstraint{
     }
 }
 
+class SizeConstraint {
+    #height:number|null
+    #width:number|null
+    constructor(vertical:number|null, horizontal:number|null){
+        this.#height = vertical;
+        this.#width = horizontal;
+    }
+    deriveRect(rect:Rect) {
+        return new Rect({
+            x:rect.x,
+            y:rect.y,
+            width:this.#width||rect.width,
+            height:this.#height|| rect.height
+        });
+    }
+    get vertical(){
+        return this.#height;
+    }
+    get horizontal(){
+        return this.#width;
+    }
+    static createNullConstraint(){
+        return new SizeConstraint(null, null);
+    }
+}
 
-export {RectConstraint, fixedStrategy,midPointFar,midPointNear,centeredStrategy}
+export {RectConstraint, SizeConstraint, fixedStrategy,midPointFar,midPointNear,centeredStrategy}

@@ -51,7 +51,7 @@ class CreateFigureCommand extends Command{
         //this.#newFigure.setRect(this.#newFigureRect);
         this.#newFigure.changeRect(this.#newFigureRect);
         this.#toContainer.appendFigure(this.#newFigure);
-        this.#newFigure.appendFigures(this.#appendFigures); 
+        this.#newFigure.appendFigures(this.#appendFigures);
         
         this.drawingView.select(this.#newFigure);
     }

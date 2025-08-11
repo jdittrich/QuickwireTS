@@ -9,6 +9,7 @@ import { LocalDragEvent, LocalMouseEvent } from "../events.js";
 //Adds an element to the drawing
 class CreateFigureTool extends Tool{
     #figureToCreate:Readonly<Figure>;
+    #createdFigureOnDrag = false;
     name:string = "";
 
     constructor(figureToCreate: Figure){
@@ -29,33 +30,45 @@ class CreateFigureTool extends Tool{
         previewedFigure.changeRectByPoints(documentMouseDownPoint,currentMousePoint);
         event.drawingView.updateDrawing();
     }
-
-    onDragend(event: LocalDragEvent){
-        const drawingView = this.getDrawingView();
-        const documentMousePoint = event.getDocumentPosition(); 
-        const documentMouseDownPoint = event.getMousedownDocumentPosition();
-        const newFigureRect = Rect.createFromCornerPoints(documentMousePoint,documentMouseDownPoint);
-        const newFigureInBounds = drawingView.drawing.isEnclosingRect(newFigureRect);
-        
-        if(!newFigureInBounds){
-            console.log("new Figure would be out of bounds, aborting command")
-            return;
+    onMouseup(mouseEvent: LocalMouseEvent): void {
+        const documentMousePoint = mouseEvent.getDocumentPosition(); 
+        if(!this.#createdFigureOnDrag){
+            try {
+                // this should be a temporary fix, createFigure Command should figure out how large the figure should be, 
+                // the mousemovement should be just a suggestion
+                this.#createNewFigure(documentMousePoint, documentMousePoint.add(new Point({x:300,y:16})));
+            } catch(error){
+                console.log(error)
+            }
         }
-        const createFigureCommand = new CreateFigureCommand(
-            {
-                "newFigurePrototype": this.#figureToCreate,
-                "cornerPoint1":       documentMousePoint,
-                "cornerPoint2":       documentMouseDownPoint,
-            },
-            drawingView
-        );
-        //do the thing
-        drawingView.do(createFigureCommand);
-    }
-    dragExit(){
+        //cleanup
         const drawingView = this.getDrawingView();
         drawingView.endPreview();
         drawingView.changeToDefaultTool();
+    }
+    onDragend(event: LocalDragEvent){
+        const documentMousePoint = event.getDocumentPosition(); 
+        const documentMouseDownPoint = event.getMousedownDocumentPosition();
+        try {
+            this.#createNewFigure(documentMouseDownPoint, documentMousePoint);
+            this.#createdFigureOnDrag = true;
+        } catch(error){
+            console.log(error)
+        } 
+    }
+    #createNewFigure(point1:Point,point2:Point){
+        const drawingView = this.getDrawingView();
+
+        const createFigureCommand = new CreateFigureCommand(
+            {
+                "newFigurePrototype": this.#figureToCreate,
+                "cornerPoint1":       point1,
+                "cornerPoint2":       point2,
+            },
+            drawingView
+        );
+        drawingView.do(createFigureCommand);
+       
     }
 }
 
