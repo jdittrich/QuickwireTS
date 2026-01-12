@@ -475,6 +475,16 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         ];
     }
 
+    //#region FormElementFactory
+    /**
+     * Similar to Handles. Handles are drawn on canvas
+     * but FormElements are handled by App and attached to a toolbar
+     * to change figure properties.
+     */
+    getFormElements(drawingView, formElementFactory){
+        return[];
+    }
+
     //#region hit tests.
     isEnclosingPoint(point:Point): boolean{
         const doesContainPoint = this.#rect.isEnclosingPoint(point);

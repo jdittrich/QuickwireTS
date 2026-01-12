@@ -140,6 +140,7 @@ class LocalDragEvent extends LocalMouseEvent{
 
 const toolChangeEventName = "toolChange"; 
 const interactionAnnouncementName = "interactionAnnouncement"
+const selectionEventName = "selection"
 
 class ToolChangeEvent extends Event{
     toolName:string = null; 
@@ -164,4 +165,14 @@ class InteractionAnnouncementEvent extends Event implements InteractionAnnouncem
     }
 }
 
-export {LocalMouseEvent, LocalDragEvent, ToolChangeEvent, toolChangeEventName, InteractionAnnouncementEvent, interactionAnnouncementName}
+class SelectionEvent extends Event{
+    constructor(){
+        super(selectionEventName);
+    }
+}
+
+export {LocalMouseEvent, LocalDragEvent, 
+        ToolChangeEvent, toolChangeEventName, 
+        InteractionAnnouncementEvent, interactionAnnouncementName,
+        SelectionEvent, selectionEventName
+    }

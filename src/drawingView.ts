@@ -1,7 +1,7 @@
 import { ViewTransform} from './transform.js'
 import {Tool} from './tools/tool.js'
 import { NoOpTool } from './tools/noopTool.js'
-import { LocalMouseEvent, LocalDragEvent, InteractionAnnouncementEvent} from './events.js'
+import { LocalMouseEvent, LocalDragEvent, InteractionAnnouncementEvent, interactionAnnouncementName, SelectionEvent, selectionEventName} from './events.js'
 import { ToolChangeEvent } from './events.js'
 import { NoOpFigure } from './figures/noopFigure.js'
 import { CommandStack } from './commands/commandStack.js'
@@ -404,7 +404,8 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
 
     onMouseup(mousePosition:Point){
         // precaution: Mouse might have been pressed outside of app
-        // and thus state is unclear
+        // and thus state is unclear. Error ends the method execution
+        // so no mess is caused. 
         if(this.#mouseState === "up"){
             throw Error("mouse can't go up in up state");
         }
@@ -506,10 +507,12 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     //#region: selection
     select(figure:Figure):void{
         this.#selection.select(figure);
+        this.dispatchEvent(new SelectionEvent());
         this.updateDrawing();
     }
     clearSelection():void{
         this.#selection.clearSelection();
+        this.dispatchEvent(new SelectionEvent());
         this.updateDrawing();
     }
     hasSelection():boolean{

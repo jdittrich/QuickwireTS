@@ -106,6 +106,10 @@ class ViewTransform implements ViewTransformerConversions{
         const documentRect = Rect.createFromCornerPoints(documentTopLeft, documentBottomRight);
         return documentRect;
     }
+
+    /**
+     * This does not consider devicePixelRatio 
+     */
     documentToScreenRect(documentRect:Rect):Rect{
         const {topLeft,bottomRight} = documentRect.getCorners();
         const screenTopLeft     = this.documentToScreenPosition(topLeft);

@@ -9,24 +9,24 @@ import { Drawing } from '../drawing.js';
 import { NoOpFigure } from '../figures/noopFigure.js';
 import { InteractionInfoProvider } from '../interfaces.js';
 
-type HandleFound = {
-    type:"handle";
-    value:Handle;
-}
-type FigureFound = {
-    type:"figure";
-    value:Figure,
-}
+// type HandleFound = {
+//     type:"handle";
+//     value:Handle;
+// }
+// type FigureFound = {
+//     type:"figure";
+//     value:Figure,
+// }
 
-type DrawingFound = {
-    type:"drawing",
-    value:Drawing
-}
+// type DrawingFound = {
+//     type:"drawing",
+//     value:Drawing
+// }
 
-type NothingFound = {
-    type:"nothing",
-    value:NoOpFigure
-}
+// type NothingFound = {
+//     type:"nothing",
+//     value:NoOpFigure
+// }
 
 // type ElementUnderCursor = HandleFound | FigureFound | DrawingFound | NothingFound;
 type ElementUnderCursor = Handle | Figure;
@@ -91,7 +91,6 @@ class SelectionTool extends Tool{
         //     throw new Error("one of the above conditions should always be the case");
             
         // }
-    
     }
     onMousedown(event: LocalMouseEvent){
         const cursorPosition = event.getDocumentPosition();
@@ -190,6 +189,7 @@ class PanTracker extends Tool{
     onDrag(event:LocalDragEvent){
         const dragMovement = event.getScreenMovement();
         event.drawingView.panBy(dragMovement);
+
     }
     onMouseup(mouseEvent: LocalMouseEvent): void {
         if(this.#hasMoved===false){

@@ -9,7 +9,7 @@ import { ButtonFigure } from "./figures/buttonFigure.js";
 import { SelectionTool } from "./tools/selectionTool.js";
 import { CreateFigureTool } from "./tools/createFigureTool.js";
 import { Toolbar, ToolButton, Actionbar, ActionBarActionButton, ActionbarLoadFileAsJsonButton, ToolData} from "./app_toolbar.js";
-import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEvent, toolChangeEventName} from "./events.js";
+import { InteractionAnnouncementEvent, interactionAnnouncementName, selectionEventName, ToolChangeEvent, toolChangeEventName} from "./events.js";
 import { Tool } from "./tools/tool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
 import { CheckboxFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
@@ -18,7 +18,9 @@ import { HorizontalTabsFigure } from "./figures/horizontalTabsFigure.js";
 import { LabelFigure } from "./figures/labeledFigure.js";
 import { HeadlineFigure } from "./figures/HeadlineFigure.js";
 import { DropdownFigure } from "./figures/dropdownFigure.js";
+import { RectangleFigure} from "./figures/rectangleFigure.js";
 
+import { FigureBar, FormElementFactory } from "./app_formElements.js";
 /**
  * App is responsible for bridging between 
  * DOM events elements and native application events and drawing.
@@ -37,6 +39,7 @@ class App{
     #horizontalBarContainerHeight:number
     #drawing: Drawing
     #drawingView: DrawingView
+    #formElementFactory:FormElementFactory
     toolbar:Toolbar
     actionbar: Actionbar
 
@@ -49,7 +52,6 @@ class App{
         //setup DOM
         this.#domContainer    = domContainer;
         
-
         //create app container. TODO: Move to private method, return DomFragment
         this.#appContainer = document.createElement("div");
         this.#appContainer.style.cssText="margin:0; padding:0; width:100%; height:100%; display:flex; flex-direction:column";
@@ -118,10 +120,10 @@ class App{
             },
             {  
                 tool: new CreateFigureTool(RectFigure.createWithDefaultParameters()),
-                label: "Rectangle",
+                label: "Rect",
                 description: "create a rectangle figure",
-                icon:"rectangleTool",
-                name:"rectangleTool"
+                icon:"rectTool",
+                name:"rectTool"
             },
             {
                 tool: new CreateFigureTool(ButtonFigure.createWithDefaultParameters()),
@@ -129,6 +131,13 @@ class App{
                 description:"create a button figure",
                 icon: "buttonTool",
                 name: "buttonTool"
+            },
+            {
+                tool: new CreateFigureTool(RectangleFigure.createWithDefaultParameters()),
+                label: "Rectangle",
+                description:"create a rectangle (new!) figure",
+                icon: "rectangleTool",
+                name: "rectangleTool"
             },
             {
                 tool: new CreateFigureTool(CheckboxFigure.createWithDefaultParameters()),
@@ -187,20 +196,22 @@ class App{
 
         const toolbar = this.#setupToolbar(toolsData); //selection tool and creating different figures
         const actionbar = this.#setupActionBar(); //action bar has download/upload, undo/redo
+        const figureBar = this.#setupFigureBar();
         
         this.#horizontalBarContainer.append(toolbar.domElement);
         this.#horizontalBarContainer.append(actionbar.domElement);
+        this.#appContainer.append(figureBar.domElement);
         
         this.#setCanvasSize();
 
         // get notified when the tool changes
         this.#drawingView.addEventListener(toolChangeEventName,this.#handleToolChange.bind(this));
         // get notified when the cursor is over a figure or handle
-        this.#drawingView.addEventListener(interactionAnnouncementName, this.#handleInteractionAnnouncement.bind(this)); 
+        this.#drawingView.addEventListener(interactionAnnouncementName, this.#handleInteractionAnnouncement.bind(this));
         
         this.#drawingView.changeToolByName("selectionTool"); //TODO: changeToDefaultTool();
 
-        
+
 
 
         ////if you need to access drawing/drawingView, uncomment these: 
@@ -314,6 +325,12 @@ class App{
         return actionbar;
     }
 
+    #setupFigureBar(){
+        const figureBar = new FigureBar(document,this.#drawingView, this.#canvasContainer);
+        return figureBar;
+    }
+
+    
     /**
      * sets canvas size in relation to its outer container and the devicePixelRatio
      * This ensures it is not blurry on high res displays. 

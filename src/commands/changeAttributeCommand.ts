@@ -41,4 +41,4 @@ class ChangeAttributeCommand extends Command{
     }
 }
 
-export{ChangeAttributeCommand}
+export{ChangeAttributeCommand,ChangeAttributeCommandParam}
