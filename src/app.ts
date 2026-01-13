@@ -206,50 +206,18 @@ class App{
 
         // get notified when the tool changes
         this.#drawingView.addEventListener(toolChangeEventName,this.#handleToolChange.bind(this));
+        
         // get notified when the cursor is over a figure or handle
         this.#drawingView.addEventListener(interactionAnnouncementName, this.#handleInteractionAnnouncement.bind(this));
         
         this.#drawingView.changeToolByName("selectionTool"); //TODO: changeToDefaultTool();
-
-
-
-
+        
         ////if you need to access drawing/drawingView, uncomment these: 
         // window.drawingView = this.#drawingView;
         // window.drawing = this.#drawing;
     }
-
-
-    //#region: event handler
-    #onMousedown(e:MouseEvent){
-        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
-        this.#drawingView.onMousedown(eventPosRelativeToCanvas);
-    }
-    #onMouseup(e:MouseEvent){
-        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
-        this.#drawingView.onMouseup(eventPosRelativeToCanvas);
-    }
-    #onMousemove(e:MouseEvent){
-        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
-        this.#drawingView.onMousemove(eventPosRelativeToCanvas);
-    }
     
-    #onWheel(e:WheelEvent){
-       e.preventDefault();//otherwise everything browser-zooms in addition the the view zoom!
-
-       let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
-        
-       //Normalize to +1 (wheel moved to user), -1 (wheel moved from user) 
-       let wheelDelta = e.deltaY > 0 ? 1:-1;   
-       this.#drawingView.onWheel(eventPosRelativeToCanvas, wheelDelta)
-    }
-
-    #keydown(e:KeyboardEvent){ //Note: Keyboard events are rather low level. Input events are high level, but only fire on input-ish elements
-        this.#drawingView.onKeyDown();
-    }
-    #keyup(e:KeyboardEvent){
-        this.#drawingView.onKeyUp();
-    }
+    //#region: setups
     #setupDrawingView(toolsData:ToolData[]){
         const tools = toolsData; 
         
@@ -352,6 +320,38 @@ class App{
         this.#drawingView.updateDrawing();
     }
 
+    //#region: input event handler
+    #onMousedown(e:MouseEvent){
+        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
+        this.#drawingView.onMousedown(eventPosRelativeToCanvas);
+    }
+    #onMouseup(e:MouseEvent){
+        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
+        this.#drawingView.onMouseup(eventPosRelativeToCanvas);
+    }
+    #onMousemove(e:MouseEvent){
+        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
+        this.#drawingView.onMousemove(eventPosRelativeToCanvas);
+    }
+    
+    #onWheel(e:WheelEvent){
+       e.preventDefault();//otherwise everything browser-zooms in addition the the view zoom!
+
+       let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
+        
+       //Normalize to +1 (wheel moved to user), -1 (wheel moved from user) 
+       let wheelDelta = e.deltaY > 0 ? 1:-1;   
+       this.#drawingView.onWheel(eventPosRelativeToCanvas, wheelDelta)
+    }
+
+    #keydown(e:KeyboardEvent){ //Note: Keyboard events are rather low level. Input events are high level, but only fire on input-ish elements
+        this.#drawingView.onKeyDown();
+    }
+    #keyup(e:KeyboardEvent){
+        this.#drawingView.onKeyUp();
+    }
+    
+
     //#region: Event offsets
     /**
      * get the offset of canvas-position to the client’s origin coordinates
@@ -407,7 +407,7 @@ class App{
         if(this.#previousCursorClass && (this.#previousCursorClass !== cursorName)){ //delete old cursor class, except if the new is the same as the old one
             this.#appContainer.classList.remove(this.#previousCursorClass);
         }
-        this.#previousCursorClass = cursorName;
+        this.#previousCursorClass = cursorName;    
     }
     getCursor():string{
         return this.#cursor;
