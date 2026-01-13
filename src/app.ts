@@ -12,12 +12,12 @@ import { Toolbar, ToolButton, Actionbar, ActionBarActionButton, ActionbarLoadFil
 import { InteractionAnnouncementEvent, interactionAnnouncementName, selectionEventName, ToolChangeEvent, toolChangeEventName} from "./events.js";
 import { Tool } from "./tools/tool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
-import { CheckboxFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
-import { ParagraphFigure } from "./figures/paragraphFigure.js";
-import { HorizontalTabsFigure } from "./figures/horizontalTabsFigure.js";
-import { LabelFigure } from "./figures/labeledFigure.js";
-import { HeadlineFigure } from "./figures/HeadlineFigure.js";
-import { DropdownFigure } from "./figures/dropdownFigure.js";
+// import { CheckboxFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
+// import { ParagraphFigure } from "./figures/paragraphFigure.js";
+// import { HorizontalTabsFigure } from "./figures/horizontalTabsFigure.js";
+// import { LabelFigure } from "./figures/labeledFigure.js";
+// import { HeadlineFigure } from "./figures/HeadlineFigure.js";
+// import { DropdownFigure } from "./figures/dropdownFigure.js";
 import { RectangleFigure} from "./figures/rectangleFigure.js";
 
 import { FigureBar, FormElementFactory } from "./app_formElements.js";
@@ -125,69 +125,69 @@ class App{
                 icon:"rectTool",
                 name:"rectTool"
             },
-            {
-                tool: new CreateFigureTool(ButtonFigure.createWithDefaultParameters()),
-                label: "Button",
-                description:"create a button figure",
-                icon: "buttonTool",
-                name: "buttonTool"
-            },
-            {
-                tool: new CreateFigureTool(RectangleFigure.createWithDefaultParameters()),
-                label: "Rectangle",
-                description:"create a rectangle (new!) figure",
-                icon: "rectangleTool",
-                name: "rectangleTool"
-            },
-            {
-                tool: new CreateFigureTool(CheckboxFigure.createWithDefaultParameters()),
-                label:"Checkbox figure",
-                description: "Checkbox with label",
-                icon: "checkboxTool",
-                name: "checkboxTool"
-            },
-            {
-                tool: new CreateFigureTool(RadiobuttonFigure.createWithDefaultParameters()),
-                label:"Radiobutton figure",
-                description: "Radiobutton with label",
-                icon: "radiobuttonTool",
-                name:"radiobuttonTool"
-            },
-            {
-                tool: new CreateFigureTool(ParagraphFigure.createWithDefaultParameters()),
-                label:"placeholder text figure",
-                description: "placeholder Text",
-                icon: "paragraphTool",
-                name:"paragraphTool"
-            },
-            {
-                tool: new CreateFigureTool(HorizontalTabsFigure.createWithDefaultParameters()),
-                label:"horizontal tabs figure",
-                description:"horizontal tabs",
-                icon: "tabsTool",
-                name:"tabsTool"
-            },
-            {
-                tool: new CreateFigureTool(LabelFigure.createWithDefaultParameters()),
-                label:"label figure",
-                description:"label figure",
-                icon:"labelTool",
-                name:"labelTool"
-            },
-            {
-                tool: new CreateFigureTool(DropdownFigure.createWithDefaultParameters()),
-                label:"dropdown figure",
-                description:"dropdown figure",
-                icon:"dropdownTool",
-                name:"dropdownTool"
-            },
-            {
-                tool: new CreateFigureTool(HeadlineFigure.createWithDefaultParameters()),
-                label:"headline figure",
-                description: "headline figure",
-                icon: "headlineTool",
-                name:"headlineTool"
-            }
+            // {
+            //     tool: new CreateFigureTool(ButtonFigure.createWithDefaultParameters()),
+            //     label: "Button",
+            //     description:"create a button figure",
+            //     icon: "buttonTool",
+            //     name: "buttonTool"
+            // },
+            // {
+            //     tool: new CreateFigureTool(RectangleFigure.createWithDefaultParameters()),
+            //     label: "Rectangle",
+            //     description:"create a rectangle (new!) figure",
+            //     icon: "rectangleTool",
+            //     name: "rectangleTool"
+            // },
+            // {
+            //     tool: new CreateFigureTool(CheckboxFigure.createWithDefaultParameters()),
+            //     label:"Checkbox figure",
+            //     description: "Checkbox with label",
+            //     icon: "checkboxTool",
+            //     name: "checkboxTool"
+            // },
+            // {
+            //     tool: new CreateFigureTool(RadiobuttonFigure.createWithDefaultParameters()),
+            //     label:"Radiobutton figure",
+            //     description: "Radiobutton with label",
+            //     icon: "radiobuttonTool",
+            //     name:"radiobuttonTool"
+            // },
+            // {
+            //     tool: new CreateFigureTool(ParagraphFigure.createWithDefaultParameters()),
+            //     label:"placeholder text figure",
+            //     description: "placeholder Text",
+            //     icon: "paragraphTool",
+            //     name:"paragraphTool"
+            // },
+            // {
+            //     tool: new CreateFigureTool(HorizontalTabsFigure.createWithDefaultParameters()),
+            //     label:"horizontal tabs figure",
+            //     description:"horizontal tabs",
+            //     icon: "tabsTool",
+            //     name:"tabsTool"
+            // },
+            // {
+            //     tool: new CreateFigureTool(LabelFigure.createWithDefaultParameters()),
+            //     label:"label figure",
+            //     description:"label figure",
+            //     icon:"labelTool",
+            //     name:"labelTool"
+            // },
+            // {
+            //     tool: new CreateFigureTool(DropdownFigure.createWithDefaultParameters()),
+            //     label:"dropdown figure",
+            //     description:"dropdown figure",
+            //     icon:"dropdownTool",
+            //     name:"dropdownTool"
+            // },
+            // {
+            //     tool: new CreateFigureTool(HeadlineFigure.createWithDefaultParameters()),
+            //     label:"headline figure",
+            //     description: "headline figure",
+            //     icon: "headlineTool",
+            //     name:"headlineTool"
+            // }
         ]
         
         
@@ -407,7 +407,7 @@ class App{
         if(this.#previousCursorClass && (this.#previousCursorClass !== cursorName)){ //delete old cursor class, except if the new is the same as the old one
             this.#appContainer.classList.remove(this.#previousCursorClass);
         }
-        this.#previousCursorClass = cursorName;    
+        this.#previousCursorClass = cursorName;
     }
     getCursor():string{
         return this.#cursor;
