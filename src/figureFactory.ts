@@ -31,54 +31,54 @@ function jsonToFigure(figureJson):Figure{
             const rectParam:CreateRectFigureParam = figureBaseParams;
             return new RectFigure(rectParam);
             break;
-        case "ButtonFigure":
-            const createButtonParam:CreateButtonParam = {
-                ...figureBaseParams,
-                label:figureJson.label
-            }
-            return new ButtonFigure(createButtonParam);
-            break;
-        case "RadiobuttonFigure":
-            const createToggleFigureParam:CreateRadiobuttonParam = {
-                ...figureBaseParams,
-                label:figureJson.label,
-                isSelected:figureJson.isSelected,
-            }
-            return new RadiobuttonFigure(createToggleFigureParam)
-            break;
-        case "CheckboxFigure":
-            const createCheckboxParam:CreateCheckboxParam = {
-                ...figureBaseParams,
-                isSelected:figureJson.isSelected,
-                label:figureJson.label
-            }
-            return new CheckboxFigure(createCheckboxParam);
-            break;
-        case "ParagraphFigure":
-            const createParagraphFigureParam:CreateParagraphFigureParam = {
-                ...figureBaseParams
-            }
-            return new ParagraphFigure(createParagraphFigureParam);
-            break;
-        case "HorizontalTabsFigure":
-            const createHorizontalTabsParam:CreateHorizontalTabsParam = {
-                ...figureBaseParams,
-                selectableLabels:SingleSelectLabelList.fromJSON(figureJson.selectableLabels)
-            }
-            return new HorizontalTabsFigure(createHorizontalTabsParam);
-            break;
-        case "LabelFigure":
-            const createLabelFigureParam:CreateLabelFigureParam = {
-                ...figureBaseParams,
-                label: figureJson.label
-            }
-            return new LabelFigure(createLabelFigureParam);
-        case "DropdownFigure":
-            const createDropdownFigureParam:CreateDropdownParam = {
-                ...figureBaseParams,
-                label: figureJson.label
-            }
-            return new DropdownFigure(createDropdownFigureParam);
+        // case "ButtonFigure":
+        //     const createButtonParam:CreateButtonParam = {
+        //         ...figureBaseParams,
+        //         label:figureJson.label
+        //     }
+        //     return new ButtonFigure(createButtonParam);
+        //     break;
+        // case "RadiobuttonFigure":
+        //     const createToggleFigureParam:CreateRadiobuttonParam = {
+        //         ...figureBaseParams,
+        //         label:figureJson.label,
+        //         isSelected:figureJson.isSelected,
+        //     }
+        //     return new RadiobuttonFigure(createToggleFigureParam)
+        //     break;
+        // case "CheckboxFigure":
+        //     const createCheckboxParam:CreateCheckboxParam = {
+        //         ...figureBaseParams,
+        //         isSelected:figureJson.isSelected,
+        //         label:figureJson.label
+        //     }
+        //     return new CheckboxFigure(createCheckboxParam);
+        //     break;
+        // case "ParagraphFigure":
+        //     const createParagraphFigureParam:CreateParagraphFigureParam = {
+        //         ...figureBaseParams
+        //     }
+        //     return new ParagraphFigure(createParagraphFigureParam);
+        //     break;
+        // case "HorizontalTabsFigure":
+        //     const createHorizontalTabsParam:CreateHorizontalTabsParam = {
+        //         ...figureBaseParams,
+        //         selectableLabels:SingleSelectLabelList.fromJSON(figureJson.selectableLabels)
+        //     }
+        //     return new HorizontalTabsFigure(createHorizontalTabsParam);
+        //     break;
+        // case "LabelFigure":
+        //     const createLabelFigureParam:CreateLabelFigureParam = {
+        //         ...figureBaseParams,
+        //         label: figureJson.label
+        //     }
+        //     return new LabelFigure(createLabelFigureParam);
+        // case "DropdownFigure":
+        //     const createDropdownFigureParam:CreateDropdownParam = {
+        //         ...figureBaseParams,
+        //         label: figureJson.label
+        //     }
+        //     return new DropdownFigure(createDropdownFigureParam);
         default: 
             throw new Error(`When Parsing Json: ${type} is not known`);
     }
