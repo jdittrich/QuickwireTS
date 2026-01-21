@@ -47,8 +47,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      */
     constructor(param: CreateFigureParam){
         const rect = param.rect 
-        this.#setRect(rect);
-        this.appendFigures(param.containedFigures ?? []);
+        this.setRect(rect);
+        //this.appendFigures(param.containedFigures ?? []);
     }
     
     /**
@@ -81,9 +81,10 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @param {CanvasRenderingContext2D} ctx 
      */
     draw(ctx: CanvasRenderingContext2D){
+        //TODO: change for composite
         if(this.getIsVisible()){
             ctx.save()
-            this.#clipFigure(ctx);
+            this.clipFigure(ctx);
 
             ctx.save();
             this.drawFigure(ctx);
@@ -102,7 +103,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     }
     
     //clips the drawing area to the figures rect
-    #clipFigure(ctx:CanvasRenderingContext2D){
+    //TODO: remove to composite
+    clipFigure(ctx:CanvasRenderingContext2D){
         ctx.beginPath();
         const {x,y,width,height} = this.getRect();
         ctx.rect(x,y,width,height);
@@ -119,7 +121,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @param {CanvasRenderingContext2D} ctx 
      */
     drawContainedFigures(ctx: CanvasRenderingContext2D){
-        this.#containedFigures.forEach(figure => {
+        //TODO: remove for composite Figure
+        this.containedFigures.forEach(figure => {
             ctx.save();
             figure.draw(ctx)
             ctx.restore();
@@ -213,7 +216,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         return offset;
     }
 
-    #containedFigures = [] 
+    containedFigures = [] 
 
     /**
      * @see {@link detachFigure} as the inverse operation
@@ -281,8 +284,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         if(!this.#isInCollection(figureToRemove)){
             throw new Error("figure to be removed is not contained in this figure.")
         }
-        const updatedContainedFigures = this.#containedFigures.filter(containedFigure => containedFigure !== figureToRemove);
-        this.#containedFigures = updatedContainedFigures;
+        const updatedContainedFigures = this.containedFigures.filter(containedFigure => containedFigure !== figureToRemove);
+        this.containedFigures = updatedContainedFigures;
     }
 
     /**
@@ -293,7 +296,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         if(this.#isInCollection(figureToAdd)){
             throw new Error("Figure to be added is already contained in this figure")
         };
-        this.#containedFigures.push(figureToAdd);
+        this.containedFigures.push(figureToAdd);
     }
 
     /**
@@ -301,7 +304,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @returns {Boolean}
      */
     #isInCollection(figure: Figure): boolean{
-        const includesFigure = this.#containedFigures.includes(figure);
+        const includesFigure = this.containedFigures.includes(figure);
         return includesFigure;
     }
 
@@ -320,7 +323,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @returns {Figure[]} 
      */
     getContainedFigures(): Figure[]{
-        return [...this.#containedFigures];
+        return [...this.containedFigures];
     }
 
     //#region position and dimensions via rect
@@ -341,7 +344,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * Low level, only to be called internally. It won't move contained figures.
      * @param {Rect} rect 
      */
-    #setRect(rect: Rect){
+    setRect(rect: Rect){
         this.#rect = rect.copy(); 
     }
 
@@ -382,7 +385,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         const oldPosition = oldRect.getPosition();
         const newPosition = newRect.getPosition();
         const moveBy = oldPosition.offsetTo(newPosition);
-        this.#setRect(newRect);
+        this.setRect(newRect);
 
         const containedFigures = this.getContainedFigures();
         containedFigures.forEach(figure=>figure.movePositionBy(moveBy));
@@ -543,15 +546,15 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     /**
      * @returns {Array} with toJSONs of contained figures.
      */
-    #getJsonOfContainedFigures(): Array<FigureJson>{
-        const jsonOfContainedFigures = this.#containedFigures.map(figure=>figure.toJSON());
+    getJsonOfContainedFigures(): Array<FigureJson>{
+        const jsonOfContainedFigures = this.containedFigures.map(figure=>figure.toJSON());
         return jsonOfContainedFigures;
     }
     /**
      * Returns a JSON of the rectangle of the figure.
      * @returns {JSON}
      */
-    #getJsonOfRect():RectJson{
+    getJsonOfRect():RectJson{
         const {x,y,width,height} = this.getRect();
         return {
             "x":x,
@@ -565,8 +568,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @returns {JSON}
     */
    toJSON(): FigureJson{
-       const containedFigureJson = this.#getJsonOfContainedFigures();
-        const rectJson = this.#getJsonOfRect();
+       const containedFigureJson = this.getJsonOfContainedFigures();
+        const rectJson = this.getJsonOfRect();
 
         const baseFigureJson:FigureJson = {
             "rect": rectJson,

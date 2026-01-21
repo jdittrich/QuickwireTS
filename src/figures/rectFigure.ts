@@ -1,10 +1,11 @@
 import { createAllResizeHandles } from '../handles/resizeHandle.js';
 
 import {Figure, CreateFigureParam, FigureJson} from './figure.js'
+import { CompositeFigure, CreateCompositeFigureParam } from './compositeFigure.js';
 import { Rect } from '../data/rect.js';
 import { DrawingView } from '../drawingView.js';
 
-type CreateRectFigureParam = CreateFigureParam;
+type CreateRectFigureParam = CreateCompositeFigureParam;
 type RectFigureJson = FigureJson;
 /**
  * Creates figure representing a simple rectangle
@@ -15,7 +16,7 @@ type RectFigureJson = FigureJson;
  * @param {number} param.width
  * @param {number} param.height
  */
-class RectFigure extends Figure{
+class RectFigure extends CompositeFigure{
     name = "RectFigure";
 
     constructor(param:CreateRectFigureParam){
