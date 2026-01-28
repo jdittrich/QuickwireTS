@@ -1,15 +1,16 @@
 import { Point } from './data/point.js';
 import { Rect } from './data/rect.js';
+import { CompositeFigure, CreateCompositeFigureParam } from './figures/compositeFigure.js';
 import { Figure,CreateFigureParam, FigureJson} from './figures/figure.js';
 import { findFiguresBelowPoint, findInnermostEnclosingFigure, findInnerMatches} from './hitTest.js';
 
 // the drawing contains other figures, so it is basically a composite figure
 
-type CreateDrawingParam = CreateFigureParam;
+type CreateDrawingParam = CreateCompositeFigureParam;
 
 type DrawingJson = FigureJson;
 
-class Drawing extends Figure{
+class Drawing extends CompositeFigure{
     name = "Drawing";
     isRoot = true;
 

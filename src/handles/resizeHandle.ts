@@ -4,6 +4,7 @@ import { Handle } from "./handle.js";
 import { ChangeFigureRectCommand } from "../commands/changeRectCommand.js";
 import { SubclassShouldImplementError } from "../errors.js";
 import { Figure } from "../figures/figure.js";
+import { CompositeFigure } from "../figures/compositeFigure.js";
 import { DrawingView } from "../drawingView.js";
 import { LocalDragEvent } from "../events.js";
 import {InteractionAnnouncement, InteractionInfoProvider} from "../interfaces.js"
@@ -11,7 +12,7 @@ import {InteractionAnnouncement, InteractionInfoProvider} from "../interfaces.js
 
 abstract class ResizeHandle extends Handle{
     size = 16;
-    constructor(figure:Figure,drawingView:DrawingView){
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
     getScreenRect(){
@@ -78,7 +79,7 @@ abstract class ResizeHandle extends Handle{
 }
 
 class ResizeTopRightHandle extends ResizeHandle{
-    constructor(figure:Figure,drawingView:DrawingView){
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
     getLocation():Point{
@@ -105,7 +106,7 @@ class ResizeTopRightHandle extends ResizeHandle{
 }
 
 class ResizeBottomRightHandle extends ResizeHandle{
-    constructor(figure:Figure,drawingView:DrawingView){
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
     getLocation():Point{
@@ -132,7 +133,7 @@ class ResizeBottomRightHandle extends ResizeHandle{
 }
 
 class ResizeBottomLeftHandle extends ResizeHandle{
-    constructor(figure:Figure,drawingView:DrawingView){
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
     getLocation(){
@@ -159,7 +160,7 @@ class ResizeBottomLeftHandle extends ResizeHandle{
 }
 
 class ResizeTopLeftHandle extends ResizeHandle{
-    constructor(figure:Figure,drawingView:DrawingView){
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
     getLocation(){
@@ -186,7 +187,7 @@ class ResizeTopLeftHandle extends ResizeHandle{
 }
 
 class ResizeLeftHandle extends ResizeHandle{
-    constructor(figure:Figure,drawingView:DrawingView){
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
     getLocation(){
@@ -215,7 +216,7 @@ class ResizeLeftHandle extends ResizeHandle{
 }
 
 class ResizeRightHandle extends ResizeHandle{
-    constructor(figure:Figure,drawingView:DrawingView){
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
     getLocation(){
@@ -249,7 +250,7 @@ class ResizeRightHandle extends ResizeHandle{
 /**
  * Generates standard set of resize handles 
  */
-function createAllResizeHandles(figure: Figure,drawingView: DrawingView): ResizeHandle[]{
+function createAllResizeHandles(figure: CompositeFigure,drawingView: DrawingView): ResizeHandle[]{
     const trHandle = new ResizeTopRightHandle(figure,drawingView);
     const brHandle = new ResizeBottomRightHandle(figure,drawingView);
     const blHandle = new ResizeBottomLeftHandle(figure,drawingView);
@@ -257,7 +258,7 @@ function createAllResizeHandles(figure: Figure,drawingView: DrawingView): Resize
     return [brHandle,trHandle,blHandle,tlHandle];
 }
 
-function createLeftRightResizeHandles(figure:Figure,drawingView:DrawingView): ResizeHandle[]{
+function createLeftRightResizeHandles(figure:CompositeFigure,drawingView:DrawingView): ResizeHandle[]{
     const rHandle = new ResizeRightHandle(figure,drawingView);
     const lHandle = new ResizeLeftHandle(figure,drawingView);
     return [rHandle,lHandle];

@@ -9,7 +9,6 @@ import { createAllResizeHandles } from '../handles/resizeHandle.js';
 import { DeleteFigureHandle } from '../handles/deleteFigureHandle.js';
 import { DrawingView } from '../drawingView.js';
 import { Drawable, Highlightable, InteractionAnnouncement, InteractionInfoProvider } from '../interfaces.js';
-import { FigureElement } from './figureElements/figureElement.js';
 import { SizeConstraint } from '../data/rectConstraint.js';
 
 type CreateFigureParam = {
@@ -32,7 +31,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
 
     isRoot = false; //only overwritten by the Drawing subclass
 
-    #figureElements:FigureElement[] = []
+    // #figureElements:FigureElement[] = []
 
     //overwrite this with another Rect constraint to e.g. have figures with fixed height.
     sizeConstraint:SizeConstraint = SizeConstraint.createNullConstraint();
@@ -67,9 +66,9 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         return baseParameters;
     }
     //#region figureElements
-    addFigureElement(figureElement:FigureElement){
-        this.#figureElements.push(figureElement);
-    }
+    // addFigureElement(figureElement:FigureElement){
+    //     this.#figureElements.push(figureElement);
+    // }
 
     //#region: drawing 
     /** Method called from other object. Interface to all needed drawing operations */
@@ -469,12 +468,12 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         const duplicationHandle = new DuplicationHandle(this,drawingView);
         const deleteFigureHandle = new DeleteFigureHandle(this,drawingView)
 
-        const elementHandles = this.#figureElements.flatMap(figure=> figure.getHandles(drawingView));
+        //const elementHandles = this.#figureElements.flatMap(figure=> figure.getHandles(drawingView));
 
         return [
             duplicationHandle,
             deleteFigureHandle,
-            ...elementHandles
+            //...elementHandles
         ];
     }
 

@@ -4,7 +4,6 @@ import { Point } from "./data/point.js";
 import { Rect } from "./data/rect.js";
 
 import { RectFigure } from "./figures/rectFigure.js";
-import { ButtonFigure } from "./figures/buttonFigure.js";
 
 import { SelectionTool } from "./tools/selectionTool.js";
 import { CreateFigureTool } from "./tools/createFigureTool.js";
@@ -12,13 +11,6 @@ import { Toolbar, ToolButton, Actionbar, ActionBarActionButton, ActionbarLoadFil
 import { InteractionAnnouncementEvent, interactionAnnouncementName, selectionEventName, ToolChangeEvent, toolChangeEventName} from "./events.js";
 import { Tool } from "./tools/tool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
-// import { CheckboxFigure, RadiobuttonFigure } from "./figures/toggleFigure.js";
-// import { ParagraphFigure } from "./figures/paragraphFigure.js";
-// import { HorizontalTabsFigure } from "./figures/horizontalTabsFigure.js";
-// import { LabelFigure } from "./figures/labeledFigure.js";
-// import { HeadlineFigure } from "./figures/HeadlineFigure.js";
-// import { DropdownFigure } from "./figures/dropdownFigure.js";
-import { RectangleFigure} from "./figures/rectangleFigure.js";
 
 import { FigureBar, FormElementFactory } from "./app_formElements.js";
 /**
