@@ -23,6 +23,13 @@ type RectCorners = {
     topLeft:    Point;
 }
 
+type RectResize = {
+    top:number,
+    right:number,
+    bottom:number,
+    left:number
+}
+
 class Rect{
     #width:number
     #height: number
@@ -140,6 +147,21 @@ class Rect{
         });
     }
 
+    resizedCopy(resizing:RectResize):Rect {
+        const {topLeft,bottomRight} = this.getCorners();
+        const resizedTopLeft = topLeft.add(new Point({
+            x:resizing.left || 0,
+            y:resizing.top || 0
+        }));
+
+        const resizedBottomRight = bottomRight.add(new Point({
+            x:resizing.right || 0,
+            y:resizing.bottom || 0
+        }))
+
+        const resizedRect = Rect.createFromCornerPoints(resizedTopLeft,resizedBottomRight);
+        return resizedRect;
+    }
 
     //#region: hit testing
     /**
@@ -223,7 +245,6 @@ class Rect{
      */
     static createFromCornerPoints(point1: Point, point2: Point): Rect{
       
-          
         const leftmostPosition   = Math.min(point1.x, point2.x);
         const rightmostPosition  = Math.max(point1.x, point2.x);
         const topmostPosition    = Math.min(point1.y, point2.y);
@@ -242,6 +263,15 @@ class Rect{
 
         return rectFromCornerPoints;
     }
+    static getDifference(from:Rect,to:Rect):RectResize{
+        const difference:RectResize= {
+            top    : to.top    - from.top,
+            right  : to.right  - from.right,
+            bottom : to.bottom - from.bottom,
+            left   : to.left   - from.left,
+        }
+        return difference;
+    }
 }
 
-export {Rect, RectParam, RectJson}
+export {Rect, RectParam, RectJson, RectResize}

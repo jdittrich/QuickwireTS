@@ -1,4 +1,5 @@
 import { DrawingView } from "../drawingView.js";
+import { CompositeFigure } from "../figures/compositeFigure.js";
 import { Figure } from "../figures/figure.js";
 import { Command } from "./command.js";
 
@@ -7,9 +8,9 @@ type RemoveFigureAndContainedCommandParam = {
 }
 
 class RemoveFigureAndContainedCommand extends Command{
-    
+    name = "remove figure"
     #figureToDelete:Figure
-    #figureContainer:Figure
+    #figureContainer:CompositeFigure
     #drawingView:DrawingView
     
     /**

@@ -48,7 +48,7 @@ class Point{
     };
 
     /**
-     * Creates inverse, i.e. adding this to a vector should create a point at 0,0;
+     * Creates inverse, i.e. adding the returned point to the original point will create a point at 0,0;
      */
     inverse(): Point{
         return new Point({

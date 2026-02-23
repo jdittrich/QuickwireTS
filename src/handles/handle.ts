@@ -35,6 +35,7 @@ class Handle implements Drawable, Highlightable, InteractionInfoProvider {
         return this.#figure;
     }
     
+    /*The rectangle as drawn in screen coordinates, not in document coordinates*/
     getScreenRect():Rect{
         throw new SubclassShouldImplementError("getScreenRect", "Handle");
     }
@@ -44,7 +45,7 @@ class Handle implements Drawable, Highlightable, InteractionInfoProvider {
     getColor(): string{
         return "#4e9a06";
     }
-    getRect(){
+    getBoundingBox(){
         const screenRect = this.getScreenRect();
         const documentRect = this.#drawingView.screenToDocumentRect(screenRect);
         return documentRect;

@@ -5,7 +5,8 @@
  * 
  * Usually redo() just calls do(). 
  */
-class Command{
+abstract class Command{
+    abstract name:string
     constructor(){}
     do(){}
     undo(){}
@@ -16,6 +17,5 @@ class Command{
 // See https://freegroup.github.io/draw2d/index.html#/api/draw2d/command/commandstack
 
 // Maybe have Command → UndoableCommand, since we might want to have something like commands for creating selections etc. 
-
 
 export {Command}

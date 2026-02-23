@@ -1,7 +1,9 @@
 
-import { Rect } from '../data/rect.js';
+import { Rect, RectResize } from '../data/rect.js';
 import {Figure} from '../figures/figure.js';
+import {CompositeFigure} from '../figures/compositeFigure.js';
 import {Command} from './command.js';
+import { CaptureFiguresCommand } from './captureFiguresCommand.js';
 import { DrawingView } from '../drawingView.js';
 
 
@@ -12,16 +14,17 @@ import { DrawingView } from '../drawingView.js';
  * @param {Rect}   param.changedRect
  */
 
-
 type CreateChangeFigureRectParam={
-    figure:Figure;
+    figure:CompositeFigure;
     changedRect:Rect;
 }
 
+//Actually, change composite rect, I assume now. 2026.01.28
 class ChangeFigureRectCommand extends Command{
-    #figure:Figure
-    #fromContainer:Figure
-    #toContainer:Figure
+    name = "changeFigureRect"
+    #figure:CompositeFigure //figure which rect is change
+    #fromContainer:CompositeFigure //container of the respective figure before the command is applies
+    #toContainer: CompositeFigure //container of the respective figure after the command is applies
     #changedRect:Rect
     #oldRect:Rect
     #appendFigures:Figure[]
@@ -34,7 +37,7 @@ class ChangeFigureRectCommand extends Command{
         //store non-derived data
         this.#figure = figure;
         this.#fromContainer = figure.getContainer();
-        this.#oldRect = figure.getRect();
+        this.#oldRect = figure.getBoundingBox();
         this.#changedRect = changedRect;
 
         // const oldPosition = this.#oldRect.getPosition();
@@ -47,7 +50,7 @@ class ChangeFigureRectCommand extends Command{
         if(!changedRectInDrawing){
             throw Error("changedRect out of drawing−s bounds, aborting command");
         }
-        const figureEnclosingRect = drawing.findFigureEnclosingRect(changedRect);
+        const figureEnclosingRect = drawing.findEnclosingCompositeFigure(changedRect);
         const rectEnclosesFigures = drawing.findEnclosedFigures(figureEnclosingRect,changedRect)
 
         this.#toContainer = figureEnclosingRect;
@@ -55,14 +58,15 @@ class ChangeFigureRectCommand extends Command{
     }
     do(){
         //note: the order of operations is relevant!
-        this.#figure.changeRect(this.#changedRect); //moves also the currently contained figures
-        this.#figure.appendFigures(this.#appendFigures); //appends figures that are enclosed in the new Rectangle
-        this.#toContainer.appendFigure(this.#figure); //append figure to its new container.
+        // this.#figure.changeRect(this.#changedRect); //moves also the currently contained figures
+        // this.#figure.appendFigures(this.#appendFigures); //appends figures that are enclosed in the new Rectangle
+        // this.#toContainer.appendFigure(this.#figure); //append figure to its new container.
+        //this.#figure.
     }
-    undo(){        
-        this.#fromContainer.appendFigures(this.#appendFigures);
-        this.#figure.changeRect(this.#oldRect);
-        this.#fromContainer.appendFigure(this.#figure);
+    undo(){
+        // this.#fromContainer.appendFigures(this.#appendFigures);
+        // this.#figure.changeRect(this.#oldRect);
+        // this.#fromContainer.appendFigure(this.#figure);
     }
     redo(){
         this.do();

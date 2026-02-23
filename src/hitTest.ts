@@ -1,6 +1,7 @@
 import { Rect  } from "./data/rect.js";
 import { Point } from "./data/point.js";
 import {Figure}  from "./figures/figure.js"
+import { CompositeFigure } from "./figures/compositeFigure.js";
 
 /**
  * A predicate function that gets a Figure any other parameter and returns a boolean. E.g. check if figure contains a point
@@ -28,19 +29,20 @@ type FigurePredicate = {
  */
 function figureWalkTreeLazy(rootFigure: Figure,predicateParameter: any,figurePredicate: FigurePredicate): Figure[]{
     if(!figurePredicate(rootFigure,predicateParameter)){ 
-        // base condition;
-        // !negation because we often check if something is NOT the case; 
-        // the predicate function is often something like (figure,point) => figure.containsPoint(point)
-        // return empty array so we can flatMap (see recursion condition)
+        /* 
+        - "base condition" i.e. = stops the recursion
+        - !negation because we often check if something is NOT the case since 
+          the predicate function is often something like (figure,point) => figure.containsPoint(point)
+        - return empty array so we can flatMap (see recursion condition)
+        */
         return [];
     } else { 
-        //recursion condition
-        //16.07.24: Array.toReversed here, 
+        // recursion condition i.e. the one that continues to traverse the tree
         const submatches = rootFigure.
                 getContainedFigures().
                 toReversed(). //so that late-in-stack (new figures are on top and appended at the end of the array) are matched earlier
                 flatMap(      //flatMap is why base condition returns []; the empty arrays disappear, so I don't need to filter out empty entries.
-                    childnode => figureWalkTreeLazy(childnode,predicateParameter,figurePredicate)
+                    childnode => figureWalkTreeLazy(childnode as Figure,predicateParameter,figurePredicate)
                 );
         return [...submatches, rootFigure];
     }
@@ -51,7 +53,7 @@ function figureWalkTreeLazy(rootFigure: Figure,predicateParameter: any,figurePre
 //ready-to-use functions
 
 /**
- * @param {DocumentView} the main view
+ * @param {CompositeFigure} the main view
  * @param {Point} a point in document coordinates
  * @param {Boolean} includeRoot
  * @returns {array} of figures under the point (or an empty array) starting with innermost matches
@@ -75,12 +77,14 @@ function findFiguresBelowPoint(rootFigure:Figure,point:Point, includeRoot: boole
  * @param {Figure} testRect - the figure that is enclosed
  * @returns {array} of figures enclosing the rect, starting with the innermost enclosing rect.
  */
-function findEnclosingFigures(rootFigure: Figure,testRect: Rect): Figure[]{
+function findEnclosingCompositeFigures(rootFigure: Figure,testRect: Rect): CompositeFigure[]{
     const enclosingFigures = figureWalkTreeLazy(rootFigure,testRect,(figure,testRect)=>{
-        const isFigureEnclosingRect = figure.isEnclosingRect(testRect);
-        return isFigureEnclosingRect;
+        const figureBoundingBox = figure.getBoundingBox();
+        const figureIsEnclosingRect = figureBoundingBox.isEnclosingRect(testRect);
+        const figureIsCompositeFigure = figure instanceof CompositeFigure;
+        return figureIsEnclosingRect && figureIsCompositeFigure;
     });
-    return enclosingFigures;
+    return enclosingFigures as CompositeFigure[];
 }
 
 
@@ -91,8 +95,8 @@ function findEnclosingFigures(rootFigure: Figure,testRect: Rect): Figure[]{
  * @param {Rect} testRect 
  * @returns {Figure}
 */
-function findInnermostEnclosingFigure(rootFigure: Figure, testRect: Rect): Figure{
-    const enclosingFigures = findEnclosingFigures(rootFigure,testRect);//all figures that fully enclose the testRect
+function findInnermostEnclosingCompositeFigure(rootFigure: Figure, testRect: Rect): CompositeFigure{
+    const enclosingFigures = findEnclosingCompositeFigures(rootFigure,testRect);//all figures that fully enclose the testRect
     const innermostEnclosing = enclosingFigures[0]; //innermost enclosing figure
     return innermostEnclosing;
 }
@@ -130,7 +134,7 @@ function findInnermostEnclosingFigure(rootFigure: Figure, testRect: Rect): Figur
 function findInnerMatches(containerFigure: Figure,testRect: Rect): Figure[]{
     //collects all figures that are contained in the innermostEnclosing figure and also enclosed by the testRect → should be added
     const innerMatches = containerFigure.getContainedFigures().filter((containedFigure)=>{ 
-        const containedFigureRect = containedFigure.getRect();
+        const containedFigureRect = containedFigure.getBoundingBox();
         const isMatch = testRect.isEnclosingRect(containedFigureRect);
         return isMatch;
     });
@@ -138,21 +142,21 @@ function findInnerMatches(containerFigure: Figure,testRect: Rect): Figure[]{
     
 }
 
-function findFiguresEnclosingAndEnclosed(rootFigure:Figure,testRect:Rect):object{
-    const innermostEnclosing = findInnermostEnclosingFigure(rootFigure,testRect);
-    const innerMatches = findInnerMatches(innermostEnclosing,testRect);
+// function findFiguresEnclosingAndEnclosed(rootFigure:CompositeFigure,testRect:Rect):object{
+//     const innermostEnclosing = findInnermostEnclosingFigure(rootFigure,testRect);
+//     const innerMatches = findInnerMatches(innermostEnclosing,testRect);
     
-    return {
-        "rectEnclosesFigures":innerMatches,
-        "rectEnclosedByFigure":innermostEnclosing
-    }
-}
+//     return {
+//         "rectEnclosesFigures":innerMatches,
+//         "rectEnclosedByFigure":innermostEnclosing
+//     }
+// }
 
 export {
     figureWalkTreeLazy, 
     findFiguresBelowPoint, 
-    findEnclosingFigures,
-    findInnermostEnclosingFigure,
+    findEnclosingCompositeFigures as findEnclosingFigures,
+    findInnermostEnclosingCompositeFigure as findInnermostEnclosingFigure,
     findInnerMatches,
-    findFiguresEnclosingAndEnclosed //combines findInnermostEnclosingFigure, findInnerMatches
+    //findFiguresEnclosingAndEnclosed //combines findInnermostEnclosingFigure, findInnerMatches
 };

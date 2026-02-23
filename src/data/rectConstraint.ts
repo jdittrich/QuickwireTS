@@ -6,12 +6,12 @@ type Outer = [number, number]; //dimensions of the outer rectangle: left and rig
 
 //all the variants of what the constraints in one dimension could be: 
 type OneIsNull = 
-    [number, number, null] | 
-    [number, null, number] | 
-    [null, number, number] ;
+    [number, number, null] | //vary distance to right/bottom (default)
+    [number, null, number] | //vary width/height
+    [null, number, number] ; //vary distance to left/top
 type AllAreNull = [null,null,null];
-type CenteredIsNull = [null,number,null];
-type FirstTwoNull = [null,null, number];
+type CenteredIsNull = [null,number,null]; 
+type FirstTwoNull = [null,null, number];  
 type LastTwoNull = [number,null,null];
 
 // merge all possible variants in one type
@@ -70,7 +70,7 @@ const midPointNear:ConstraintStrategy= function(outer,innerConstraints:FirstTwoN
 }
 
 //one values is null, it is calculated
-const fixedStrategy:ConstraintStrategy = function(outer,innerConstraints:OneIsNull){
+const fixedStrategy:ConstraintStrategy = function(outer:Outer,innerConstraints:OneIsNull){
     const innerNear =  
         innerConstraints[0] != null ? // is left defined? 
             outer[0]  + innerConstraints[0] // left defined: add distanced from the left
@@ -89,130 +89,145 @@ const  thirdsStrategy:ConstraintStrategy= function(outer, innerConstraints:AllAr
     return thirdsPoints;
 }
 
-class RectConstraint{
-    #vertical:InnerConstraints
-    #horizontal:InnerConstraints
-    #verticalStrategy:ConstraintStrategy
-    #horizontalStrategy:ConstraintStrategy
 
-    #pickStrategy(constraints:InnerConstraints):(outer:Outer, innerConstraints:InnerConstraints) => [number,number]{
-        const countNullishValues = constraints.filter(value => value == null).length;
-        if(countNullishValues===1){
-            return fixedStrategy;
-        }else if(!constraints[0] && constraints[1] && !constraints[2]){
-        //only center value defined: center fixed length element
-            return centeredStrategy
-        } else if (!constraints[0] && !constraints[1] && !constraints[2]){
-        //no value defined: equal division in thirds
-            return thirdsStrategy
-        } else if(!constraints[0] && !constraints[1] && constraints[2]){
-            return midPointNear;
-        } else if(constraints[0] && !constraints[1] && !constraints[2]){
-            return midPointFar;
-        }  else if (constraints[0] && constraints[1] && constraints[2]){
-        //all values are defined
-            throw new Error("at least one element in the constraints array needs to be nullish")
-        } else {
-            throw new Error("this should not be reachable");
-        }
-
+class Constraint{
+    constraints:OneIsNull
+    constructor(constraints:OneIsNull){
+        this.constraints = constraints;
     }
-    constructor(param:CreateRectConstraintParam){
+    derive(outer:Outer){
+        const startEndValues = fixedStrategy(outer,this.constraints)
+        return startEndValues;
+    }
+}
+
+
+// class RectConstraint_{
+//     #vertical:InnerConstraints
+//     #horizontal:InnerConstraints
+//     #verticalStrategy:ConstraintStrategy
+//     #horizontalStrategy:ConstraintStrategy
+
+//     #pickStrategy(constraints:InnerConstraints):(outer:Outer, innerConstraints:InnerConstraints) => [number,number]{
+//         const countNullishValues = constraints.filter(value => value == null).length;
+//         if(countNullishValues===1){
+//             return fixedStrategy;
+//         }else if(!constraints[0] && constraints[1] && !constraints[2]){
+//         //only center value defined: center fixed length element
+//             return centeredStrategy
+//         } else if (!constraints[0] && !constraints[1] && !constraints[2]){
+//         //no value defined: equal division in thirds
+//             return thirdsStrategy
+//         } else if(!constraints[0] && !constraints[1] && constraints[2]){
+//             return midPointNear;
+//         } else if(constraints[0] && !constraints[1] && !constraints[2]){
+//             return midPointFar;
+//         }  else if (constraints[0] && constraints[1] && constraints[2]){
+//         //all values are defined
+//             throw new Error("at least one element in the constraints array needs to be nullish")
+//         } else {
+//             throw new Error("this should not be reachable");
+//         }
+
+//     }
+//     constructor(param:CreateRectConstraintParam){
         
-        this.#vertical = param.vertical;
-        this.#horizontal = param.horizontal;
+//         this.#vertical = param.vertical;
+//         this.#horizontal = param.horizontal;
 
-        this.#verticalStrategy = this.#pickStrategy(param.vertical);
-        this.#horizontalStrategy = this.#pickStrategy(param.horizontal);
+//         this.#verticalStrategy = this.#pickStrategy(param.vertical);
+//         this.#horizontalStrategy = this.#pickStrategy(param.horizontal);
 
-    }
+//     }
 
-    deriveRect(outerRect:Rect):Rect{
-            const horizontalValues = this.#horizontalStrategy([outerRect.left,outerRect.right], this.#horizontal);
+//     deriveRect(outerRect:Rect):Rect{
+//             const horizontalValues = this.#horizontalStrategy([outerRect.left,outerRect.right], this.#horizontal);
 
-            const left =  horizontalValues[0];
-            const right = horizontalValues[1];
+//             const left =  horizontalValues[0];
+//             const right = horizontalValues[1];
 
-            const verticalValues = this.#verticalStrategy([outerRect.top,outerRect.bottom],this.#vertical);
+//             const verticalValues = this.#verticalStrategy([outerRect.top,outerRect.bottom],this.#vertical);
 
-            const top = verticalValues[0];
-            const bottom = verticalValues[1];
+//             const top = verticalValues[0];
+//             const bottom = verticalValues[1];
             
-            const innerRect = Rect.createFromCornerPoints(
-                new Point({"x":left, "y":top}),
-                new Point({"x":right, "y":bottom})
-            );
+//             const innerRect = Rect.createFromCornerPoints(
+//                 new Point({"x":left, "y":top}),
+//                 new Point({"x":right, "y":bottom})
+//             );
     
-            return innerRect;
-    }
+//             return innerRect;
+//     }
 
-    /**
-     * Creates constraint that derives a rect of same dimensions as passed. 
-     */
-    static createNullConstraint(){
-        return new RectConstraint({vertical:[0,null,0],horizontal:[0,null,0]});
-    }
-    /**
-     * Creates a constraint based on two rects and passing for 
-     * the vertical and horizontal dimension 
-     * which property should be calculated 
-     * (rather than kept constant) 
-     */
-    static fromRects(outerRect: Rect,innerRect: Rect,calculateVertical: "top"|"height"|"bottom",calculateHorizontal: "left"| "width"| "right"){
-        // Set value to null, if it is to be calculated by the constraint, 
-        // if it is to be kept constant instead, you can derive it from the rectangles
-        const topDistance    = calculateVertical   === "top"     ? null : innerRect.top - outerRect.top;
-        const heightDistance = calculateVertical   === "height"  ? null : innerRect.height;
-        const bottomDistance = calculateVertical   === "bottom"  ? null : outerRect.bottom - innerRect.bottom; 
-        const leftDistance   = calculateHorizontal === "left"    ? null : innerRect.left - outerRect.left;
-        const widthDistance  = calculateHorizontal === "width"   ? null : innerRect.width;
-        const rightDistance  = calculateHorizontal === "right"   ? null : outerRect.right - innerRect.right;
+//     /**
+//      * Creates constraint that derives a rect of same dimensions as passed. 
+//      */
+//     static createNullConstraint(){
+//         return new RectConstraint({vertical:[0,null,0],horizontal:[0,null,0]});
+//     }
+//     /**
+//      * Creates a constraint based on two rects and passing for 
+//      * the vertical and horizontal dimension 
+//      * which property should be calculated 
+//      * (rather than kept constant) 
+//      */
+//     static fromRects(outerRect: Rect,innerRect: Rect,calculateVertical: "top"|"height"|"bottom",calculateHorizontal: "left"| "width"| "right"){
+//         // Set value to null, if it is to be calculated by the constraint, 
+//         // if it is to be kept constant instead, you can derive it from the rectangles
+//         const topDistance    = calculateVertical   === "top"     ? null : innerRect.top - outerRect.top;
+//         const heightDistance = calculateVertical   === "height"  ? null : innerRect.height;
+//         const bottomDistance = calculateVertical   === "bottom"  ? null : outerRect.bottom - innerRect.bottom; 
+//         const leftDistance   = calculateHorizontal === "left"    ? null : innerRect.left - outerRect.left;
+//         const widthDistance  = calculateHorizontal === "width"   ? null : innerRect.width;
+//         const rightDistance  = calculateHorizontal === "right"   ? null : outerRect.right - innerRect.right;
 
-        const constraint = new RectConstraint({
-            vertical:[topDistance,heightDistance,bottomDistance] as InnerConstraints,
-            horizontal:[leftDistance,widthDistance,rightDistance] as InnerConstraints
-        });
-        return constraint;
-    }
-    static fromJSON(json){
-        const rectConstraint = new RectConstraint(json);
-        return rectConstraint;
-    }
-    toJSON(){
-        const replaceUndefinedWithNull = value=> value === undefined? null:value;
-        const horizontal = this.#horizontal.map(replaceUndefinedWithNull);
-        const vertical   = this.#vertical.map(replaceUndefinedWithNull);
-        return {
-            "horizontal": horizontal,
-            "vertical"  : vertical
-        }
-    }
-}
+//         const constraint = new RectConstraint({
+//             vertical:[topDistance,heightDistance,bottomDistance] as InnerConstraints,
+//             horizontal:[leftDistance,widthDistance,rightDistance] as InnerConstraints
+//         });
+//         return constraint;
+//     }
+//     static fromJSON(json){
+//         const rectConstraint = new RectConstraint(json);
+//         return rectConstraint;
+//     }
+//     toJSON(){
+//         const replaceUndefinedWithNull = value=> value === undefined? null:value;
+//         const horizontal = this.#horizontal.map(replaceUndefinedWithNull);
+//         const vertical   = this.#vertical.map(replaceUndefinedWithNull);
+//         return {
+//             "horizontal": horizontal,
+//             "vertical"  : vertical
+//         }
+//     }
+// }
 
-class SizeConstraint {
-    #height:number|null
-    #width:number|null
-    constructor(vertical:number|null, horizontal:number|null){
-        this.#height = vertical;
-        this.#width = horizontal;
-    }
-    deriveRect(rect:Rect) {
-        return new Rect({
-            x:rect.x,
-            y:rect.y,
-            width:this.#width||rect.width,
-            height:this.#height|| rect.height
-        });
-    }
-    get vertical(){
-        return this.#height;
-    }
-    get horizontal(){
-        return this.#width;
-    }
-    static createNullConstraint(){
-        return new SizeConstraint(null, null);
-    }
-}
+// class SizeConstraint {
+//     #height:number|null
+//     #width:number|null
+//     constructor(vertical:number|null, horizontal:number|null){
+//         this.#height = vertical;
+//         this.#width = horizontal;
+//     }
+//     deriveRect(rect:Rect) {
+//         return new Rect({
+//             x:rect.x,
+//             y:rect.y,
+//             width:this.#width||rect.width,
+//             height:this.#height|| rect.height
+//         });
+//     }
+//     get vertical(){
+//         return this.#height;
+//     }
+//     get horizontal(){
+//         return this.#width;
+//     }
+//     static createNullConstraint(){
+//         return new SizeConstraint(null, null);
+//     }
+// }
 
-export {RectConstraint, SizeConstraint, fixedStrategy,midPointFar,midPointNear,centeredStrategy}
+export {Constraint, }
+
+//export {RectConstraint, SizeConstraint, fixedStrategy,midPointFar,midPointNear,centeredStrategy}

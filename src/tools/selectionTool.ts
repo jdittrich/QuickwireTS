@@ -1,6 +1,7 @@
 import {Tool} from './tool.js';
 import {LocalDragEvent, LocalMouseEvent} from '../events.js';
 import {ChangeFigureRectCommand} from '../commands/changeRectCommand.js';
+import {MoveFigureCommand} from '../commands/moveFigureCommand.js'
 import { Figure } from '../figures/figure.js';
 import { Handle } from '../handles/handle.js';
 import { NoOpTool } from './noopTool.js';
@@ -220,13 +221,13 @@ class DragTracker extends Tool{
         const drawingView = this.getDrawingView();
         const dragPreviewFigure = drawingView.getPreviewedFigure();
         const movement = event.getDocumentMovement();
-        dragPreviewFigure.movePositionBy(movement);
+        dragPreviewFigure.moveBy(movement);
 
         //create highlighted drop target
         const drawing = event.drawingView.drawing;
 
         try{ 
-            const figureEnclosingRect = drawing.findFigureEnclosingRect(dragPreviewFigure.getRect())
+            const figureEnclosingRect = drawing.findEnclosingCompositeFigure(dragPreviewFigure.getBoundingBox())
             drawingView.startHighlightOf(figureEnclosingRect);//maybe that should just be "highlight"
         }catch(e){ }
 
@@ -235,16 +236,11 @@ class DragTracker extends Tool{
     }
     onDragend(event:LocalDragEvent){
         //event.drawingView.endPreview()
-
         const drawingView = this.getDrawingView();
         const moveBy = event.getDocumentDragMovement();
         const figure = this.#figureToDrag;
-        // const moveCommand = new MoveFigureCommand({
-        //     "moveBy": moveBy,
-        //     "figure": this.#figureToDrag
-        // }, drawingView);
 
-        const oldRect = figure.getRect();
+        const oldRect = figure.getBoundingBox();
         const changedRect = oldRect.movedCopy(moveBy);
         const isInBounds = drawingView.drawing.isEnclosingRect(changedRect);
         if(!isInBounds){
@@ -252,11 +248,11 @@ class DragTracker extends Tool{
             return;
         }
         const changeRectParam = {
-            "changedRect":changedRect,
+            "moveBy":moveBy,
             "figure":figure
         }
-
-        const moveCommand = new ChangeFigureRectCommand(changeRectParam,drawingView);
+        //TODO: Needs to get a proper "move" command, rather than a changeRect
+        const moveCommand = new MoveFigureCommand(changeRectParam,drawingView);
         
         drawingView.do(moveCommand);
     }

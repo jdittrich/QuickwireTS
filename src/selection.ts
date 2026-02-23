@@ -5,7 +5,7 @@ class Selection implements SelectionManager{
     #selectedFigure:Figure|null = null;
     constructor(){}
     /**
-     * gets selected figure (if existing)
+     * gets selected figure (if existing). Should return null figure?
      */
     getSelection():Figure|null{
         return this.#selectedFigure;

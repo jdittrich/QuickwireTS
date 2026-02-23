@@ -9,6 +9,7 @@ type ChangeAttributeCommandParam = {
 }
 
 class ChangeAttributeCommand extends Command{
+    name="change attribute"
     #newAttributeValue:any 
     #oldAttributeValue:any
     #AttributeKey     :string

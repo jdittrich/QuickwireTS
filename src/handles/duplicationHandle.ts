@@ -31,7 +31,7 @@ class DuplicationHandle extends Handle{
     getScreenRect():Rect{
         const drawingView = this.getDrawingView();
         const figure = this.getFigure();
-        const figureRect = figure.getRect();
+        const figureRect = figure.getBoundingBox();
         const {bottomRight} = figureRect.getCorners();
         const drawAnchorScreen = drawingView.documentToScreenPosition(bottomRight);
         const screenRect = new Rect({
@@ -52,7 +52,7 @@ class DuplicationHandle extends Handle{
     #createChangedRect(dragMovement:Point){
         //get drag movement, return new Rectangle
         const figure = this.getFigure();
-        const rect = figure.getRect();
+        const rect = figure.getBoundingBox();
         const newRect = rect.movedCopy(dragMovement);
         return newRect;
     }
@@ -69,7 +69,7 @@ class DuplicationHandle extends Handle{
         const drawingView = this.getDrawingView();
         const previewFigure = drawingView.getPreviewedFigure();
         const dragMovement = dragEvent.getDocumentMovement();
-        previewFigure.movePositionBy(dragMovement);
+        previewFigure.moveBy(dragMovement);
     }
     onDragend(dragEvent:LocalDragEvent){
         //check if copy can be placed
@@ -81,7 +81,8 @@ class DuplicationHandle extends Handle{
             console.log("Changed Figure would be out of bounds, aborting command");
             return;
         }
-        const duplicateFigureCommand = new DuplicateFigureCommand({figure:this.getFigure(), newRect:resizedFigureRect},drawingView)
+
+        const duplicateFigureCommand = new DuplicateFigureCommand({figure:this.getFigure(), moveFigureBy:dragMovement},drawingView)
         drawingView.do(duplicateFigureCommand);
     }
     dragExit(){

@@ -1,12 +1,12 @@
 import { createAllResizeHandles } from '../handles/resizeHandle.js';
 
-import {Figure, CreateFigureParam, FigureJson} from './figure.js'
-import { CompositeFigure, CreateCompositeFigureParam } from './compositeFigure.js';
+
+import { CompositeFigure, CreateCompositeFigureParam, CompositeFigureJson } from './compositeFigure.js';
 import { Rect } from '../data/rect.js';
 import { DrawingView } from '../drawingView.js';
 
 type CreateRectFigureParam = CreateCompositeFigureParam;
-type RectFigureJson = FigureJson;
+type RectFigureJson = CompositeFigureJson;
 /**
  * Creates figure representing a simple rectangle
  * 
@@ -24,7 +24,7 @@ class RectFigure extends CompositeFigure{
     }
 
     drawFigure(ctx:CanvasRenderingContext2D){
-        const {width,height,x,y} = this.getRect();
+        const {width,height,x,y} = this.getBoundingBox();
         ctx.strokeRect(x,y,width,height);
     }
 

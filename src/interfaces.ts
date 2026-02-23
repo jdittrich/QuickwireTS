@@ -9,7 +9,7 @@ interface Drawable{
 }
 
 interface Highlightable{
-    getRect():Rect;
+    getBoundingBox():Rect;
 }
 
 interface ToolManager {

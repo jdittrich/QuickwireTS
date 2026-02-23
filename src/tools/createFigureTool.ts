@@ -27,7 +27,7 @@ class CreateFigureTool extends Tool{
         const currentMousePoint = event.getDocumentPosition(); 
         const documentMouseDownPoint = event.getMousedownDocumentPosition();
         const previewedFigure = event.drawingView.getPreviewedFigure();
-        previewedFigure.changeRectByPoints(documentMouseDownPoint,currentMousePoint);
+        previewedFigure.resizeByPoints(documentMouseDownPoint,currentMousePoint);
         event.drawingView.updateDrawing();
     }
     onMouseup(mouseEvent: LocalMouseEvent): void {
@@ -44,7 +44,7 @@ class CreateFigureTool extends Tool{
         //cleanup
         const drawingView = this.getDrawingView();
         drawingView.endPreview();
-        drawingView.changeToDefaultTool();
+        //drawingView.changeToDefaultTool();
     }
     onDragend(event: LocalDragEvent){
         const documentMousePoint = event.getDocumentPosition(); 

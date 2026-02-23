@@ -1,24 +1,35 @@
 import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
 import { Rect,RectJson } from "../data/rect.js";
+import { Point } from "../data/point.js";
+import { RectConstraint } from "../data/constraint.js";
 
 type CreateCompositeFigureParam = CreateFigureParam & {
+    rect:Rect,
     containedFigures?:Figure[]
 }
 
 type CompositeFigureJson = FigureJson & {
     containedFigures:FigureJson[];   
 }
-
+//abstract class CompositeFigure extends Figure{
 abstract class CompositeFigure extends Figure{
-    name:string = "CompositeFigure";
+    readonly name:string = "CompositeFigure";
     containedFigures:Figure[] = []
+    #rect:Rect;
+    #rectConstraint: RectConstraint
+    isRoot = false; //only overwritten by the Drawing subclass
 
     constructor(param:CreateCompositeFigureParam){
         super(param);
+        this.setRect(param.rect);
         this.appendFigures(param.containedFigures ?? []);
     }
- 
-    /**needs a draw function that considers contained figures */
+    
+    get rect(){
+        return this.#rect.copy();
+    }
+
+    //#region: drawing
     draw(ctx: CanvasRenderingContext2D){
         if(this.getIsVisible()){
             ctx.save();
@@ -35,7 +46,7 @@ abstract class CompositeFigure extends Figure{
     
     clipFigure(ctx:CanvasRenderingContext2D){
         ctx.beginPath();
-        const {x,y,width,height} = this.getRect();
+        const {x,y,width,height} = this.getBoundingBox();
         ctx.rect(x,y,width,height);
         ctx.clip(); //prevent drawing outside of figure boundaries
     }
@@ -52,8 +63,26 @@ abstract class CompositeFigure extends Figure{
             ctx.restore();
         });
     }
-    // //#region: child management: Containing other figures
-    // #containedFigures = [] 
+
+    getParameters(): CreateCompositeFigureParam {
+        const containedCopies = this.getContainedFigures().map(figure => figure.copy())
+        const compositeFigureParameters = {
+            "rect":this.rect,
+            "containedFigures":containedCopies
+        }
+        return compositeFigureParameters;
+    }
+    
+    //#region: child management: Containing other figures
+    
+    /**
+     * Overwrites stub method in Figure, which is provided for interface compatibility.
+     * Returns array with contained figures BUT not their contained figures, too
+     * @returns {Figure[]} 
+     */
+    getContainedFigures(): Figure[]{
+        return [...this.containedFigures];
+    }
 
     /**
      * @see {@link detachFigure} as the inverse operation
@@ -77,38 +106,32 @@ abstract class CompositeFigure extends Figure{
         this.#addToCollection(figureToAppend);
 
         figureToAppend.setContainer(this);
+        figureToAppend.generateConstraints();
     }
 
     /**
      * @param {Figure[]} figuresToAppend 
      */
     appendFigures(figuresToAppend: Figure[]){
-        //TODO: How to do that with constraints?
+        //TODO: How to do update the con
         //first check circularity for all, preventing that a part is appended before the error
         const circularityChecks = figuresToAppend.map(figure=>this.#isCircularRelation(figure));
         const atLeastOneCircular = circularityChecks.includes(true);
         if(atLeastOneCircular){
             throw new Error("Can’t append: At least one proposed Child is its own ancestor, would create circular hierarchy.")
         }
-
-        // const containmentChecks = figuresToAppend.map(figure=>this.isEnclosingFigure(figure));
-        // const atLeastOneOutside = containmentChecks.includes(false);
-        // if(atLeastOneOutside){
-        //     throw new Error("Can’t append: At least one proposed Child is outside the this figure")
-        // }
-
         //but if all checks pass: 
         figuresToAppend.forEach(figure=>this.appendFigure(figure));
     }
 
     /**
      * Checks, if appending to this would create a circular relation i.e. it would be contained in itself.
-     * @param {Figure} figureToAppend 
+     * @param {Figure} figureToAppend. It might be Figure or a Composite figure, only for the latter the circular relation is possible.  
      * @returns {Boolean} 
      */
     #isCircularRelation(figureToAppend: Figure): boolean{
         //we have a circularRelation if the figureToAppend is in the list of figures that contain this.
-        const isCircular = this.getContainers().includes(figureToAppend);
+        const isCircular = this.getContainers().includes(figureToAppend as CompositeFigure);
         return isCircular;
     }
 
@@ -155,45 +178,109 @@ abstract class CompositeFigure extends Figure{
         figureToRemove.setContainer(null);
     }
     
-    /**
-     * Returns array with contained figures BUT not their contained figures, too
-     * @returns {Figure[]} 
-     */
-    getContainedFigures(): Figure[]{
-        return [...this.containedFigures];
+
+    
+    protected setRect(rect:Rect){
+        this.#rect = rect;
+    }
+    resizeByPoints(point1: Point, point2: Point): void {
+        const newRect = Rect.createFromCornerPoints(point1, point2);
+        this.changeRect(newRect);
     }
 
-    changeRect(suggestedRect:Rect){ 
-        //TODO replace with overwritten setRect, there is no need to have two of this, 
-        // except setrect would e.g. trigger an event or so.
-        
-        const oldRect = this.getRect();
+    //#region: hittests
+    getBoundingBox(): Rect {
+        const rect = this.rect
+        return rect;
+    }
+    isEnclosingPoint(point: Point): boolean {
+        return this.getBoundingBox().isEnclosingPoint(point);
+    }
+    isEnclosingFigure(figure: Figure): boolean{
+        const  otherFigureRect = figure.getBoundingBox();
+        const  doesThisEncloseFigure = this.isEnclosingRect(otherFigureRect);
+        return doesThisEncloseFigure; 
+    }
 
-        // I guess this is here to prevent wild changes to nested objects on first rect assignment.
-        // but I wonder where that happens? 
-        // UPDATE: I tried and it does not seem to happen. Commenting out and seeing...
-        // if(!oldRect){
-        //     this.#setRect(changedRect);
-        //     return;
-        // }
+    isEnclosingRect(rect: Rect): boolean{ 
+        const doesThisEncloseRect = this.getBoundingBox().isEnclosingRect(rect);
+        return doesThisEncloseRect;
+    }
 
-        //change child rects accordingly
-        const newRect = this.sizeConstraint.deriveRect(suggestedRect);
-        const oldPosition = oldRect.getPosition();
-        const newPosition = newRect.getPosition();
-        const moveBy = oldPosition.offsetTo(newPosition);
+    moveBy(point: Point) {
+        //move bounding box
+        const oldRect= this.rect;
+        const newRect = oldRect.movedCopy(point);
         this.setRect(newRect);
-
+        
+        //move all contained
+        this.containedFigures.forEach(figure=>figure.moveBy(point));
+    }
+    
+    getRect(){
+        return this.getBoundingBox();
+    }
+    // @see {Figure.updateFromConstraints}
+    changeRect(updatedRect:Rect):void{
+        //new rect
+        this.#rect = updatedRect;
         const containedFigures = this.getContainedFigures();
-        containedFigures.forEach(figure=>figure.movePositionBy(moveBy));
-        //containedFigures.forEach(figure=>figure.updateRectFromConstraints()) //# For later when we have constraints
+        containedFigures.forEach(figure=>figure.outerFigureChange(updatedRect))
+    }
+    resizeRect(resize:{top:number,right:number,bottom:number,left:number}):void{
+        const updatedRect = this.#rect.resizedCopy(resize);
+        this.changeRect(updatedRect);
+    }
+    outerFigureChange(outerRect:Rect):void {
+        const updatedRect = this.#rectConstraint.deriveRect(outerRect);
+        this.#rect = updatedRect;
+        const containedFigures = this.getContainedFigures();
+        containedFigures.forEach(figure=>figure.outerFigureChange(updatedRect))
+    }
+    generateConstraints():void{
+        const innerRect = this.rect;
+        const outerFigure = this.getContainer()
+        const outerRect = outerFigure.rect;
+
+        const differences = Rect.getDifference(outerRect, innerRect);//▣
+
+        const sticksToRight  = differences.right< 0 && differences.right > -15;
+        const sticksToLeft   = differences.left > 0 && differences.left < innerRect.width * 0.9
+        
+        let calculateHorizontal:"right"|"left"|"width";
+        
+        // can be counterintuitive: the variable is what will be calculated! So to stick to left, but not right it needs to be "right"
+        if(sticksToLeft && sticksToRight){
+            calculateHorizontal = "width"
+        } else if (sticksToLeft && !sticksToRight ){
+            calculateHorizontal = "right"
+        } else if (!sticksToLeft && sticksToRight){
+            calculateHorizontal = "left"
+        } else if (!sticksToLeft && !sticksToRight) {
+            calculateHorizontal = "right" // needs to stick somewhere, still...
+        }
+        // For now the constraint will just simulate the usual behavior of "relative to top-left corner"
+        // Later, we can swap out the calculate... values depending on relative position, 
+        // i.e. if the rect is close to left and right of the outer rect, we calculate width,
+        // if it is close to right, but not to left, we calculate left.
+
+        const constraint = RectConstraint.fromRects({
+            "outerRect":outerRect,
+            "innerRect":innerRect,
+            "calculateHorizontal":calculateHorizontal,
+            "calculateVertical":"bottom"
+        });
+
+        this.containedFigures.forEach(figure=> figure.generateConstraints())
+
+        this.#rectConstraint = constraint;
     }
     toString(){
-       const type = this.name; 
-       const {x,y,width,height} = this.getRect();
+       const baseString = super.toString();
        const containedFigures = this.getContainedFigures();
-       const basicString = `x:${x}, y:${y}, width:${width}, height:${height},number of contained figures:${containedFigures.length}, type:${type} `
-       return basicString;
+       const compositeString  = `number of contained figures:${containedFigures.length}`
+       const compositeFigureString = baseString + compositeString;
+       return compositeFigureString;
     }
     /**
      * @returns {Array} with toJSONs of contained figures.
@@ -206,31 +293,29 @@ abstract class CompositeFigure extends Figure{
      * Returns a JSON of the rectangle of the figure.
      * @returns {JSON}
      */
-    getJsonOfRect():RectJson{
-        const {x,y,width,height} = this.getRect();
-        return {
-            "x":x,
-            "y":y,
-            "width":width,
-            "height":height
-        }
-    }
+    // getJsonOfRect():RectJson{
+    //     const {x,y,width,height} = this.getRect();
+    //     return {
+    //         "x":x,
+    //         "y":y,
+    //         "width":width,
+    //         "height":height
+    //     }
+    // }
     /**
      * JSON serialization for storage
      * @returns {JSON}
     */
-   toJSON(): FigureJson{
+   toJSON(): CompositeFigureJson{
+       const baseFigureJson = super.toJSON();
        const containedFigureJson = this.getJsonOfContainedFigures();
-        const rectJson = this.getJsonOfRect();
 
-        const baseFigureJson:FigureJson = {
-            "rect": rectJson,
+        const compositeFigureJson = {
+            ...baseFigureJson,
             "containedFigures":containedFigureJson,
-            "type": this.name 
         }
-        return baseFigureJson
+        return compositeFigureJson
     }
-
 }
 
-export {CompositeFigure, CreateCompositeFigureParam}
+export {CompositeFigure, CreateCompositeFigureParam, CompositeFigureJson}

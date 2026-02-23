@@ -148,7 +148,7 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
 
     #drawHighlightRects(ctx:CanvasRenderingContext2D):void{
         ctx.save();
-        const rect = this.#highlightElement.getRect();
+        const rect = this.#highlightElement.getBoundingBox();
         const screenRect = this.documentToScreenRect(rect);
         const {x,y,width,height} = screenRect;
         ctx.strokeStyle = "rgba(0,0,0,0.5)";

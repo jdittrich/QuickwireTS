@@ -34,7 +34,7 @@ class DeleteFigureHandle extends Handle{
     getScreenRect(){
         const drawingView = this.getDrawingView();
         const figure = this.getFigure();
-        const documentRect = figure.getRect();
+        const documentRect = figure.getBoundingBox();
         const {topRight:documentTopRight} = documentRect.getCorners();
         const screenTopRight = drawingView.documentToScreenPosition(documentTopRight);
         

@@ -205,8 +205,8 @@ class App{
         this.#drawingView.changeToolByName("selectionTool"); //TODO: changeToDefaultTool();
         
         ////if you need to access drawing/drawingView, uncomment these: 
-        // window.drawingView = this.#drawingView;
-        // window.drawing = this.#drawing;
+        globalThis.drawingView = this.#drawingView;
+        globalThis.drawing = this.#drawing;
     }
     
     //#region: setups

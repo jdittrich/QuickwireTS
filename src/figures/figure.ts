@@ -9,70 +9,39 @@ import { createAllResizeHandles } from '../handles/resizeHandle.js';
 import { DeleteFigureHandle } from '../handles/deleteFigureHandle.js';
 import { DrawingView } from '../drawingView.js';
 import { Drawable, Highlightable, InteractionAnnouncement, InteractionInfoProvider } from '../interfaces.js';
-import { SizeConstraint } from '../data/rectConstraint.js';
+import { CompositeFigure } from './compositeFigure.js';
 
-type CreateFigureParam = {
-    rect:Rect;
-    containedFigures?:Figure[]
-}
+type CreateFigureParam = {}
 
 type FigureJson = {
-    rect:RectJson;
-    containedFigures:FigureJson[];
     type: String;
 }
 
 abstract class Figure implements Drawable, Highlightable, InteractionInfoProvider{
-    #rect = null;
 
     #attributes = new FigureAttributes();
 
     #containedBy = null;
 
-    isRoot = false; //only overwritten by the Drawing subclass
-
-    // #figureElements:FigureElement[] = []
-
-    //overwrite this with another Rect constraint to e.g. have figures with fixed height.
-    sizeConstraint:SizeConstraint = SizeConstraint.createNullConstraint();
-    
-    // suggestedSize: Point = new Point(...); //accessible from the outside e.g. for the create tool. Size constraint might override suggestion. 
-
-    name:string = "baseFigure";
+    readonly name:string = "baseFigure";
     /**
      * 
      * @param {object} param 
      * @param { } param
      */
     constructor(param: CreateFigureParam){
-        const rect = param.rect 
-        this.setRect(rect);
-        //this.appendFigures(param.containedFigures ?? []);
+        
     }
     
     /**
      * returns the copies of parameters shared by all figures: 
-     * a copy of the figure rect
-     * a copy of the contained figures
      * @returns CreateFigureParam
      */
     getParameters():CreateFigureParam{
-        const rectCopy = this.getRect().copy();
-        const containedCopies = this.getContainedFigures().map(figure => figure.copy())
-        const baseParameters = {
-            rect:rectCopy,
-            containedFigures: containedCopies
-        }
-        return baseParameters;
+        return {}
     }
-    //#region figureElements
-    // addFigureElement(figureElement:FigureElement){
-    //     this.#figureElements.push(figureElement);
-    // }
 
-    //#region: drawing 
-    /** Method called from other object. Interface to all needed drawing operations */
-    
+    //#region: drawing     
     /**
      * Called from other objects, interface to drawing operations.
      * Usually not overwritten by subclasses.
@@ -82,51 +51,23 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     draw(ctx: CanvasRenderingContext2D){
         //TODO: change for composite
         if(this.getIsVisible()){
-            ctx.save()
-            this.clipFigure(ctx);
-
             ctx.save();
             this.drawFigure(ctx);
-            ctx.restore()
-
-            this.drawContainedFigures(ctx); //will be clipped, but not inherit e.g. strokes from the figure
             ctx.restore()
         }
     }
     drawHighlight(ctx: CanvasRenderingContext2D){
-        const {x,y,width,height} = this.getRect();
+        const {x,y,width,height} = this.getBoundingBox();
         ctx.save();
         ctx.strokeStyle = "#5895d6";
         ctx.strokeRect(x,y,width,height);
         ctx.restore();
     }
     
-    //clips the drawing area to the figures rect
-    //TODO: remove to composite
-    clipFigure(ctx:CanvasRenderingContext2D){
-        ctx.beginPath();
-        const {x,y,width,height} = this.getRect();
-        ctx.rect(x,y,width,height);
-        ctx.clip(); //prevent drawing outside of figure boundaries
-    }
     /**
      * @param {CanvasRenderingContext2D} ctx 
      */
     abstract drawFigure(ctx: CanvasRenderingContext2D):void
-
-    /**
-     * Not to be overwritten by subclasses.
-     * Called only internally by draw.
-     * @param {CanvasRenderingContext2D} ctx 
-     */
-    drawContainedFigures(ctx: CanvasRenderingContext2D){
-        //TODO: remove for composite Figure
-        this.containedFigures.forEach(figure => {
-            ctx.save();
-            figure.draw(ctx)
-            ctx.restore();
-        });
-    }
 
     //#region: Attributes
     /**
@@ -154,14 +95,11 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     registerAttributes(keyConstructorObject){
         this.#attributes.register(keyConstructorObject)
     };
-
-    //#region: child management
-    
     
     /**
      * @param {Figure} figure 
      */
-    setContainer(container){
+    setContainer(container:CompositeFigure){
         this.#containedBy = container;
     }
 
@@ -169,7 +107,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * Returns the figure containing this
      * @returns {Figure}
      */
-    getContainer(): Figure{
+    getContainer(): CompositeFigure{
         return this.#containedBy;
     }
 
@@ -185,268 +123,40 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * Get all figures that contain this.
      * @returns {Figure[]}
      */
-    getContainers(): Figure[]{
-        let containers:Figure[] = [];
+    getContainers(): CompositeFigure[]{
+        let containers:CompositeFigure[] = [];
 
         let currentFigure:Figure = this; 
 
         while(currentFigure.getContainer()){
-            let container:Figure = currentFigure.getContainer();
+            let container:CompositeFigure = currentFigure.getContainer();
             containers.push(container);
             currentFigure = container;
         }
-        
+
         return containers;
     }
+    // Child management null implementations for composite pattern
 
-    /**
-     * Returns the difference between the two upper left corners of this figure and the container.
-     * @returns {Point}
-     */
-    offsetFromContainer(): Point{
-        if(!this.getContainer()){
-            throw new Error("Requested offset from Container, but figure is not currently assigned to a container")
-        }
-        const container = this.getContainer();
-        const containerPosition = container.getPosition();
-        const ownPosition = this.getPosition();
-        const offset = ownPosition.offsetFrom(containerPosition);
-
-        return offset;
-    }
-
-    containedFigures = [] 
-
-    /**
-     * @see {@link detachFigure} as the inverse operation
-     * @param {Figure} figure
-     */
-    appendFigure(figureToAppend:Figure){
-        // #Constraint maybe not needed after constraints?
-        if(!this.isEnclosingFigure(figureToAppend)){
-            new Error(`can't append a figure that would be outside of container. If you append after a change of a figure e.g. drag, change the figure first, then append, not vice versa`);
-        }
-
-        if(this.#isCircularRelation(figureToAppend)){
-            new Error("can't append a figure that would create a circular graph, i.e. be contained in itself")
-        }
-        
-        if(figureToAppend.getContainer()){
-           const currentContainer = figureToAppend.getContainer();
-           currentContainer.detachFigure(figureToAppend);
-        }
-   
-        this.#addToCollection(figureToAppend);
-
-        figureToAppend.setContainer(this);
-    }
-
-    /**
-     * @param {Figure[]} figuresToAppend 
-     */
-    appendFigures(figuresToAppend: Figure[]){
-        //TODO: How to do that with constraints?
-        //first check circularity for all, preventing that a part is appended before the error
-        const circularityChecks = figuresToAppend.map(figure=>this.#isCircularRelation(figure));
-        const atLeastOneCircular = circularityChecks.includes(true);
-        if(atLeastOneCircular){
-            throw new Error("Can’t append: At least one proposed Child is its own ancestor, would create circular hierarchy.")
-        }
-
-        // const containmentChecks = figuresToAppend.map(figure=>this.isEnclosingFigure(figure));
-        // const atLeastOneOutside = containmentChecks.includes(false);
-        // if(atLeastOneOutside){
-        //     throw new Error("Can’t append: At least one proposed Child is outside the this figure")
-        // }
-
-        //but if all checks pass: 
-        figuresToAppend.forEach(figure=>this.appendFigure(figure));
-    }
-
-    /**
-     * Checks, if appending to this would create a circular relation i.e. it would be contained in itself.
-     * @param {Figure} figureToAppend 
-     * @returns {Boolean} 
-     */
-    #isCircularRelation(figureToAppend: Figure): boolean{
-        //we have a circularRelation if the figureToAppend is in the list of figures that contain this.
-        const isCircular = this.getContainers().includes(figureToAppend);
-        return isCircular;
-    }
-
-    /**
-     * encapsulate removal from collection of contained figures
-     * @see {@link CompositeFigure.#addToCollection} as inverse
-     * @param {Figure} figureToRemove 
-     */
-    #removeFromCollection(figureToRemove: Figure){
-        if(!this.#isInCollection(figureToRemove)){
-            throw new Error("figure to be removed is not contained in this figure.")
-        }
-        const updatedContainedFigures = this.containedFigures.filter(containedFigure => containedFigure !== figureToRemove);
-        this.containedFigures = updatedContainedFigures;
-    }
-
-    /**
-     * @see {@link CompositeFigure.#removeFromCollection} as inverse
-     * @param {Figure} figureToAdd 
-     */
-    #addToCollection(figureToAdd: Figure){
-        if(this.#isInCollection(figureToAdd)){
-            throw new Error("Figure to be added is already contained in this figure")
-        };
-        this.containedFigures.push(figureToAdd);
-    }
-
-    /**
-     * @param {Figure} figure 
-     * @returns {Boolean}
-     */
-    #isInCollection(figure: Figure): boolean{
-        const includesFigure = this.containedFigures.includes(figure);
-        return includesFigure;
-    }
-
-    /**
-     * remove figure from container. 
-     * Might be called directly or when by appendFigure to move to a new container
-     * @see {@link Figure.appendFigure} as the inverse
-     */
-    detachFigure(figureToRemove:Figure){
-        this.#removeFromCollection(figureToRemove)
-        figureToRemove.setContainer(null);
-    }
-    
-    /**
-     * Returns array with contained figures BUT not their contained figures, too
-     * @returns {Figure[]} 
-     */
     getContainedFigures(): Figure[]{
-        return [...this.containedFigures];
+        return [];
     }
 
-    //#region position and dimensions via rect
+    //#region position and dimensions
     /** 
      * @param {Point} point as vector to move the figure 
     */
-    movePositionBy(point: Point){
-        const oldRect =  this.getRect();
-        const newRect = oldRect.movedCopy(point);
-        this.changeRect(newRect);
-    }
-    getPosition(): Point{ 
-        const position = this.#rect.getPosition();
-        return position;
-    }
-    
-    /**
-     * Low level, only to be called internally. It won't move contained figures.
-     * @param {Rect} rect 
-     */
-    setRect(rect: Rect){
-        this.#rect = rect.copy(); 
-    }
-
-    /**
-     * Called when creating a figure, from mousedown point to mouseup point. 
-     * NOTE: Maybe it should be refactored into changeRect? Currently (1.3.24) only called on previewedFigure in "createFigureTool"
-     * 
-     * @see Rect.createFromCornerPoints
-     * @param {Point} point1 
-     * @param {Point} point2 
-     */
-    changeRectByPoints(point1: Point,point2: Point){
-        const newRect = Rect.createFromCornerPoints(point1, point2);
-        this.changeRect(newRect);
-    }
+    abstract moveBy(point: Point):void
+    abstract resizeByPoints(point1:Point, point2:Point):void //useful for reacting to mouse drags e.g. on figure creation
+    // The container figure calls this after resizing.
+    // if the container figure is resized, contained figures need to react to it somehow
+    // (the "normal" reaction is to keep distance to the upper left corner the same)
+    abstract outerFigureChange(outerRect:Rect):void 
+    abstract generateConstraints():void
 
 
-    /**
-     * For repositioning and resizing.
-     * Collaboration: Usually called by updateRectFromConstraints,
-     * but e.g. currently previewed elements can also set it directly 
-     * (since they have no outer element to be constrainted by)
-     */
-    changeRect(suggestedRect:Rect){ //:Rect
-        // set a new rect
-        const oldRect = this.getRect();
 
-        // I guess this is here to prevent wild changes to nested objects on first rect assignment.
-        // but I wonder where that happens? 
-        // UPDATE: I tried and it does not seem to happen. Commenting out and seeing...
-        // if(!oldRect){
-        //     this.#setRect(changedRect);
-        //     return;
-        // }
-
-        //change child rects accordingly
-        const newRect = this.sizeConstraint.deriveRect(suggestedRect);
-        const oldPosition = oldRect.getPosition();
-        const newPosition = newRect.getPosition();
-        const moveBy = oldPosition.offsetTo(newPosition);
-        this.setRect(newRect);
-
-        const containedFigures = this.getContainedFigures();
-        containedFigures.forEach(figure=>figure.movePositionBy(moveBy));
-        //containedFigures.forEach(figure=>figure.updateRectFromConstraints()) //# For later when we have constraints
-    }
-    
-    /**
-     *
-     * The rect that is suggested might not be set directly:
-     * Maybe constraints apply. This function takes the suggested Rect and 
-     * derives the actually used rect from it.
-     * 
-     * Included as public method to be overridden by derived classes.
-     */
-
-    /*
-    deriveFromSuggestedRect(rect:Rect):Rect{
-        // I can just use a normal rect constraint here.
-        // I need to set it in the constructor.
-        // maybe it is a pre-made constraint like horizontallyResizableConstraint or the like? 
-        // It should probably stick to top/left so it does not move around vertically
-        //
-        // the default mechanism however, is just returning the same rect.
-        // Oh, wait... or I just set the constraint for every figure, in the constructor,
-        // this method (or even suggestRect directly) just grabs that!
-    }
-    */
-
-    /**
-    * @returns {Rect} 
-    */
-    getRect(): Rect{
-       const rectCopy = this.#rect.copy(); 
-       return rectCopy;
-    }
-    //#region constraints
-    // #constraint
-    // /**
-    //  * @param {RectConstraint} constraints 
-    //  */
-    // setConstraint(constraint){
-    //     this.#constraint = constraint;
-    // }
-    // getConstraint(){
-    //     return this.#constraint;
-    // }
-
-    // /**
-    //  * Collaboration: Will be called by outer container when it is resized
-    //  */
-    // updateRectFromConstraint(){
-    //     const container = this.getContainer();
-    //     const containerRect = container.getRect();
-    //     const constraint = this.getConstraint();
-
-    //     const newRect = constraint.deriveRect(containerRect);
-    //     this.changeRect(newRect);
-    // }
-
-
-    //#region Handles factory
-    
+    //#region: Handles factory
     /**Returns a list of handles of the figure */ 
     getHandles(drawingView:DrawingView):Handle[]{
         /**
@@ -487,23 +197,21 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
         return[];
     }
 
-    //#region hit tests.
-    isEnclosingPoint(point:Point): boolean{
-        const doesContainPoint = this.#rect.isEnclosingPoint(point);
-        return doesContainPoint;
+    //#region: hit tests.
+    abstract getBoundingBox(): Rect
+    isEnclosingPoint(point:Point){
+        const rect = this.getBoundingBox()
+        const isEnclosingPoint = rect.isEnclosingPoint(point);
+        return isEnclosingPoint;
+    }
+    isEnclosedBy(compositeFigure:CompositeFigure){
+        const outerRect = compositeFigure.getBoundingBox();
+        const innerRect = this.getBoundingBox();
+        const isEnclosingInnerRect = outerRect.isEnclosingRect(innerRect);
+        return isEnclosingInnerRect;
     }
 
-    isEnclosingFigure(figure: Figure): boolean{
-        const  otherFigureRect = figure.getRect();
-        const  doesThisEncloseFigure = this.isEnclosingRect(otherFigureRect);
-        return doesThisEncloseFigure; 
-    }
-
-    isEnclosingRect(rect: Rect): boolean{ 
-        const doesThisEncloseRect = this.#rect.isEnclosingRect(rect);
-        return doesThisEncloseRect;
-    }
-    //# region visibility
+    //#region: visibility
     #isVisible = true
     
     /**
@@ -534,73 +242,37 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     /**
      * string serialization read by people, similar to python’s __str__
     */
-   toString(){
+    toString(){
        const type = this.name; 
-       const {x,y,width,height} = this.getRect();
-       const containedFigures = this.getContainedFigures();
-       const basicString = `x:${x}, y:${y}, width:${width}, height:${height},number of contained figures:${containedFigures.length}, type:${type} `
+       const basicString = `type:${type}`
        return basicString;
     }
     
-    /**
-     * @returns {Array} with toJSONs of contained figures.
-     */
-    getJsonOfContainedFigures(): Array<FigureJson>{
-        const jsonOfContainedFigures = this.containedFigures.map(figure=>figure.toJSON());
-        return jsonOfContainedFigures;
-    }
-    /**
-     * Returns a JSON of the rectangle of the figure.
-     * @returns {JSON}
-     */
-    getJsonOfRect():RectJson{
-        const {x,y,width,height} = this.getRect();
-        return {
-            "x":x,
-            "y":y,
-            "width":width,
-            "height":height
-        }
-    }
+    
     /**
      * JSON serialization for storage
      * @returns {JSON}
     */
-   toJSON(): FigureJson{
-       const containedFigureJson = this.getJsonOfContainedFigures();
-        const rectJson = this.getJsonOfRect();
-
-        const baseFigureJson:FigureJson = {
-            "rect": rectJson,
-            "containedFigures":containedFigureJson,
-            "type": this.name 
+    toJSON(): FigureJson {
+        return {
+            type:this.name
         }
-        return baseFigureJson
     }
 
+    /*
+    Why is there no
+    abstract fromJSON(FigureJson)
+    ?
 
-    /**
-     * Helper
-     * @param {Array} containedFiguresJson 
-     * @returns {Figure[]} 
-     */
-    // static createContainedFiguresFromJson(figureJson:FigureJson,nameFigureClassMapper:NameFigureClassMapper): Figure[]{
-    //     if(!figureJson.containedFigures){
-    //         return [];
-    //     }
+    Composite figures need some way to create figures of any type.
+    In the figure Factory we have a function that recursively creates figures
+    that are contained within a compositeFigure. The factory collects all types
+    of figures in one place and can switch between them. Doing it here would 
+    have needed to much trickery and indirection (at least in the ways I tried.)
 
-    //     const containedFiguresInstances = figureJson.containedFigures.map((containedFigureJson)=>{
-    //         const type = containedFigureJson.type;
-    //         const RequiredFigureClass = nameFigureClassMapper.getClass(type) //figureJson.type goes in…
-    //         const figure = RequiredFigureClass.fromJSON(containedFigureJson,nameFigureClassMapper);
-    //         return figure;
-    //     })
-    //     return containedFiguresInstances;
-    // }
-
-    // static fromJSON(JSON: FigureJson,nameFigureClassMapper: NameFigureClassMapper){
-    //     throw new SubclassShouldImplementError("MainFigure","fromJSON");
-    // }
+    @see{CompositeFigure}
+    @see{figureFactory}
+    */
 
     getInteractions(): InteractionAnnouncement {
         return {
