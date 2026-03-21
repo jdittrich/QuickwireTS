@@ -11,7 +11,7 @@ class CreateFigureTool extends Tool{
     #figureToCreate:Readonly<Figure>;
     #createdFigureOnDrag = false;
     name:string = "";
-
+    
     constructor(figureToCreate: Figure){
         super();
         this.name = "createFigure"+"_"+figureToCreate.name;

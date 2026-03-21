@@ -61,7 +61,7 @@ class LocalMouseEvent{
     }
 
     getDocumentMovement(): Point{
-        //we cant use the view’s  transform since movements are relative to each other, and thus should not consider pan.
+        //we cant use the view’s transform since movements are relative to each other, and thus should not consider pan.
         //setup conversion only for scale, not pan
         const viewScale = this.drawingView.getScale()
         const transform = new ViewTransform(0,0,viewScale);

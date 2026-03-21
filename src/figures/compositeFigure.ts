@@ -9,6 +9,7 @@ type CreateCompositeFigureParam = CreateFigureParam & {
 }
 
 type CompositeFigureJson = FigureJson & {
+    rect:RectJson,
     containedFigures:FigureJson[];   
 }
 //abstract class CompositeFigure extends Figure{
@@ -111,6 +112,7 @@ abstract class CompositeFigure extends Figure{
 
     /**
      * @param {Figure[]} figuresToAppend 
+     * @see {@link appendFigure}
      */
     appendFigures(figuresToAppend: Figure[]){
         //TODO: How to do update the con
@@ -178,8 +180,6 @@ abstract class CompositeFigure extends Figure{
         figureToRemove.setContainer(null);
     }
     
-
-    
     protected setRect(rect:Rect){
         this.#rect = rect;
     }
@@ -217,7 +217,7 @@ abstract class CompositeFigure extends Figure{
         this.containedFigures.forEach(figure=>figure.moveBy(point));
     }
     
-    getRect(){
+    getRect():Rect{
         return this.getBoundingBox();
     }
     // @see {Figure.updateFromConstraints}
@@ -227,25 +227,28 @@ abstract class CompositeFigure extends Figure{
         const containedFigures = this.getContainedFigures();
         containedFigures.forEach(figure=>figure.outerFigureChange(updatedRect))
     }
-    resizeRect(resize:{top:number,right:number,bottom:number,left:number}):void{
+    
+    resizeByRectResize(resize:{top:number,right:number,bottom:number,left:number}):void{
         const updatedRect = this.#rect.resizedCopy(resize);
         this.changeRect(updatedRect);
     }
+
     outerFigureChange(outerRect:Rect):void {
         const updatedRect = this.#rectConstraint.deriveRect(outerRect);
         this.#rect = updatedRect;
         const containedFigures = this.getContainedFigures();
         containedFigures.forEach(figure=>figure.outerFigureChange(updatedRect))
     }
+
     generateConstraints():void{
         const innerRect = this.rect;
         const outerFigure = this.getContainer()
         const outerRect = outerFigure.rect;
 
-        const differences = Rect.getDifference(outerRect, innerRect);//▣
+        const differences = Rect.getDifference(outerRect, innerRect);//▣ 
 
-        const sticksToRight  = differences.right< 0 && differences.right > -15;
-        const sticksToLeft   = differences.left > 0 && differences.left < innerRect.width * 0.9
+        const sticksToRight  = differences.right< 0 && differences.right > -20; //not more than 15 distance to the right (from outer to inner is negative!)
+        const sticksToLeft   = differences.left > 0 && differences.left < outerRect.width * 0.8 //
         
         let calculateHorizontal:"right"|"left"|"width";
         
@@ -312,6 +315,7 @@ abstract class CompositeFigure extends Figure{
 
         const compositeFigureJson = {
             ...baseFigureJson,
+            "rect":this.rect.toJSON(),
             "containedFigures":containedFigureJson,
         }
         return compositeFigureJson

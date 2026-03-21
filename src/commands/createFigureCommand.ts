@@ -24,8 +24,10 @@ class CreateFigureCommand extends Command{
     #appendTo:CompositeFigure
     //#appendFigureCommand:AppendFigureCommand
     #captureFiguresCommand:CaptureFiguresCommand | NullCommand
+    #drawingView 
     constructor(param:CreateFigureCommandParam,drawingView:DrawingView){
         super()
+        this.#drawingView = drawingView;
         const {cornerPoint1, cornerPoint2, newFigurePrototype} = param; 
         //this.#drawingView = drawingView;
         
@@ -53,11 +55,15 @@ class CreateFigureCommand extends Command{
         //this.#appendFigureCommand.do()
         this.#appendTo.appendFigure(this.#newFigure);
         this.#captureFiguresCommand.do()
+        this.#drawingView.select(this.#newFigure)
     }
     undo(): void {
         //this.#appendFigureCommand.undo();
         this.#captureFiguresCommand.undo()
         this.#appendTo.detachFigure(this.#newFigure);
+        if(this.#drawingView.getSelection() === this.#newFigure){
+            this.#drawingView.clearSelection();
+        }
         
     }
     redo(): void {

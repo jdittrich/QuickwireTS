@@ -55,7 +55,7 @@ class Handle implements Drawable, Highlightable, InteractionInfoProvider {
     /**
      * Draws the handle on the rendering context
      */ 
-    draw(ctx: CanvasRenderingContext2D){ 
+    draw(ctx: CanvasRenderingContext2D){
         const screenRect = this.getScreenRect();
         const {x,y,width,height} = screenRect;
 

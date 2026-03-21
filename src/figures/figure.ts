@@ -1,5 +1,5 @@
 import { SubclassShouldImplementError } from '../errors.js';
-import {Rect,RectJson, RectParam } from '../data/rect.js';
+import {Rect,RectJson, RectParam, RectResize } from '../data/rect.js';
 import {Point} from '../data/point.js';
 //import { RectConstraint} from '../data/rectConstraint.js';
 import {FigureAttributes} from './figureAttributes.js';
@@ -23,7 +23,11 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
 
     #containedBy = null;
 
+    /**
+     * Identify Figure type. Used e.g. in Deserialization.
+     */
     readonly name:string = "baseFigure";
+    
     /**
      * 
      * @param {object} param 
@@ -47,6 +51,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * Usually not overwritten by subclasses.
      * Subclasses overwrite drawFigure
      * @param {CanvasRenderingContext2D} ctx 
+     * @see {@link drawFigure}
      */
     draw(ctx: CanvasRenderingContext2D){
         //TODO: change for composite
@@ -56,6 +61,11 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
             ctx.restore()
         }
     }
+
+    /**
+     * Draws a rectangle based on boundingBox
+     * Used e.g. for mouse hover
+     */
     drawHighlight(ctx: CanvasRenderingContext2D){
         const {x,y,width,height} = this.getBoundingBox();
         ctx.save();
@@ -65,6 +75,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     }
     
     /**
+     * Draws the figure. Overwrite in subclasses.
+     * @see {@link draw}
      * @param {CanvasRenderingContext2D} ctx 
      */
     abstract drawFigure(ctx: CanvasRenderingContext2D):void
@@ -138,6 +150,9 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     }
     // Child management null implementations for composite pattern
 
+    /**
+     * Null implementation on Figure
+     */
     getContainedFigures(): Figure[]{
         return [];
     }
@@ -147,17 +162,34 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @param {Point} point as vector to move the figure 
     */
     abstract moveBy(point: Point):void
-    abstract resizeByPoints(point1:Point, point2:Point):void //useful for reacting to mouse drags e.g. on figure creation
-    // The container figure calls this after resizing.
-    // if the container figure is resized, contained figures need to react to it somehow
-    // (the "normal" reaction is to keep distance to the upper left corner the same)
+
+    /**
+     * Change size based on two points.
+     * Useful for reacting to mouse drags e.g. on figure creation
+     */
+    abstract resizeByPoints(point1:Point, point2:Point):void
+
+    abstract resizeByRectResize(resize:RectResize):void
+    /**
+     * The container figure calls this after resizing.
+     * if the container figure is resized, contained figures need to react to it somehow
+     * (the "normal" reaction is to keep distance to the upper left corner the same)
+     * @param outerRect 
+     */
     abstract outerFigureChange(outerRect:Rect):void 
+
+    /**
+     * To request updates the constraints i.e. how the figure reacts 
+     * to a resizing of its container.
+     */
     abstract generateConstraints():void
 
 
 
     //#region: Handles factory
-    /**Returns a list of handles of the figure */ 
+    /**
+     * Returns a list of handles of the figure 
+     */ 
     getHandles(drawingView:DrawingView):Handle[]{
         /**
          * NOTE on Architecture: 
@@ -198,12 +230,26 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     }
 
     //#region: hit tests.
+
+    /**
+     * Returns a rectangle of the area the figure takes up on screen
+     * Used e.g. for hit testing if  the mouseDown on this figure.
+     */
     abstract getBoundingBox(): Rect
+    
     isEnclosingPoint(point:Point){
         const rect = this.getBoundingBox()
         const isEnclosingPoint = rect.isEnclosingPoint(point);
         return isEnclosingPoint;
     }
+
+    /**
+     * Test if the figure is enclosed by another CompositeFigure.
+     * Only based on space, does not mean it is attached/contained by it, 
+     * for this, @see{@link getContainer}
+     * @param compositeFigure 
+     * @returns 
+     */
     isEnclosedBy(compositeFigure:CompositeFigure){
         const outerRect = compositeFigure.getBoundingBox();
         const innerRect = this.getBoundingBox();
@@ -212,6 +258,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     }
 
     //#region: visibility
+
     #isVisible = true
     
     /**
@@ -222,14 +269,18 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     }
 
     /**
+     * Visibility setting is needed when previewing changes 
+     * e.g. on drag
      * @param {Boolean} isVisible 
      */
     setIsVisible(isVisible: boolean){
-        if(typeof isVisible !== "boolean"){throw TypeError("setIsVisible parameter needs to be boolean")}
+        if(typeof isVisible !== "boolean"){throw TypeError("setIsVisible parameter needs to be boolean")}//14.2.26 why is this here?
         this.#isVisible = isVisible;
     }
 
     //#region: copy
+
+    /**Creates a complete copy of the figure */
     copy():Figure{
         const parameters = this.getParameters();
         const constructor = this.constructor as unknown as any;
@@ -274,6 +325,10 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     @see{figureFactory}
     */
 
+    /**
+     * Defines possible interactions, e.g. for changing the mouse cursor appropriately
+     * Managing the cursor is usually done by @see{@link App}
+     */
     getInteractions(): InteractionAnnouncement {
         return {
             clickable: false,

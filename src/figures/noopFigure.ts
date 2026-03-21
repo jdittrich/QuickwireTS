@@ -1,5 +1,5 @@
 import { Figure } from "./figure.js";
-import { Rect } from "../data/rect.js";
+import { Rect, RectResize } from "../data/rect.js";
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
 import { Point } from "../data/point.js";
@@ -22,9 +22,8 @@ class NoOpFigure extends Figure{
     getBoundingBox(): Rect {
         return new Rect({x:0,y:0,width:0,height:0})
     }
-    resizeByPoints(point1: Point, point2: Point):void{
-
-    }
+    resizeByPoints(point1: Point, point2: Point):void{}
+    resizeByRectResize(resize: RectResize): void {}
 }
 
 export {NoOpFigure}

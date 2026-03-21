@@ -17,7 +17,7 @@ type RectFigureJson = CompositeFigureJson;
  * @param {number} param.height
  */
 class RectFigure extends CompositeFigure{
-    name = "RectFigure";
+    readonly name = "RectFigure";
 
     constructor(param:CreateRectFigureParam){
         super(param);
