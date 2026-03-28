@@ -13,6 +13,7 @@ import { Tool } from "./tools/tool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
 
 import { FigureBar, FormElementFactory } from "./app_formElements.js";
+import { CreateFigureMultiTool } from "./tools/createFigureMultiTool.js";
 /**
  * App is responsible for bridging between 
  * DOM events elements and native application events and drawing.
@@ -110,12 +111,19 @@ class App{
                 name:"selectionTool",
                 isDefault:true
             },
+            // {  
+            //     tool: new CreateFigureTool(RectFigure.createWithDefaultParameters()),
+            //     label: "Rect",
+            //     description: "create a rectangle figure",
+            //     icon:"rectTool",
+            //     name:"rectTool"
+            // },
             {  
-                tool: new CreateFigureTool(RectFigure.createWithDefaultParameters()),
-                label: "Rect",
-                description: "create a rectangle figure",
-                icon:"rectTool",
-                name:"rectTool"
+                tool: new CreateFigureMultiTool(),
+                label: "Multi",
+                description: "creates horizontal lines or rectangles",
+                icon:"multiTool",
+                name:"multiTool"
             },
             // {
             //     tool: new CreateFigureTool(ButtonFigure.createWithDefaultParameters()),
