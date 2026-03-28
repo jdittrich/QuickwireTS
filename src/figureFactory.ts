@@ -24,7 +24,7 @@ function jsonToFigure(figureJson):Figure{
     switch (type){
         case "Drawing":
             return new Drawing({
-                rect: Rect.fromJSON(figureJson.rect);
+                rect: Rect.fromJSON(figureJson.rect),
                 containedFigures:parsedChildren
             })
             break;
