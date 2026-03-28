@@ -1,7 +1,9 @@
 import { Rect } from "./data/rect.js";
-import { Figure, CreateFigureParam} from "./figures/figure.js";
-import { RectFigure, CreateRectFigureParam } from "./figures/rectFigure.js";
-import { Drawing, CreateDrawingParam } from "./drawing.js";
+import { Figure} from "./figures/figure.js";
+import { RectFigure } from "./figures/rectFigure.js";
+import { Drawing } from "./drawing.js";
+import { HorizontalLineFigure } from "./figures/lineFigure.js";
+import { HorizontalLine } from "./data/horizontalLine.js";
 //adding a new figure: Import the figure, its parameter type as well as any value object types the object needs.
 
 
@@ -11,30 +13,30 @@ import { Drawing, CreateDrawingParam } from "./drawing.js";
  * create figures of any type (probably by calling this function anyway)
  */
 function jsonToFigure(figureJson):Figure{
-    const type = figureJson;
+    const type = figureJson.type;
 
-    let parsedRect:Rect;
     let parsedChildren:Figure[];
-    
-    if(figureJson.rect){
-        parsedRect = Rect.fromJSON(figureJson.rect);
-    }
+
     if(figureJson.containedFigures){
         parsedChildren = figureJson.containedFigures.map(jsonToFigure);
     }
     
-
     switch (type){
         case "Drawing":
             return new Drawing({
-                rect: parsedRect,
+                rect: Rect.fromJSON(figureJson.rect);
                 containedFigures:parsedChildren
             })
             break;
         case "RectFigure":
             return new RectFigure({
-                rect:parsedRect,
+                rect: Rect.fromJSON(figureJson.rect),
                 containedFigures:parsedChildren
+            });
+            break;
+        case "HorizontalLineFigure":
+            return new HorizontalLineFigure({
+                horizontalLine: HorizontalLine.fromJSON(figureJson.horizontalLine)
             });
             break;
         default: 

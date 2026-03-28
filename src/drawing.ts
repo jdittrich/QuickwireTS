@@ -11,7 +11,7 @@ type CreateDrawingParam = CreateCompositeFigureParam;
 type DrawingJson = CompositeFigureJson;
 
 class Drawing extends CompositeFigure{
-    #name = "Drawing";
+    name = "Drawing";
     isRoot = true;
 
     constructor(param:CreateDrawingParam){
