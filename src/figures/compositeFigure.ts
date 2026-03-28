@@ -245,23 +245,23 @@ abstract class CompositeFigure extends Figure{
         const outerFigure = this.getContainer()
         const outerRect = outerFigure.rect;
 
-        const differences = Rect.getDifference(outerRect, innerRect);//▣ 
+        // const differences = Rect.getDifference(outerRect, innerRect);//▣ 
 
-        const sticksToRight  = differences.right< 0 && differences.right > -20; //not more than 15 distance to the right (from outer to inner is negative!)
-        const sticksToLeft   = differences.left > 0 && differences.left < outerRect.width * 0.8 //
+        // const sticksToRight  = differences.right< 0 && differences.right > -20; //not more than 15 distance to the right (from outer to inner is negative!)
+        // const sticksToLeft   = differences.left > 0 && differences.left < outerRect.width * 0.8 //
         
-        let calculateHorizontal:"right"|"left"|"width";
+        // let calculateHorizontal:"right"|"left"|"width";
         
-        // can be counterintuitive: the variable is what will be calculated! So to stick to left, but not right it needs to be "right"
-        if(sticksToLeft && sticksToRight){
-            calculateHorizontal = "width"
-        } else if (sticksToLeft && !sticksToRight ){
-            calculateHorizontal = "right"
-        } else if (!sticksToLeft && sticksToRight){
-            calculateHorizontal = "left"
-        } else if (!sticksToLeft && !sticksToRight) {
-            calculateHorizontal = "right" // needs to stick somewhere, still...
-        }
+        // // can be counterintuitive: the variable is what will be calculated! So to stick to left, but not right it needs to be "right"
+        // if(sticksToLeft && sticksToRight){
+        //     calculateHorizontal = "width"
+        // } else if (sticksToLeft && !sticksToRight ){
+        //     calculateHorizontal = "right"
+        // } else if (!sticksToLeft && sticksToRight){
+        //     calculateHorizontal = "left"
+        // } else if (!sticksToLeft && !sticksToRight) {
+        //     calculateHorizontal = "right" // needs to stick somewhere, still...
+        // }
         // For now the constraint will just simulate the usual behavior of "relative to top-left corner"
         // Later, we can swap out the calculate... values depending on relative position, 
         // i.e. if the rect is close to left and right of the outer rect, we calculate width,
@@ -270,8 +270,8 @@ abstract class CompositeFigure extends Figure{
         const constraint = RectConstraint.fromRects({
             "outerRect":outerRect,
             "innerRect":innerRect,
-            "calculateHorizontal":calculateHorizontal,
-            "calculateVertical":"bottom"
+            // "calculateHorizontal":calculateHorizontal,
+            // "calculateVertical":"bottom"
         });
 
         this.containedFigures.forEach(figure=> figure.generateConstraints())
