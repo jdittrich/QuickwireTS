@@ -57,9 +57,9 @@ interface ViewTransformerConversions {
  * defines possible interactions/features
  */
 interface InteractionAnnouncement {
-    cursor?:     string,
+    cursor?:     string, //needs corresponding CSS class
     helpText?:   string,
-    clickable?:  boolean
+    clickable?:  boolean 
     draggable?:  boolean
     cursorDown?: string
 }

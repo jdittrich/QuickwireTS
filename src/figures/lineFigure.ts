@@ -4,6 +4,7 @@ import { FixedConstraint, ProportionalConstraint, RectConstraint, Segment } from
 
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
+import {createLeftRightResizeHandles} from "../handles/resizeHandle.js"
 import {Figure, FigureJson, CreateFigureParam} from "./figure.js"
 import { HorizontalLine, HorizontalLineJson } from "../data/horizontalLine.js";
 
@@ -119,7 +120,11 @@ class HorizontalLineFigure extends Figure{
     }
     getHandles(drawingView: DrawingView): Handle[] {
         const baseHandles = super.getHandles(drawingView)
-        const handles = baseHandles;
+        const leftRightHandles = createLeftRightResizeHandles(this,drawingView)
+        const handles = [
+            ...baseHandles,
+            ...leftRightHandles
+        ]
         return handles;
     }
     getParameters():CreateHorizontalLineFigureParam{

@@ -1,3 +1,8 @@
+/*
+cursors are changed according to the activated tool 
+or through objects that implement InteractionAnnouncement.cursor
+*/
+
 .cursor_copy        {cursor:copy;}
 .cursor_pointer     {cursor:pointer;}
 .cursor_grab        {cursor:grab;}
@@ -23,8 +28,7 @@
 
 .cursor_nw-resize{cursor:nw-resize;}
 
-.cursor_e-resize{cursor:e-resize;}
-.cursor_w-resize{cursor:w-resize;}
+.cursor_ew-resize{cursor:ew-resize;}
 
 .cursor_undefined{}
 

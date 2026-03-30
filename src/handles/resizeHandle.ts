@@ -14,7 +14,7 @@ import { Command } from "../commands/command.js";
 
 abstract class ResizeFigureHandle extends Handle {
     size=16;
-    constructor(figure:CompositeFigure,drawingView:DrawingView){
+    constructor(figure:Figure,drawingView:DrawingView){
         super(figure,drawingView);
     }
     getScreenRect(){
@@ -94,15 +94,14 @@ abstract class ResizeFigureHandle extends Handle {
 
 
 class ResizeLeftHandle extends ResizeFigureHandle{
-    constructor(figure:CompositeFigure,drawingView:DrawingView){
+    constructor(figure:Figure,drawingView:DrawingView){
         super(figure,drawingView);
     }
     getLocation():Point{
         const figure = this.getFigure();
         const rect = figure.getBoundingBox();
         const center = rect.getCenter()
-        const left = rect.left;
-        const location = new Point({x:center.x,y:left});
+        const location = new Point({x:rect.left,y:center.y});
         return location
     }
     createRectResize(dragDocumentMovement:Point):RectResize{
@@ -111,6 +110,35 @@ class ResizeLeftHandle extends ResizeFigureHandle{
             right: 0,
             bottom: 0,
             left: dragDocumentMovement.x,
+        }
+        return rectResize;
+    }
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "ew-resize"
+        };
+    }
+}
+
+class ResizeRightHandle extends ResizeFigureHandle{
+    constructor(figure:Figure,drawingView:DrawingView){
+        super(figure,drawingView);
+    }
+    getLocation():Point{
+        const figure = this.getFigure();
+        const rect = figure.getBoundingBox();
+        const center = rect.getCenter()
+        const location = new Point({x:rect.right,y:center.y});
+        return location
+    }
+    createRectResize(dragDocumentMovement:Point):RectResize{
+        const rectResize = {
+            top:0,
+            right: dragDocumentMovement.x,
+            bottom: 0,
+            left: 0,
         }
         return rectResize;
     }
@@ -351,10 +379,11 @@ function createAllResizeHandles(figure: CompositeFigure,drawingView: DrawingView
     return [brHandle,trHandle,blHandle,tlHandle];
 }
 
-// function createLeftRightResizeHandles(figure:CompositeFigure,drawingView:DrawingView): ResizeHandle[]{
-//     const rHandle = new ResizeRightHandle(figure,drawingView);
-//     const lHandle = new ResizeLeftHandle(figure,drawingView);
-//     return [rHandle,lHandle];
-// }
 
-export {ResizeCompositeFigureHandle as ResizeHandle, createAllResizeHandles}
+function createLeftRightResizeHandles(figure:Figure,drawingView:DrawingView): ResizeFigureHandle[]{
+    const rHandle = new ResizeRightHandle(figure,drawingView);
+    const lHandle = new ResizeLeftHandle(figure,drawingView);
+    return [rHandle,lHandle];
+}
+
+export {ResizeCompositeFigureHandle as ResizeHandle, createAllResizeHandles, createLeftRightResizeHandles}
