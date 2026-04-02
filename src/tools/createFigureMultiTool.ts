@@ -79,6 +79,11 @@ class CreateFigureMultiTool extends Tool{
             console.log(error)
         } 
     }
+    onWheel(event:LocalMouseEvent,wheelDelta:number){
+        const changeFactor = (wheelDelta>0) ? 0.8:1.2; 
+        const screenPosition = event.getScreenPosition()
+        event.drawingView.scaleBy(changeFactor,screenPosition);
+    }
 }
 
 export {CreateFigureMultiTool}
