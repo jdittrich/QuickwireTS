@@ -8,7 +8,7 @@ import { DrawingView } from '../drawingView.js';
  *  
  * - provides every tool with a setView method, which a drawingView.changeTool calls when changing tools
  * - provides empty methods to handle events. Implement in extending class to enable your tool to react to these events.
- *   No need to implement all; if you do not implement them the ones from AbtractTool are called, which do nothing.
+ *   No need to implement all; if you do not implement them the ones from AbstractTool are called, which do nothing.
  * 
  * NOTES: 
  * - The general event order is: mousemove → mousedown → dragStart → mousemove → drag → dragEnd → mouseup → mousemove
