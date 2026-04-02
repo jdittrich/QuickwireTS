@@ -190,11 +190,10 @@ class PanTracker extends Tool{
     onDrag(event:LocalDragEvent){
         const dragMovement = event.getScreenMovement();
         event.drawingView.panBy(dragMovement);
-
     }
     onMouseup(mouseEvent: LocalMouseEvent): void {
         if(this.#hasMoved===false){
-            this.getDrawingView().clearSelection();
+            mouseEvent.getDrawingView().clearSelection();
         }
     }
 
@@ -251,7 +250,7 @@ class DragTracker extends Tool{
             "moveBy":moveBy,
             "figure":figure
         }
-        //TODO: Needs to get a proper "move" command, rather than a changeRect
+
         const moveCommand = new MoveFigureCommand(changeRectParam,drawingView);
         
         drawingView.do(moveCommand);
