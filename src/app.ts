@@ -3,14 +3,10 @@ import { DrawingView, DrawingViewParam} from "./drawingView.js";
 import { Point } from "./data/point.js";
 import { Rect } from "./data/rect.js";
 
-import { RectFigure } from "./figures/rectFigure.js";
-
 import { SelectionTool } from "./tools/selectionTool.js";
-import { CreateFigureTool } from "./tools/createFigureTool.js";
-import { Toolbar, ToolButton, Actionbar, ActionBarActionButton, ActionbarLoadFileAsJsonButton, ToolData} from "./app_toolbar.js";
-import { InteractionAnnouncementEvent, interactionAnnouncementName, selectionEventName, ToolChangeEvent, toolChangeEventName} from "./events.js";
-import { Tool } from "./tools/tool.js";
-import { InteractionAnnouncement } from "./interfaces.js";
+import { Toolbar, Actionbar, ToolData} from "./app_toolbar.js";
+import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEvent, toolChangeEventName} from "./events.js";
+
 
 import { FigureBar, FormElementFactory } from "./app_formElements.js";
 import { CreateFigureMultiTool } from "./tools/createFigureMultiTool.js";
@@ -75,16 +71,19 @@ class App{
         this.#canvas.width = 800;
         this.#canvas.height = 600;
         this.#canvasContainer.append(this.#canvas);
+        this.#canvas.style.background = "lightgray";
         
+        // the following can be changed to pointerEvents. 
+        // this works already, but some other things would need to be adjusted 
+        // for mobile use to work.
         this.#canvas.addEventListener("mousedown", this.#onMousedown.bind(this));
         this.#canvas.addEventListener("mouseup"  , this.#onMouseup.bind(this));
         this.#canvas.addEventListener("mousemove", this.#onMousemove.bind(this));
+
         this.#canvas.addEventListener("wheel",     this.#onWheel.bind(this));
         this.#canvas.addEventListener("keydown",   this.#keydown.bind(this));
         this.#canvas.addEventListener("keyup",     this.#keyup.bind(this));
         
-        this.#canvas.style.background = "lightgray";
-
         // enable redraw of canvas when it changes size
         window.addEventListener("resize",this.#setCanvasSize.bind(this));
 
@@ -111,13 +110,6 @@ class App{
                 name:"selectionTool",
                 isDefault:true
             },
-            // {  
-            //     tool: new CreateFigureTool(RectFigure.createWithDefaultParameters()),
-            //     label: "Rect",
-            //     description: "create a rectangle figure",
-            //     icon:"rectTool",
-            //     name:"rectTool"
-            // },
             {  
                 tool: new CreateFigureMultiTool(),
                 label: "Multi",
@@ -125,69 +117,6 @@ class App{
                 icon:"multiTool",
                 name:"multiTool"
             },
-            // {
-            //     tool: new CreateFigureTool(ButtonFigure.createWithDefaultParameters()),
-            //     label: "Button",
-            //     description:"create a button figure",
-            //     icon: "buttonTool",
-            //     name: "buttonTool"
-            // },
-            // {
-            //     tool: new CreateFigureTool(RectangleFigure.createWithDefaultParameters()),
-            //     label: "Rectangle",
-            //     description:"create a rectangle (new!) figure",
-            //     icon: "rectangleTool",
-            //     name: "rectangleTool"
-            // },
-            // {
-            //     tool: new CreateFigureTool(CheckboxFigure.createWithDefaultParameters()),
-            //     label:"Checkbox figure",
-            //     description: "Checkbox with label",
-            //     icon: "checkboxTool",
-            //     name: "checkboxTool"
-            // },
-            // {
-            //     tool: new CreateFigureTool(RadiobuttonFigure.createWithDefaultParameters()),
-            //     label:"Radiobutton figure",
-            //     description: "Radiobutton with label",
-            //     icon: "radiobuttonTool",
-            //     name:"radiobuttonTool"
-            // },
-            // {
-            //     tool: new CreateFigureTool(ParagraphFigure.createWithDefaultParameters()),
-            //     label:"placeholder text figure",
-            //     description: "placeholder Text",
-            //     icon: "paragraphTool",
-            //     name:"paragraphTool"
-            // },
-            // {
-            //     tool: new CreateFigureTool(HorizontalTabsFigure.createWithDefaultParameters()),
-            //     label:"horizontal tabs figure",
-            //     description:"horizontal tabs",
-            //     icon: "tabsTool",
-            //     name:"tabsTool"
-            // },
-            // {
-            //     tool: new CreateFigureTool(LabelFigure.createWithDefaultParameters()),
-            //     label:"label figure",
-            //     description:"label figure",
-            //     icon:"labelTool",
-            //     name:"labelTool"
-            // },
-            // {
-            //     tool: new CreateFigureTool(DropdownFigure.createWithDefaultParameters()),
-            //     label:"dropdown figure",
-            //     description:"dropdown figure",
-            //     icon:"dropdownTool",
-            //     name:"dropdownTool"
-            // },
-            // {
-            //     tool: new CreateFigureTool(HeadlineFigure.createWithDefaultParameters()),
-            //     label:"headline figure",
-            //     description: "headline figure",
-            //     icon: "headlineTool",
-            //     name:"headlineTool"
-            // }
         ]
         
         
@@ -195,14 +124,14 @@ class App{
         this.#drawingView = drawingView;
 
         const toolbar = this.#setupToolbar(toolsData); //selection tool and creating different figures
-        const actionbar = this.#setupActionBar(); //action bar has download/upload, undo/redo
-        const figureBar = this.#setupFigureBar();
+        const actionbar = this.#setupActionBar();      //action bar has download/upload, undo/redo
+        const figureBar = this.#setupFigureBar();      //figure bar has controls for the selected figure type
         
         this.#horizontalBarContainer.append(toolbar.domElement);
         this.#horizontalBarContainer.append(actionbar.domElement);
         this.#appContainer.append(figureBar.domElement);
         
-        this.#setCanvasSize();
+        this.#setCanvasSize(); //ensures pixel alignment on higher resolution displays.
 
         // get notified when the tool changes
         this.#drawingView.addEventListener(toolChangeEventName,this.#handleToolChange.bind(this));
@@ -293,6 +222,7 @@ class App{
         return actionbar;
     }
 
+    //figure bar can display contextual controls for the currently selected figure
     #setupFigureBar(){
         const figureBar = new FigureBar(document,this.#drawingView, this.#canvasContainer);
         return figureBar;
@@ -308,7 +238,7 @@ class App{
     #setCanvasSize(){
         const canvas = this.#canvas;
         const canvasContainer = this.#canvasContainer;
-        const canvasRect              = canvasContainer.getBoundingClientRect();
+        const canvasRect        = canvasContainer.getBoundingClientRect();
         canvas.width            = canvasRect.width  * devicePixelRatio;
         canvas.height           = canvasRect.height * devicePixelRatio;
         canvas.style.width      = canvasRect.width+"px";
@@ -389,7 +319,6 @@ class App{
         return dpiCorrectedEventPosition;
     }
 
-    //WIP Request a cursor
     // encapsulates setting a cursor based on its name
     #cursor = "default";
     #previousCursorClass:string = null;
