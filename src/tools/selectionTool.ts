@@ -52,12 +52,6 @@ class SelectionTool extends Tool{
         const drawing = drawingView.drawing;
         const figureEnclosingPoint = drawing.findFigureEnclosingPoint(documentPoint);
         
-        // if(!figureEnclosingPoint){ //outside of root figure
-        //     return {
-        //         type:"nothing",
-        //         value:new NoOpFigure()
-        //     }
-        // }
         if(!figureEnclosingPoint){
             return new NoOpFigure();
         }
@@ -72,67 +66,31 @@ class SelectionTool extends Tool{
         } else {
             throw new Error("one of the above conditions should always be the case");
         }
-        // if(handleUnderPoint){
-        //     //if we are over a handle,  keep selection, change handle
-        //     return {
-        //         type:"handle",
-        //         value:handleUnderPoint
-        //     }
-        // } else if (figureEnclosingPoint === drawing){ //clicked document, but no movable figure
-        //     return {
-        //         type:"drawing",
-        //         value:drawing
-        //     }
-        // } else if(figureEnclosingPoint){ //at least one figure under mouse
-        //     return {
-        //         type:"figure",
-        //         value:figureEnclosingPoint
-        //     }
-        // } else {
-        //     throw new Error("one of the above conditions should always be the case");
-            
-        // }
     }
-    onMousedown(event: LocalMouseEvent){
-        const cursorPosition = event.getDocumentPosition();
-        const elementUnderPoint = this.#whatIsUnderPoint(cursorPosition);
+    #elementUnderPointToTracker(elementUnderPoint:Handle|Drawing|Figure):Tool{
         const drawingView = this.getDrawingView();
         const drawing = drawingView.drawing;
-
+        
         if(elementUnderPoint instanceof Handle){
             const handleTracker = new HandleTracker(elementUnderPoint);
-            this.setChildTool(handleTracker);
+            return handleTracker
         } else if (elementUnderPoint === drawing){
             const panTracker = new PanTracker();
-            this.setChildTool(panTracker);
+            return panTracker;
         } else if (elementUnderPoint instanceof Figure){
-            event.drawingView.select(elementUnderPoint);
+            drawingView.select(elementUnderPoint);
             const dragTracker = new DragTracker(elementUnderPoint);
-            this.setChildTool(dragTracker);
+            return dragTracker
         } else {
             this.setChildTool(new NoOpTool());
             throw new Error("one of the above conditions should always be the case");
         }
-        // const type = elementUnderPoint.type;
-        // const value = elementUnderPoint.value;
-        // if(type === "handle"){
-        //     //if we are over a handle,  keep selection, change handle
-        //     const handleTracker = new HandleTracker(value);
-        //     this.setChildTool(handleTracker);
-        // } else if (type === "drawing"){ //clicked document, but no movable figure
-        //     const panTracker = new PanTracker();
-        //     this.setChildTool(panTracker);
-        // } else if(type === "figure"){ //at least one figure under mouse
-        //     //if we are over a figure, select and go do drag mode
-        //     const figureUnderCursor = elementUnderPoint.value;
-        //     event.drawingView.select(figureUnderCursor);
-        //     const dragTracker = new DragTracker(figureUnderCursor);
-        //     this.setChildTool(dragTracker);
-        // } else {
-        //     this.setChildTool(new NoOpTool());
-        //     throw new Error("one of the above conditions should always be the case");
-        // }
-
+    }
+    onMousedown(event: LocalMouseEvent){
+        const cursorPosition = event.getDocumentPosition();
+        const elementUnderPoint = this.#whatIsUnderPoint(cursorPosition);
+        const childTool = this.#elementUnderPointToTracker(elementUnderPoint);
+        this.setChildTool(childTool);
         this.#childTool.onMousedown(event);
     }
     onHover(event:LocalMouseEvent){
