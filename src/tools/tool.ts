@@ -1,6 +1,7 @@
 import {LocalDragEvent, LocalMouseEvent} from '../events.js'
 import {Point} from '../data/point.js';
 import { DrawingView } from '../drawingView.js';
+import { NoOpTool } from './noopTool.js';
 
 
 /**
@@ -18,10 +19,9 @@ import { DrawingView } from '../drawingView.js';
  */
 abstract class Tool{
     #drawingView = null;
+    #childTool:Tool = null;
     name = null;
-    constructor(){
-       
-    }
+    
     /**
      * Internal use only. Counterpart to toolManager’s change tool; this way, 
      * Every tool "knows" the view, so it can use it to change to another tool
@@ -34,6 +34,7 @@ abstract class Tool{
     getDrawingView():DrawingView{
         return this.#drawingView;
     }
+    //adding setChildTool here would reduce duplication, but messes with the noop tool.
     onKeydown(){}
     onKeyup(){}
     onMousedown(mouseEvent: LocalMouseEvent){}
@@ -44,7 +45,7 @@ abstract class Tool{
     onDragstart(mouseEvent: LocalDragEvent){}
     onDragend(mouseEvent: LocalDragEvent){}
     onWheel(mouseEvent:LocalMouseEvent,wheelDelta:number){}
-    dragExit(){} //to be called after dragend
+    dragExit(){ } //to be called after dragend
     //what if there would be a cleanup method, called before a tool is switched out?
 }
 

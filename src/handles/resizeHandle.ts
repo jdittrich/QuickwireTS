@@ -78,8 +78,8 @@ abstract class ResizeFigureHandle extends Handle {
         dragEvent.getDrawingView().do(resizeCommand);
     }
     dragExit(){
-        const drawingView = this.getDrawingView();
-        drawingView.endPreview();
+        // const drawingView = this.getDrawingView();
+        // drawingView.endPreview();
     }
     getDefaultInteractions(){
         return { 

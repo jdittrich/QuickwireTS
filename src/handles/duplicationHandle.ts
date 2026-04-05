@@ -85,10 +85,7 @@ class DuplicationHandle extends Handle{
         const duplicateFigureCommand = new DuplicateFigureCommand({figure:this.getFigure(), moveFigureBy:dragMovement},drawingView)
         drawingView.do(duplicateFigureCommand);
     }
-    dragExit(){
-        const drawingView = this.getDrawingView();
-        drawingView.endPreview();
-    }
+
     getInteractions(){
         return { 
             cursor: "grab",

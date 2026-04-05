@@ -42,8 +42,8 @@ class CreateFigureTool extends Tool{
             }
         }
         //cleanup
-        const drawingView = this.getDrawingView();
-        drawingView.endPreview();
+        // const drawingView = this.getDrawingView();
+        // drawingView.endPreview();
         //drawingView.changeToDefaultTool();
     }
     onDragend(event: LocalDragEvent){

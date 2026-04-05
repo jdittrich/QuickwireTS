@@ -149,9 +149,15 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     #drawHighlightRects(ctx:CanvasRenderingContext2D):void{
         ctx.save();
         const rect = this.#highlightElement.getBoundingBox();
-        const screenRect = this.documentToScreenRect(rect);
+        const largerRect = rect.resizedCopy({
+            top:-1,
+            right:1,
+            bottom:1,
+            left:-1
+        })
+        const screenRect = this.documentToScreenRect(largerRect);
         const {x,y,width,height} = screenRect;
-        ctx.strokeStyle = "rgba(0,0,0,0.5)";
+        ctx.strokeStyle = "rgba(0, 21, 255, 0.5)";
         ctx.strokeRect(x,y,width,height);
         ctx.restore();
     }
@@ -163,8 +169,8 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     }
 
     //#region: previews
-    #previewedElement:Figure|null; //the element which change should be previewed
-    #previewElement = new NoOpFigure(); //the copy used to preview the changes
+    #previewedElement:Figure = new NoOpFigure(); //the element which change should be previewed
+    #previewElement:Figure = new NoOpFigure(); //the copy used to preview the changes
     #isPreviewing = false;
 
     #drawPreviews(ctx:CanvasRenderingContext2D){ 
@@ -186,16 +192,20 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
      * @see {getPreviewedFigure}
      */
     startPreviewOf(figureToPreview: Figure, hideOriginal:Boolean = true):void{ //puts figure in preview
+        console.log("started Preview of", figureToPreview)
+        if(this.#isPreviewing){
+            this.endPreview()//cleanup
+        }
         this.#previewedElement = figureToPreview;
         this.#previewElement = figureToPreview.copy(); //like: copy(this.stringClassMapper)
         this.#isPreviewing = true;
         if(hideOriginal){
             figureToPreview.setIsVisible(false);
         }
-        
     }
 
     endPreview():void{
+        console.log("ended Preview of", this.#previewedElement)
         this.#previewElement = new NoOpFigure();
         this.#previewedElement.setIsVisible(true);
         this.#previewedElement = new NoOpFigure(); 
@@ -466,6 +476,8 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     #onDragend(dragEvent:LocalDragEvent){
         this.#lockedDragTool.onDragend(dragEvent);
         this.#lockedDragTool.dragExit();
+        this.endPreview()
+        this.updateDrawing();
     }
 
     onKeyDown(){}

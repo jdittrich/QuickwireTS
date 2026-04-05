@@ -8,6 +8,7 @@ import { NoOpTool } from './noopTool.js';
 import { Point } from '../data/point.js';
 import { Drawing } from '../drawing.js';
 import { NoOpFigure } from '../figures/noopFigure.js';
+import { findElementUnderPoint } from './trackerSelectionHelper.js';
 import { InteractionInfoProvider } from '../interfaces.js';
 
 // type HandleFound = {
@@ -46,27 +47,6 @@ class SelectionTool extends Tool{
     getChildTool():Tool{
         return this.#childTool;
     }
-    #whatIsUnderPoint(documentPoint:Point):ElementUnderCursor{
-        //are we over a figure?
-        const drawingView = this.getDrawingView();
-        const drawing = drawingView.drawing;
-        const figureEnclosingPoint = drawing.findFigureEnclosingPoint(documentPoint);
-        
-        if(!figureEnclosingPoint){
-            return new NoOpFigure();
-        }
-        //get handles from an already selected figure.
-        const handles = drawingView.getHandles();
-        const handleUnderPoint = handles.find(handle=> handle.isEnclosingPoint(documentPoint));
-        
-        if(handleUnderPoint){
-            return handleUnderPoint
-        } else if (figureEnclosingPoint){
-            return figureEnclosingPoint
-        } else {
-            throw new Error("one of the above conditions should always be the case");
-        }
-    }
     #elementUnderPointToTracker(elementUnderPoint:Handle|Drawing|Figure):Tool{
         const drawingView = this.getDrawingView();
         const drawing = drawingView.drawing;
@@ -87,16 +67,18 @@ class SelectionTool extends Tool{
         }
     }
     onMousedown(event: LocalMouseEvent){
-        const cursorPosition = event.getDocumentPosition();
-        const elementUnderPoint = this.#whatIsUnderPoint(cursorPosition);
+        const point = event.getDocumentPosition();
+        const drawingView = event.getDrawingView()
+        const elementUnderPoint = findElementUnderPoint(point,drawingView)
+
         const childTool = this.#elementUnderPointToTracker(elementUnderPoint);
         this.setChildTool(childTool);
         this.#childTool.onMousedown(event);
     }
     onHover(event:LocalMouseEvent){
         const drawingView = this.getDrawingView();
-        const cursorPosition = event.getDocumentPosition();
-        const elementUnderPoint = this.#whatIsUnderPoint(cursorPosition);
+        const point = event.getDocumentPosition();
+        const elementUnderPoint = findElementUnderPoint(point,drawingView)
 
         drawingView.startHighlightOf(elementUnderPoint);
         drawingView.announceInteractionsOf(elementUnderPoint);
@@ -122,9 +104,6 @@ class SelectionTool extends Tool{
         const changeFactor = (wheelDelta>0) ? 0.8:1.2; 
         const screenPosition = event.getScreenPosition()
         event.drawingView.scaleBy(changeFactor,screenPosition);
-    }
-    dragExit(){
-        this.#childTool.dragExit();
     }
     onKeydown(): void {
         console.log("selection tool key pressed");
@@ -213,11 +192,6 @@ class DragTracker extends Tool{
         
         drawingView.do(moveCommand);
     }
-    dragExit(){
-        const drawingView = this.getDrawingView();
-        drawingView.endPreview()
-        drawingView.updateDrawing();
-    }
 }
 
 class HandleTracker extends Tool{
@@ -244,9 +218,6 @@ class HandleTracker extends Tool{
         this.#handleToDrag.onDragend(dragEvent);
         this.getDrawingView().updateDrawing();
     }
-    dragExit(): void {
-        this.#handleToDrag.dragExit();
-    }
 }
 
-export {SelectionTool}
+export {SelectionTool, PanTracker, HandleTracker,DragTracker}

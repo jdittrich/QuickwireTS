@@ -91,7 +91,6 @@ class Handle implements Drawable, Highlightable, InteractionInfoProvider {
     onDragend(dragEvent:LocalDragEvent):void{ }
     onMousedown(mouseEvent:LocalMouseEvent):void{ }
     onMouseup(mouseEvent:LocalMouseEvent):void{ }
-    dragExit():void{}
 
     //== announcer
     getInteractions(){
