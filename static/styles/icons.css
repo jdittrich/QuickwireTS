@@ -1,6 +1,7 @@
 .selectionTool_icon  { background-image:url(../tools/SelectionToolIcon.svg);  }
-.rectTool_icon  { background-image:url(../tools/rectToolIcon.svg);       }
+.rectTool_icon   { background-image:url(../tools/rectToolIcon.svg);       }
 .multiTool_icon  { background-image:url(../tools/multiToolIcon.svg);       }
+.paintTool_icon  { background-image:url(../tools/paintToolIcon.svg);       }
 /* .buttonTool_icon     { background-image: url(../tools/buttonToolIIcon.svg);   }
 .radiobuttonTool_icon{ background-image:url(../tools/RadioButtonToolIcon.svg);} 
 .checkboxTool_icon   { background-image:url(../tools/CheckboxToolIcon.svg);   }
