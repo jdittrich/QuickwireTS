@@ -18,9 +18,9 @@ import { NoOpTool } from './noopTool.js';
  * @see {DrawingView} which calls the tool methods and shows how the calling of the functions is implemented.
  */
 abstract class Tool{
-    #drawingView = null;
+    #drawingView:DrawingView = null;
     #childTool:Tool = null;
-    name = null;
+    name:string = null;
     
     /**
      * Internal use only. Counterpart to toolManager’s change tool; this way, 

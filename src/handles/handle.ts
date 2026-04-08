@@ -7,7 +7,7 @@ import { LocalDragEvent, LocalMouseEvent } from "../events.js";
 import { Drawable, Highlightable, InteractionInfoProvider, InteractionAnnouncement } from "../interfaces.js";
 
 
-class Handle implements Drawable, Highlightable, InteractionInfoProvider {
+abstract class Handle implements Drawable, Highlightable, InteractionInfoProvider {
     #figure:Figure
     #drawingView:DrawingView
 

@@ -1,6 +1,7 @@
 import { Handle } from "./handle.js";
 import { RemoveFigureAndContainedCommand } from "../commands/removeFigureCommand.js";
 import { Rect } from "../data/rect.js";
+import { Point } from "../data/point.js";
 
 class DeleteFigureHandle extends Handle{
     #figureToDelete = null;
@@ -31,12 +32,16 @@ class DeleteFigureHandle extends Handle{
         ctx.lineTo(x+width-dist,y+dist) //upper right
         ctx.stroke();        
     }
-    getScreenRect(){
-        const drawingView = this.getDrawingView();
+    getLocation(): Point {
         const figure = this.getFigure();
         const documentRect = figure.getBoundingBox();
-        const {topRight:documentTopRight} = documentRect.getCorners();
-        const screenTopRight = drawingView.documentToScreenPosition(documentTopRight);
+        const {topRight} = documentRect.getCorners();
+        return topRight
+    }
+    getScreenRect(){
+        const documentPosition = this.getLocation();
+        const drawingView = this.getDrawingView();
+        const screenTopRight = drawingView.documentToScreenPosition(documentPosition);
         
         const screenRect = new Rect({
             x: screenTopRight.x + (2*this.#size),
