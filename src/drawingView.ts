@@ -169,35 +169,35 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     }
 
     //#region: previews
-    #previewedElement:Figure = new NoOpFigure(); //the element which change should be previewed
-    #previewElement:Figure = new NoOpFigure(); //the copy used to preview the changes
+    #previewedFigure:Figure = new NoOpFigure(); //the element which change should be previewed
+    #previewFigure:Figure = new NoOpFigure(); //the copy used to preview the changes
     #isPreviewing = false;
 
     #drawPreviews(ctx:CanvasRenderingContext2D){ 
         const transArr = this.#transform.toArray();
         ctx.setTransform(transArr[0],transArr[1],transArr[2],transArr[3],transArr[4], transArr[5] );
-        this.#previewElement.draw(ctx);
+        this.#previewFigure.draw(ctx);
         ctx.resetTransform();
     }
 
     /**
      * @see {startPreviewOf}
      */
-    getPreviewedFigure(): Figure{
-        return this.#previewElement;
+    getPreviewFigure(): Figure{
+        return this.#previewFigure;
     }
     /**
      * Use to start a preview of a figure which then can be accessed via getPreviewedFigure
      * Makes the previewed Figure invisible so it looks as if you interact with the original figure
-     * @see {getPreviewedFigure}
+     * @see {getPreviewFigure}
      */
     startPreviewOf(figureToPreview: Figure, hideOriginal:Boolean = true):void{ //puts figure in preview
         console.log("started Preview of", figureToPreview)
         if(this.#isPreviewing){
             this.endPreview()//cleanup
         }
-        this.#previewedElement = figureToPreview;
-        this.#previewElement = figureToPreview.copy(); //like: copy(this.stringClassMapper)
+        this.#previewedFigure = figureToPreview;
+        this.#previewFigure = figureToPreview.copy(); //like: copy(this.stringClassMapper)
         this.#isPreviewing = true;
         if(hideOriginal){
             figureToPreview.setIsVisible(false);
@@ -205,10 +205,10 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     }
 
     endPreview():void{
-        console.log("ended Preview of", this.#previewedElement)
-        this.#previewElement = new NoOpFigure();
-        this.#previewedElement.setIsVisible(true);
-        this.#previewedElement = new NoOpFigure(); 
+        console.log("ended Preview of", this.#previewedFigure)
+        this.#previewFigure = new NoOpFigure();
+        this.#previewedFigure.setIsVisible(true);
+        this.#previewedFigure = new NoOpFigure(); 
         this.#isPreviewing = false;
     }
 
@@ -541,7 +541,7 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         let handles:Handle[] = [];
         const selectedFigure = this.#selection.getSelection();
         if(this.#isPreviewing){
-            handles = this.#previewElement.getHandles(this);
+            handles = this.#previewFigure.getHandles(this);
         } else if (selectedFigure){
             handles = selectedFigure.getHandles(this);
         }   

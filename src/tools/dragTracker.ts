@@ -22,7 +22,7 @@ class DragTracker extends Tool{
     onDrag(event:LocalDragEvent){
         //move figure
         const drawingView = this.getDrawingView();
-        const dragPreviewFigure = drawingView.getPreviewedFigure();
+        const dragPreviewFigure = drawingView.getPreviewFigure();
         const movement = event.getDocumentMovement();
         dragPreviewFigure.moveBy(movement);
 

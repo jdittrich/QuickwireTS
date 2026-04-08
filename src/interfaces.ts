@@ -18,7 +18,7 @@ interface ToolManager {
 }
 
 interface Previewer {
-    getPreviewedFigure():Figure;
+    getPreviewFigure():Figure;
     startPreviewOf(Figure):void;
     endPreview():void;
 }

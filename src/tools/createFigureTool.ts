@@ -9,7 +9,7 @@ import { LocalDragEvent, LocalMouseEvent } from "../events.js";
 //Adds an element to the drawing
 class CreateFigureTool extends Tool{
     #figureToCreate:Readonly<Figure>;
-    #createdFigureOnDrag = false;
+    //#createdFigureOnDrag = false;
     name:string = "";
     
     constructor(figureToCreate: Figure){
@@ -26,32 +26,20 @@ class CreateFigureTool extends Tool{
     onDrag(event: LocalDragEvent){ 
         const currentMousePoint = event.getDocumentPosition(); 
         const documentMouseDownPoint = event.getMousedownDocumentPosition();
-        const previewedFigure = event.drawingView.getPreviewedFigure();
+        const previewedFigure = event.drawingView.getPreviewFigure();
         previewedFigure.resizeByPoints(documentMouseDownPoint,currentMousePoint);
         event.drawingView.updateDrawing();
     }
     onMouseup(mouseEvent: LocalMouseEvent): void {
-        const documentMousePoint = mouseEvent.getDocumentPosition(); 
-        if(!this.#createdFigureOnDrag){
-            try {
-                // this should be a temporary fix, createFigure Command should figure out how large the figure should be, 
-                // the mousemovement should be just a suggestion
-                this.#createNewFigure(documentMousePoint, documentMousePoint.add(new Point({x:300,y:16})));
-            } catch(error){
-                console.log(error)
-            }
-        }
-        //cleanup
-        // const drawingView = this.getDrawingView();
-        // drawingView.endPreview();
-        //drawingView.changeToDefaultTool();
+        const drawingView = this.getDrawingView();
+        drawingView.changeToDefaultTool();
     }
     onDragend(event: LocalDragEvent){
         const documentMousePoint = event.getDocumentPosition(); 
         const documentMouseDownPoint = event.getMousedownDocumentPosition();
         try {
             this.#createNewFigure(documentMouseDownPoint, documentMousePoint);
-            this.#createdFigureOnDrag = true;
+            //this.#createdFigureOnDrag = true;
         } catch(error){
             console.log(error)
         } 
@@ -68,7 +56,6 @@ class CreateFigureTool extends Tool{
             drawingView
         );
         drawingView.do(createFigureCommand);
-       
     }
 }
 
