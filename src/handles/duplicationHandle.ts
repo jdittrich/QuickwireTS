@@ -67,7 +67,7 @@ class DuplicationHandle extends Handle{
     }
     onDrag(dragEvent:LocalDragEvent){
         const drawingView = this.getDrawingView();
-        const previewFigure = drawingView.getPreviewedFigure();
+        const previewFigure = drawingView.getPreviewFigure();
         const dragMovement = dragEvent.getDocumentMovement();
         previewFigure.moveBy(dragMovement);
     }
