@@ -19,6 +19,10 @@ class HandleTracker extends Tool{
         this.#handleToDrag.onMousedown(event);
         this.getDrawingView().updateDrawing();
     }
+    onMouseup(mouseEvent: LocalMouseEvent): void {
+        this.#handleToDrag.onMouseup(mouseEvent);
+        this.getDrawingView().updateDrawing();
+    }
     onDragstart(dragEvent:LocalDragEvent){
         this.#handleToDrag.onDragstart(dragEvent)
         this.getDrawingView().updateDrawing();
