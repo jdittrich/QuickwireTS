@@ -61,7 +61,7 @@ abstract class ResizeFigureHandle extends Handle {
     onDrag(dragEvent:LocalDragEvent){
         const drawingView = this.getDrawingView();
         //const dragMovement = dragEvent.getDocumentDragMovement();
-        const previewFigure = drawingView.getPreviewedFigure();
+        const previewFigure = drawingView.getPreviewFigure();
         const movementIncrement = dragEvent.getDocumentMovement();
         const dragRectResize = this.createRectResize(movementIncrement);
         previewFigure.resizeByRectResize(dragRectResize);
