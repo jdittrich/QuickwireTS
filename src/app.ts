@@ -10,6 +10,8 @@ import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEv
 
 import { FigureBar, FormElementFactory } from "./app_formElements.js";
 import { CreateFigureMultiTool } from "./tools/createFigureMultiTool.js";
+import { CreateFigureTool } from "./tools/createFigureTool.js";
+import { PaintFigure } from "./figures/paintFigure.js"
 /**
  * App is responsible for bridging between 
  * DOM events elements and native application events and drawing.
@@ -117,6 +119,13 @@ class App{
                 icon:"multiTool",
                 name:"multiTool"
             },
+            {
+                tool: new CreateFigureTool(PaintFigure.createWithDefaultParameters()),
+                label:"create paint Figure",
+                description:"creates a figure you can paint on",
+                icon:"paintTool",
+                name:"createPaintFigure",
+            }
         ]
         
         
