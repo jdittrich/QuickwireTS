@@ -10,6 +10,7 @@ import { DeleteFigureHandle } from '../handles/deleteFigureHandle.js';
 import { DrawingView } from '../drawingView.js';
 import { Drawable, Highlightable, InteractionAnnouncement, InteractionInfoProvider } from '../interfaces.js';
 import { CompositeFigure } from './compositeFigure.js';
+import { FormElement, FormElementFactory } from '../app_formElements.js';
 
 type CreateFigureParam = {}
 
@@ -21,7 +22,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
 
     #attributes = new FigureAttributes();
 
-    #containedBy = null;
+    #containedBy:CompositeFigure = null;
 
     /**
      * Identify Figure type. Used e.g. in Deserialization.
@@ -54,7 +55,6 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @see {@link drawFigure}
      */
     draw(ctx: CanvasRenderingContext2D){
-        //TODO: change for composite
         if(this.getIsVisible()){
             ctx.save();
             this.drawFigure(ctx);
@@ -104,10 +104,11 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * Usually called in constructor.
      * @param {object}   {"Keyname":"ConstructorName"}
      */
-    registerAttributes(keyConstructorObject){
+    registerAttributes(keyConstructorObject:any){
         this.#attributes.register(keyConstructorObject)
     };
     
+    //#region: Composite interface
     /**
      * @param {Figure} figure 
      */
@@ -181,6 +182,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
     /**
      * To request updates the constraints i.e. how the figure reacts 
      * to a resizing of its container.
+     * Constraints are usually generated based on a constraint type, 
+     * the figures rectangle and the rectangle of the container.
      */
     abstract generateConstraints():void
 
@@ -225,7 +228,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * but FormElements are handled by App and attached to a toolbar
      * to change figure properties.
      */
-    getFormElements(drawingView, formElementFactory){
+    getFormElements(drawingView:DrawingView, formElementFactory:FormElementFactory):FormElement[]{
         return[];
     }
 
