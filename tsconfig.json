@@ -1,6 +1,7 @@
 {
   "include": ["./src/**/*"],
   "compilerOptions": {
+    "rootDir": "./src",
     /* Visit https://aka.ms/tsconfig to read more about this file */
     "outDir": "./built",
     "target": "ES2024",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
@@ -13,6 +14,8 @@
     "skipLibCheck": true,                                /* Skip type checking all .d.ts files. */
     "noImplicitThis": true,
     "noImplicitReturns": true,
+    "strictPropertyInitialization": false, //??
+    "strictNullChecks":false
     //"lib":["ES2023.Array"]
   }
 }
