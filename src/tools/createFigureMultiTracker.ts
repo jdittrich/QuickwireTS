@@ -7,6 +7,7 @@ import { HorizontalLineFigure} from "../figures/lineFigure.js"
 import { RectFigure } from "../figures/rectFigure.js";
 import { Tool } from "./tool.js";
 import { CreateFigureCommand } from "../commands/createFigureCommand.js";
+import { CompositeFigure } from "../figures/compositeFigure.js";
 
 class CreateFigureMultiTracker extends Tool{
     /**

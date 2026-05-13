@@ -10,7 +10,7 @@ type LabelListJson = {
 type Labels = string[];
 
 class LabelList{
-    #labels = [];
+    #labels:Labels = [];
     
     //creation
     constructor(param:LabelListParam){
@@ -40,7 +40,7 @@ class LabelList{
         const labelList =  new LabelList({labels:labelArray});
         return labelList;
     }
-    static fromJSON(labelListJson):LabelList{
+    static fromJSON(labelListJson:any):LabelList{
         const labelList = new LabelList({
             labels:labelListJson.labels
         });

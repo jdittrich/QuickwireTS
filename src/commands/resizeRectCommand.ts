@@ -11,10 +11,13 @@ type CreateResizeFigureParam={
     rectResize:RectResize;
 }
 
-type CreateResizeCompositeFigureParam={
+type CreateResizeCompositeFigureParam= CreateResizeFigureParam & {
     figure:CompositeFigure;
-    rectResize:RectResize;
+    affectInner:boolean;
 }
+
+
+
 
 // class ResizeCompositeFigureCommand extends Command{
 //     name = "resizeCompositeFigure"
@@ -69,29 +72,49 @@ class ResizeFigureCommand extends Command{
             left: this.resize.left*-1
         }
         this.figure.resizeByRectResize(inverseResize);
+        this.figure.generateConstraints();
     }
     redo(){
         this.do();
     }   
 }
 
-class ResizeCompositeFigureCommand extends ResizeFigureCommand{
+class ResizeCompositeFigureCommand extends Command{
     protected captureCommand:CaptureFiguresCommand
     name = "ResizeCompositeFigureCommand"
+    figure: CompositeFigure
+    resize:RectResize
+    affectInner:boolean
+    scaleImage:boolean
+
     constructor(param:CreateResizeCompositeFigureParam, drawingView:DrawingView){
-        super(param, drawingView);
+        super()
+        const {figure,rectResize} = param;
+        this.figure = figure;
+        this.resize = rectResize;
+        this.affectInner = param.affectInner;
         this.captureCommand = new CaptureFiguresCommand({figure:param.figure}, drawingView)
     }
     do(){
-        super.do()
+        this.figure.resizeByRectResize(this.resize, this.affectInner);
+        this.figure.generateConstraints()
+        
         this.captureCommand.do();
     }
     undo(){
-        super.undo()
+        const inverseResize:RectResize = {
+            top:this.resize.top*-1,
+            right:this.resize.right*-1,
+            bottom:this.resize.bottom*-1,
+            left: this.resize.left*-1
+        }
+        this.figure.resizeByRectResize(inverseResize, this.affectInner);
+        this.figure.generateConstraints();
+
         this.captureCommand.undo()
     }
     redo(){
-        super.redo();
+        this.do();
         this.captureCommand.redo()
     }
 

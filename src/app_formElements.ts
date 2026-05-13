@@ -66,7 +66,7 @@ class FormElementCheckbox extends FormElement{
 class FigureBar{
     domElement:HTMLElement = null;
     #drawingView:DrawingView;
-    #formElementFactory = null; 
+    #formElementFactory:FormElementFactory = null; 
     #canvasContainer:HTMLElement = null; 
     #currentFormElements:FormElement[] = []
     constructor(document:HTMLDocument,drawingView:DrawingView, canvasContainer:HTMLElement){
@@ -136,6 +136,7 @@ class FormElementFactory{
         const checkbox = new FormElementCheckbox(label,startValue,changeHandler, this.#doc);
         return checkbox;
     }
+    
 }
 
 export {FormElementFactory, FigureBar,FormElementCheckbox, FormElement}

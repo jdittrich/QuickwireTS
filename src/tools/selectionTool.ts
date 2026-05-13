@@ -8,6 +8,7 @@ import { findElementUnderPoint } from './trackerSelectionHelper.js';
 import { PanTracker } from './panTracker.js';
 import { HandleTracker } from './handleTracker.js'
 import { DragTracker } from './dragTracker.js';
+import { Point } from '../data/point.js';
 
 
 /** Default tool that allows selection, dragging of figures and dragging handles */
@@ -25,16 +26,19 @@ class SelectionTool extends Tool{
     getChildTool():Tool{
         return this.#childTool;
     }
-    #elementUnderPointToTracker(elementUnderPoint:Handle|Drawing|Figure):Tool{
-        const drawingView = this.getDrawingView();
+    #getTracker(event:LocalMouseEvent){
+        const drawingView = this.getDrawingView()
+        const documentPoint = event.getDocumentPosition();
+
+        const elementUnderPoint = findElementUnderPoint(documentPoint,drawingView)
+
         const drawing = drawingView.drawing;
-        
-        if(elementUnderPoint instanceof Handle){
-            const handleTracker = new HandleTracker(elementUnderPoint);
-            return handleTracker
-        } else if (elementUnderPoint === drawing){
+        if(elementUnderPoint === drawing || event.middleButton){
             const panTracker = new PanTracker();
             return panTracker;
+        } else if (elementUnderPoint instanceof Handle){
+            const handleTracker = new HandleTracker(elementUnderPoint);
+            return handleTracker
         } else if (elementUnderPoint instanceof Figure){
             drawingView.select(elementUnderPoint);
             const dragTracker = new DragTracker(elementUnderPoint);
@@ -42,14 +46,10 @@ class SelectionTool extends Tool{
         } else {
             this.setChildTool(new NoOpTool());
             throw new Error("one of the above conditions should always be the case");
-        }
+        }      
     }
     onMousedown(event: LocalMouseEvent){
-        const point = event.getDocumentPosition();
-        const drawingView = event.getDrawingView()
-        const elementUnderPoint = findElementUnderPoint(point,drawingView)
-
-        const childTool = this.#elementUnderPointToTracker(elementUnderPoint);
+        const childTool = this.#getTracker(event);
         this.setChildTool(childTool);
         this.#childTool.onMousedown(event);
     }

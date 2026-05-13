@@ -9,7 +9,7 @@ import { Handle } from "../handles/handle.js";
  */
 class HandleTracker extends Tool{
     name = "handleTracker"
-    #handleToDrag = null
+    #handleToDrag:Handle = null
 
     constructor(handle:Handle){
         super();

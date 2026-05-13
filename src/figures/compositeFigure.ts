@@ -1,24 +1,28 @@
 import { Figure, CreateFigureParam, FigureJson } from "./figure.js";
-import { Rect,RectJson } from "../data/rect.js";
+import { Rect,RectJson, RectResize } from "../data/rect.js";
 import { Point } from "../data/point.js";
 import { RectConstraint } from "../data/constraint.js";
+import { createAllResizeHandles, createCropHandles } from '../handles/resizeHandle.js';
+import { DrawingView } from "../drawingView.js";
+import { InteractionAnnouncement } from "../interfaces.js";
 
 type CreateCompositeFigureParam = CreateFigureParam & {
-    rect:Rect,
-    containedFigures?:Figure[]
+    rect:Rect;
+    containedFigures?:Figure[];
 }
 
 type CompositeFigureJson = FigureJson & {
-    rect:RectJson,
+    rect:RectJson;
     containedFigures:FigureJson[];   
 }
-//abstract class CompositeFigure extends Figure{
-abstract class CompositeFigure extends Figure{
+
+class CompositeFigure extends Figure {
     readonly name:string = "CompositeFigure";
     containedFigures:Figure[] = []
     #rect:Rect;
     #rectConstraint: RectConstraint
     isRoot = false; //only overwritten by the Drawing subclass
+
 
     constructor(param:CreateCompositeFigureParam){
         super(param);
@@ -32,6 +36,7 @@ abstract class CompositeFigure extends Figure{
 
     //#region: drawing
     draw(ctx: CanvasRenderingContext2D){
+        const {x,y,width,height} = this.getRect()
         if(this.getIsVisible()){
             ctx.save();
                 this.clipFigure(ctx);
@@ -43,6 +48,11 @@ abstract class CompositeFigure extends Figure{
                 this.drawContainedFigures(ctx); //will be clipped, but not inherit e.g. strokes from the figure
             ctx.restore();
         }
+    }
+
+    drawFigure(ctx: CanvasRenderingContext2D): void {
+        const {width,height,x,y} = this.getBoundingBox();
+        ctx.strokeRect(x,y,width,height);
     }
     
     clipFigure(ctx:CanvasRenderingContext2D){
@@ -67,9 +77,10 @@ abstract class CompositeFigure extends Figure{
 
     getParameters(): CreateCompositeFigureParam {
         const containedCopies = this.getContainedFigures().map(figure => figure.copy())
+       
         const compositeFigureParameters = {
             "rect":this.rect,
-            "containedFigures":containedCopies
+            "containedFigures":containedCopies,
         }
         return compositeFigureParameters;
     }
@@ -185,7 +196,7 @@ abstract class CompositeFigure extends Figure{
     }
     resizeByPoints(point1: Point, point2: Point): void {
         const newRect = Rect.createFromCornerPoints(point1, point2);
-        this.changeRect(newRect);
+        this.changeRect(newRect, true);
     }
 
     //#region: hittests
@@ -207,12 +218,14 @@ abstract class CompositeFigure extends Figure{
         return doesThisEncloseRect;
     }
 
+    //#region:Resizes/moves
+
     moveBy(point: Point) {
         //move bounding box
         const oldRect= this.rect;
         const newRect = oldRect.movedCopy(point);
         this.setRect(newRect);
-        
+
         //move all contained
         this.containedFigures.forEach(figure=>figure.moveBy(point));
     }
@@ -221,18 +234,21 @@ abstract class CompositeFigure extends Figure{
         return this.getBoundingBox();
     }
     // @see {Figure.updateFromConstraints}
-    changeRect(updatedRect:Rect):void{
-        //new rect
+    changeRect(updatedRect:Rect, affectInner:boolean):void{
+
+        const oldRect = this.#rect;
         this.#rect = updatedRect;
-        const containedFigures = this.getContainedFigures();
-        containedFigures.forEach(figure=>figure.outerFigureChange(updatedRect))
+        if(affectInner){
+            //move figures
+            const containedFigures = this.getContainedFigures();
+            containedFigures.forEach(figure=>figure.outerFigureChange(updatedRect))
+        }        
     }
     
-    resizeByRectResize(resize:{top:number,right:number,bottom:number,left:number}):void{
+    resizeByRectResize(resize:RectResize,affectInner:boolean=true):void{
         const updatedRect = this.#rect.resizedCopy(resize);
-        this.changeRect(updatedRect);
+        this.changeRect(updatedRect,affectInner);
     }
-
     outerFigureChange(outerRect:Rect):void {
         const updatedRect = this.#rectConstraint.deriveRect(outerRect);
         this.#rect = updatedRect;
@@ -240,44 +256,49 @@ abstract class CompositeFigure extends Figure{
         containedFigures.forEach(figure=>figure.outerFigureChange(updatedRect))
     }
 
+    
+    getConstraintType():"ProportionalConstraint"|"MidpointProportionalConstraint"{
+        return "ProportionalConstraint"
+    }
+
+    //currently called manually, maybe it should directly be called by resizes.
     generateConstraints():void{
+        if(!this.getContainer()){
+            throw Error("figure currently not attached, can't generate constraints")
+        }
+        
         const innerRect = this.rect;
         const outerFigure = this.getContainer()
         const outerRect = outerFigure.rect;
 
-        // const differences = Rect.getDifference(outerRect, innerRect);//▣ 
-
-        // const sticksToRight  = differences.right< 0 && differences.right > -20; //not more than 15 distance to the right (from outer to inner is negative!)
-        // const sticksToLeft   = differences.left > 0 && differences.left < outerRect.width * 0.8 //
-        
-        // let calculateHorizontal:"right"|"left"|"width";
-        
-        // // can be counterintuitive: the variable is what will be calculated! So to stick to left, but not right it needs to be "right"
-        // if(sticksToLeft && sticksToRight){
-        //     calculateHorizontal = "width"
-        // } else if (sticksToLeft && !sticksToRight ){
-        //     calculateHorizontal = "right"
-        // } else if (!sticksToLeft && sticksToRight){
-        //     calculateHorizontal = "left"
-        // } else if (!sticksToLeft && !sticksToRight) {
-        //     calculateHorizontal = "right" // needs to stick somewhere, still...
-        // }
-        // For now the constraint will just simulate the usual behavior of "relative to top-left corner"
-        // Later, we can swap out the calculate... values depending on relative position, 
-        // i.e. if the rect is close to left and right of the outer rect, we calculate width,
-        // if it is close to right, but not to left, we calculate left.
-
         const constraint = RectConstraint.fromRects({
             "outerRect":outerRect,
             "innerRect":innerRect,
-            // "calculateHorizontal":calculateHorizontal,
-            // "calculateVertical":"bottom"
+            "type":this.getConstraintType()
         });
 
         this.containedFigures.forEach(figure=> figure.generateConstraints())
 
         this.#rectConstraint = constraint;
     }
+    //#region: handles
+    getHandles(drawingView:DrawingView){
+        const basicHandles = super.getHandles(drawingView);
+        const resizeHandles = createAllResizeHandles(this,drawingView);
+        const cropHandles = createCropHandles(this,drawingView)
+        return [...basicHandles, ...resizeHandles, ...cropHandles];
+    }
+    //#region: interactions
+    getInteractions(): InteractionAnnouncement {
+        return {
+            clickable: false,
+            draggable: true,
+            paintable: false,
+            cursor:"default",
+            helpText: "a figure"
+        }
+    }
+    //#region: (de)serialization
     toString(){
        const baseString = super.toString();
        const containedFigures = this.getContainedFigures();
@@ -306,7 +327,7 @@ abstract class CompositeFigure extends Figure{
     //     }
     // }
     /**
-     * JSON serialization for storage
+     * JSON serialization for storage 
      * @returns {JSON}
     */
    toJSON(): CompositeFigureJson{
@@ -319,6 +340,17 @@ abstract class CompositeFigure extends Figure{
             "containedFigures":containedFigureJson,
         }
         return compositeFigureJson
+    }
+    static createWithDefaultParameters():CompositeFigure{
+        const compositeFigure = new CompositeFigure({
+            rect: new Rect({
+                "x":0,
+                "y":0,
+                "width":100,
+                "height":50
+            })
+        });
+        return compositeFigure;
     }
 }
 

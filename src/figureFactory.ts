@@ -12,7 +12,7 @@ import { HorizontalLine } from "./data/horizontalLine.js";
  * but for composite figures it would have needed to be able to recursively
  * create figures of any type (probably by calling this function anyway)
  */
-function jsonToFigure(figureJson):Figure{
+function jsonToFigure(figureJson:any):Figure{
     const type = figureJson.type;
 
     let parsedChildren:Figure[];
@@ -31,7 +31,8 @@ function jsonToFigure(figureJson):Figure{
         case "RectFigure":
             return new RectFigure({
                 rect: Rect.fromJSON(figureJson.rect),
-                containedFigures:parsedChildren
+                containedFigures:parsedChildren,
+                //canvas:
             });
             break;
         case "HorizontalLineFigure":

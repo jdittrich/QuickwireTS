@@ -1,17 +1,20 @@
 import { Drawing } from "./drawing.js";
-import { DrawingView, DrawingViewParam} from "./drawingView.js";
+import { DrawingView, DrawingViewParam, MouseEventData} from "./drawingView.js";
 import { Point } from "./data/point.js";
 import { Rect } from "./data/rect.js";
 
 import { SelectionTool } from "./tools/selectionTool.js";
 import { Toolbar, Actionbar, ToolData} from "./app_toolbar.js";
-import { InteractionAnnouncementEvent, interactionAnnouncementName, ToolChangeEvent, toolChangeEventName} from "./events.js";
+import { InteractionAnnouncementEvent, interactionAnnouncementName, LocalMouseEvent, ToolChangeEvent, toolChangeEventName} from "./events.js";
 
 
 import { FigureBar, FormElementFactory } from "./app_formElements.js";
 import { CreateFigureMultiTool } from "./tools/createFigureMultiTool.js";
-import { CreateFigureTool } from "./tools/createFigureTool.js";
-import { PaintFigure } from "./figures/paintFigure.js"
+import { PaintTool } from "./tools/paintTool.js"
+
+
+
+
 /**
  * App is responsible for bridging between 
  * DOM events elements and native application events and drawing.
@@ -120,11 +123,11 @@ class App{
                 name:"multiTool"
             },
             {
-                tool: new CreateFigureTool(PaintFigure.createWithDefaultParameters()),
-                label:"create paint Figure",
-                description:"creates a figure you can paint on",
+                tool: new PaintTool(),
+                label:"paint",
+                description:"paint on rect figures",
                 icon:"paintTool",
-                name:"createPaintFigure",
+                name:"paintTool",
             }
         ]
         
@@ -143,16 +146,18 @@ class App{
         this.#setCanvasSize(); //ensures pixel alignment on higher resolution displays.
 
         // get notified when the tool changes
-        this.#drawingView.addEventListener(toolChangeEventName,this.#handleToolChange.bind(this));
+        // specified types because dealing with custom events seems to cause problems. 
+        this.#drawingView.addEventListener(toolChangeEventName,this.#handleToolChange.bind(this) as  EventListenerOrEventListenerObject);
         
         // get notified when the cursor is over a figure or handle
-        this.#drawingView.addEventListener(interactionAnnouncementName, this.#handleInteractionAnnouncement.bind(this));
+        this.#drawingView.addEventListener(interactionAnnouncementName, this.#handleInteractionAnnouncement.bind(this) as EventListenerOrEventListenerObject);
         
         this.#drawingView.changeToolByName("selectionTool"); //TODO: changeToDefaultTool();
         
         ////if you need to access drawing/drawingView, uncomment these: 
-        globalThis.drawingView = this.#drawingView;
-        globalThis.drawing = this.#drawing;
+
+        // globalThis.drawingView = this.#drawingView;
+        // globalThis.drawing = this.#drawing;
     }
     
     //#region: setups
@@ -172,7 +177,7 @@ class App{
             }),
             "drawing": this.#drawing,
             "textDirection": textDirection,
-            "requestEditorText":function(message,prefillText){
+            "requestEditorText":function(message:string,prefillText:string){
                 const editedText = window.prompt(message,prefillText);
                 if(editedText===null){
                     throw new Error("Editing cancelled");
@@ -259,28 +264,74 @@ class App{
         this.#drawingView.updateDrawing();
     }
 
-    //#region: input event handler
+    //#region: input events
+    #createKeyState(e:MouseEvent):{"ctrlKey":boolean,"altKey":boolean,"shiftKey":boolean}{
+        const eventKeys = {
+            "ctrlKey":  e.ctrlKey,
+            "altKey":   e.altKey,
+            "shiftKey": e.shiftKey,
+        }
+        return eventKeys;
+    }
+    
+    #eventButtonsToBoolean(buttonsNumber:number,buttonName:"left"|"middle"|"right"):boolean{
+        const buttonNames = ["left", "right", "middle"];
+        const isPressed = !!(buttonsNumber & (1 << buttonNames.indexOf(buttonName)))
+        return isPressed
+    }
+    #createButtonState(e:MouseEvent):{"leftButton":boolean,"middleButton":boolean, "rightButton":boolean}{
+        const eventButtons = {
+            "leftButton":  this.#eventButtonsToBoolean(e.buttons,"left"),
+            "middleButton":this.#eventButtonsToBoolean(e.buttons,"middle"),
+            "rightButton": this.#eventButtonsToBoolean(e.buttons,"right")
+        }
+        return eventButtons
+    }
     #onMousedown(e:MouseEvent){
-        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
-        this.#drawingView.onMousedown(eventPosRelativeToCanvas);
+        const eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
+        //TODO: Hand over modifiers to event processing
+        const keyPresses = this.#createKeyState(e);
+        const mouseButtons = this.#createButtonState(e);
+        this.#drawingView.onMousedown({
+            ...mouseButtons,
+            ...keyPresses,
+            screenPosition:eventPosRelativeToCanvas
+        });
     }
     #onMouseup(e:MouseEvent){
-        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
-        this.#drawingView.onMouseup(eventPosRelativeToCanvas);
+        const eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
+        const keyPresses = this.#createKeyState(e);
+        const mouseButtons = this.#createButtonState(e);
+        this.#drawingView.onMouseup({
+            ...mouseButtons,
+            ...keyPresses,
+            screenPosition:eventPosRelativeToCanvas
+        });
     }
     #onMousemove(e:MouseEvent){
-        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
-        this.#drawingView.onMousemove(eventPosRelativeToCanvas);
+        const eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
+        const keyPresses = this.#createKeyState(e);
+        const mouseButtons = this.#createButtonState(e);
+        this.#drawingView.onMousemove({
+            ...mouseButtons,
+            ...keyPresses,
+            screenPosition:eventPosRelativeToCanvas
+        });
     }
     
     #onWheel(e:WheelEvent){
        e.preventDefault();//otherwise everything browser-zooms in addition the the view zoom!
 
        let eventPosRelativeToCanvas = this.#getLocalEventPosition(e);
-        
        //Normalize to +1 (wheel moved to user), -1 (wheel moved from user) 
-       let wheelDelta = e.deltaY > 0 ? 1:-1;   
-       this.#drawingView.onWheel(eventPosRelativeToCanvas, wheelDelta)
+       let wheelDelta = e.deltaY > 0 ? 1:-1; 
+       const keyPresses = this.#createKeyState(e);
+       const mouseButtons = this.#createButtonState(e);
+       this.#drawingView.onWheel({
+            ...mouseButtons,
+            ...keyPresses,
+            screenPosition:eventPosRelativeToCanvas
+        }, wheelDelta)
     }
 
     #keydown(e:KeyboardEvent){ //Note: Keyboard events are rather low level. Input events are high level, but only fire on input-ish elements

@@ -6,6 +6,7 @@ import { Handle } from "../handles/handle.js";
 import { HandleTracker } from "./handleTracker.js";
 import { CreateFigureMultiTracker } from "./createFigureMultiTracker.js";
 import { findElementUnderPoint } from "./trackerSelectionHelper.js";
+import { PanTracker } from "./panTracker.js";
 
 class CreateFigureMultiTool extends Tool{
     #childTool:Tool
@@ -21,10 +22,14 @@ class CreateFigureMultiTool extends Tool{
     getChildTool():Tool{
         return this.#childTool;
     }
-    getTracker(point:Point, drawingView:DrawingView):CreateFigureMultiTracker|HandleTracker{
+    getTracker(mouseEvent:LocalMouseEvent):CreateFigureMultiTracker|HandleTracker|PanTracker{
+        const point = mouseEvent.getDocumentPosition();
+        const drawingView = this.getDrawingView()
         const elementUnderPoint = findElementUnderPoint(point,drawingView)
-
-        if(elementUnderPoint instanceof Handle){
+        if(mouseEvent.middleButton){
+            const panTracker = new PanTracker()
+            return panTracker;
+        } else if(elementUnderPoint instanceof Handle){
             const handleTracker = new HandleTracker(elementUnderPoint);
             return handleTracker
         } else{
@@ -33,10 +38,9 @@ class CreateFigureMultiTool extends Tool{
         }
     }
     onMousedown(mouseEvent: LocalMouseEvent): void {
-        const point = mouseEvent.getDocumentPosition();
-        const drawingView = mouseEvent.getDrawingView()
-        const tracker = this.getTracker(point,drawingView);
+        const tracker = this.getTracker(mouseEvent);
         this.setChildTool(tracker);
+        this.#childTool.onMousedown(mouseEvent);
     }
     
     onDragstart(mouseEvent: LocalDragEvent){
@@ -53,6 +57,9 @@ class CreateFigureMultiTool extends Tool{
         const screenPosition = event.getScreenPosition()
         event.drawingView.scaleBy(changeFactor,screenPosition);
     }
+    // onHover(mouseEvent: LocalMouseEvent): void {
+        
+    // }
 }
 
 

@@ -1,7 +1,7 @@
 import { ViewTransform} from './transform.js'
 import {Tool} from './tools/tool.js'
 import { NoOpTool } from './tools/noopTool.js'
-import { LocalMouseEvent, LocalDragEvent, InteractionAnnouncementEvent, interactionAnnouncementName, SelectionEvent, selectionEventName} from './events.js'
+import { LocalMouseEvent, LocalDragEvent, InteractionAnnouncementEvent, interactionAnnouncementName, SelectionEvent, selectionEventName, LocalMouseEventParam} from './events.js'
 import { ToolChangeEvent } from './events.js'
 import { NoOpFigure } from './figures/noopFigure.js'
 import { CommandStack } from './commands/commandStack.js'
@@ -49,6 +49,24 @@ type DrawingViewParam = {
     tools:Array<NamedTool>
 }
 
+
+/**
+ * Used to feed data generated from system/DOM events
+ * from the app to the drawingView
+ */
+type MouseEventData = { //"...Data" is a naming anti-pattern.
+    //the position of drawingView on screen substracted from the point coordinates, so upper left is 0,0:
+    screenPosition: Point; 
+    //keys held down at the moment of event: 
+    shiftKey:boolean;
+    altKey:boolean;
+    ctrlKey:boolean;
+    leftButton:boolean
+    rightButton:boolean;
+    middleButton:boolean
+}
+
+
 /**
  * Manages the view, but none of the native UI or the event conversion (which is what app does)
  * 
@@ -62,10 +80,10 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     #ctx:CanvasRenderingContext2D
     #transform:ViewTransform
     #ctxSize:Point;
-    #commandStack = null;
-    #selection    = null; 
-    #requestEditorText  = null;
-    #textDirection = null; 
+    #commandStack:CommandStack   = null;
+    #selection:Selection         = null; 
+    #requestEditorText:Function  = null;
+    #textDirection:"rtl"|"ltr"   = null; 
 
     drawing:Drawing
 
@@ -170,7 +188,7 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
 
     //#region: previews
     #previewedFigure:Figure = new NoOpFigure(); //the element which change should be previewed
-    #previewFigure:Figure = new NoOpFigure(); //the copy used to preview the changes
+    #previewFigure:Figure   = new NoOpFigure(); //the copy used to preview the changes
     #isPreviewing = false;
 
     #drawPreviews(ctx:CanvasRenderingContext2D){ 
@@ -352,12 +370,39 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
 
     //set *any* position to calculate the first move distance we need *any* valid point here.
     #previousMousePosition = new Point({x:0,y:0}); 
-    #lockedDragTool = null; //locked in place by Mousedown, so that no tool is changed during drag.
+    #lockedDragTool:Tool = null; //locked in place by Mousedown, so that no tool is changed during drag.
+    
+    #mapMouseEventDataToLocalParam(e:MouseEventData):LocalMouseEventParam{
+        const {
+            altKey,
+            ctrlKey,
+            shiftKey,
+            leftButton,
+            rightButton,
+            middleButton,
+            screenPosition
+        } = e;
+
+        const localMouseEventParam = {
+            "screenPosition"  : screenPosition.copy(),
+            "previousPosition": this.#previousMousePosition.copy(),
+            "view": this,
+            "leftButton":leftButton,
+            "rightButton":rightButton,
+            "middleButton":middleButton,
+            "altKey"   : altKey,
+            "ctrlKey"  : ctrlKey,
+            "shiftKey" : shiftKey
+        }
+
+        return localMouseEventParam;
+    }
+    
     /**
      * @param {Point} mousePosition 
      */
-    onMousedown(mousePosition: Point){
-
+    onMousedown(mouseEventData:MouseEventData){
+        
         // precaution: Mouse might have been released outside of app
         // and thus state is unclear
         if(this.#mouseState === "down"){
@@ -365,37 +410,29 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         }
 
         this.#mouseState = "down";
-        this.#mouseDownPoint = mousePosition;
+        this.#mouseDownPoint = mouseEventData.screenPosition;
         
-        const localMouseEvent = new LocalMouseEvent({
-            "screenPosition": mousePosition.copy(),
-            "previousPosition": this.#previousMousePosition.copy(),
-            "view": this
-        });
+        const localMouseEventParam = this.#mapMouseEventDataToLocalParam(mouseEventData);
+        const localMouseEvent = new LocalMouseEvent(localMouseEventParam);
         this.#lockedDragTool = this.#activeTool; 
         this.#lockedDragTool.onMousedown(localMouseEvent);
-        this.#previousMousePosition = mousePosition.copy();
+        this.#previousMousePosition = mouseEventData.screenPosition.copy();
     }
     
     /**
     * Calls mousemove, then tests if this is a dragstart or dragmove and calls none or one of them if needed.
     * @param {Point} mousePosition
     */
-    onMousemove(mousePosition: Point){ 
-        const localMouseEvent = new LocalMouseEvent({
-            "screenPosition": mousePosition,
-            "previousPosition": this.#previousMousePosition,
-            "view":this
-        });
+    onMousemove(mouseEventData:MouseEventData){ 
+        const localMouseEventParam = this.#mapMouseEventDataToLocalParam(mouseEventData);
+        const localMouseEvent = new LocalMouseEvent(localMouseEventParam);
 
         this.#activeTool.onMousemove(localMouseEvent);
         
         if(this.#mouseDownPoint ){
             const localDragEvent = new LocalDragEvent({
-                "screenPosition":mousePosition,
-                "previousPosition":this.#previousMousePosition,
-                "downPoint": this.#mouseDownPoint,
-                "view":this
+                ...localMouseEventParam,
+                "downPoint":this.#mouseDownPoint
             });
             if(!this.#dragging){ //first drag event
                 this.#onDragstart(localDragEvent);
@@ -408,11 +445,11 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         if(!this.#mouseDownPoint){
             this.#onHover(localMouseEvent);
         }
-        
-        this.#previousMousePosition = mousePosition.copy();
+        this.#previousMousePosition = mouseEventData.screenPosition.copy();
     }
 
-    onMouseup(mousePosition:Point){
+    onMouseup(mouseEventData:MouseEventData){
+
         // precaution: Mouse might have been pressed outside of app
         // and thus state is unclear. Error ends the method execution
         // so no mess is caused. 
@@ -421,19 +458,14 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         }
         this.#mouseState = "up";
         
-        const localMouseEvent = new LocalMouseEvent({
-            "screenPosition":mousePosition.copy(),
-            "previousPosition":this.#previousMousePosition.copy(),
-            "view":this
-        })
+        const localMouseEventParam = this.#mapMouseEventDataToLocalParam(mouseEventData);
+        const localMouseEvent = new LocalMouseEvent(localMouseEventParam);
         
         //check if drag ends, and call this first.
         if(this.#mouseDownPoint && this.#dragging){
             const localDragEvent = new LocalDragEvent({
-                "screenPosition":mousePosition,
-                "previousPosition":this.#previousMousePosition,
-                "downPoint": this.#mouseDownPoint,
-                "view":this
+                ...localMouseEventParam,
+                downPoint:this.#mouseDownPoint
             });
             this.#onDragend(localDragEvent);
         }
@@ -441,7 +473,7 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
         //resets
         this.#dragging = false  
         this.#mouseDownPoint = null;
-        this.#previousMousePosition = mousePosition.copy();
+        this.#previousMousePosition = mouseEventData.screenPosition.copy();
         this.#lockedDragTool = null;
     }
 
@@ -449,14 +481,12 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
      * @param {Point} mousePosition 
      * @param {Number} wheelDelta 
      */
-    onWheel(mousePosition: Point, wheelDelta: number){
-        const localMouseEvent = new LocalMouseEvent({
-            "screenPosition": mousePosition.copy(),
-            "previousPosition": this.#previousMousePosition.copy(),
-            "view": this
-        })
+    onWheel(mouseEventData:MouseEventData, wheelDelta: number){
+        const localMouseEventParam = this.#mapMouseEventDataToLocalParam(mouseEventData);
+        const localMouseEvent = new LocalMouseEvent(localMouseEventParam);
+
         this.#activeTool.onWheel(localMouseEvent,wheelDelta);
-        this.#previousMousePosition = mousePosition.copy();
+        this.#previousMousePosition = mouseEventData.screenPosition.copy();
     }
     
     //the drag events are automatically called from mousemove and mouseup
@@ -585,4 +615,4 @@ implements ToolManager,Previewer, Highlighter,SelectionManager, CommandManager, 
     }
 }
 
-export {DrawingView, DrawingViewParam}
+export {DrawingView, DrawingViewParam, MouseEventData}

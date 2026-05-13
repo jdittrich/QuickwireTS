@@ -67,7 +67,7 @@ class ActionbarLoadFileAsJsonButton extends ActionBarButton{
     constructor(label:string, drawingView:DrawingView, callback:AddLoadFileCallback, tooltip:string){
         super(label, tooltip);
         this.domElement.setAttribute("type","file");
-        const callAction = function(event){
+        const callAction = function(event:any){
             //guards
             if(event.target.files === undefined) {return};
             if(!event.target.files[0].type.match('application/json')){
@@ -102,15 +102,15 @@ type CreateToolButtonParam = ToolData & {
 }
 
 class Toolbar{
-    domElement = null;
-    drawingView = null;
+    domElement:HTMLElement = null;
+    drawingView:DrawingView = null;
     selectedTool = ""
     buttons:Array<ToolButton> = []
-    constructor(drawingView){
+    constructor(drawingView:DrawingView){
         this.domElement = document.createElement("div");
         this.domElement.className = "qwToolbar";
         this.drawingView = drawingView;
-        this.drawingView.addEventListener("toolChange",this.updateToolbar.bind(this))
+        this.drawingView.addEventListener("toolChange",this.updateToolbar.bind(this) as EventListenerOrEventListenerObject)
     }
 
     addToolButton(addToolButtonParam:ToolData){

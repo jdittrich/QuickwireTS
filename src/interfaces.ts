@@ -19,7 +19,7 @@ interface ToolManager {
 
 interface Previewer {
     getPreviewFigure():Figure;
-    startPreviewOf(Figure):void;
+    startPreviewOf(figure:Figure):void;
     endPreview():void;
 }
 
@@ -57,10 +57,11 @@ interface ViewTransformerConversions {
  * defines possible interactions/features
  */
 interface InteractionAnnouncement {
-    cursor?:     string, //needs corresponding CSS class
-    helpText?:   string,
+    cursor?:     string //needs corresponding CSS class
+    helpText?:   string
     clickable?:  boolean 
     draggable?:  boolean
+    paintable?:  boolean
     cursorDown?: string
 }
 

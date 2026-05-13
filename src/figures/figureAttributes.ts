@@ -22,7 +22,7 @@ class FigureAttributes{
      * Usually called in constructor.
      * @param {object} attributeTypes - having Key:Constructor pairs, i.e.  ({"label":String});
      */
-    register(attributeTypes){
+    register(attributeTypes:any){
         //entries returns an array of [key,value]
         const keyTypePairs = Object.entries(attributeTypes);
         keyTypePairs.forEach((value) =>{
@@ -32,14 +32,14 @@ class FigureAttributes{
             this.#keyTypes.set(value[0],value[1]);
         });
     }
-    #checkKey(keyname){
+    #checkKey(keyname:string){
         if(typeof keyname !== "string"){
             throw new TypeError("key needs to be of type string")
         } else if(!this.#keyTypes.has(keyname)){
             throw new Error(`key ${keyname} was not found in the list of registered keys`)
         } 
     }
-    #checkKeyValue(key,value){
+    #checkKeyValue(key:string,value:any){
         this.#checkKey(key);
 
         const expectedConstructor = this.#keyTypes.get(key);

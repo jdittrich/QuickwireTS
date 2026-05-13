@@ -34,11 +34,10 @@ abstract class ResizeFigureHandle extends Handle {
     abstract getLocation():Point
     abstract createRectResize(dragDocumentMovement:Point):RectResize
 
-    // create command allows to create handles and thus also commands for different types (composite, non-composite)
-    // with minimal code-duplication
+    // overwrite this for other (sub)types of (resize)command
     createCommand(rectResize: RectResize): Command {
         return new ResizeFigureCommand({
-            "figure":this.getFigure() as CompositeFigure,
+            "figure":this.getFigure(),
             "rectResize": rectResize
         },this.getDrawingView());
     }
@@ -232,20 +231,70 @@ class ResizeRightHandle extends ResizeFigureHandle{
 // }
 
 abstract class ResizeCompositeFigureHandle extends ResizeFigureHandle{
+    affectInner:boolean=true
     constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView)
     }
     createCommand(rectResize: RectResize): Command {
         return new ResizeCompositeFigureCommand({
             "figure":this.getFigure() as CompositeFigure,
-            "rectResize": rectResize
+            "rectResize": rectResize,
+            "affectInner": this.affectInner
         },this.getDrawingView());
+    }
+    onDrag(dragEvent:LocalDragEvent){
+        const drawingView = this.getDrawingView();
+        //const dragMovement = dragEvent.getDocumentDragMovement();
+        const previewFigure = drawingView.getPreviewFigure() as CompositeFigure;
+        const movementIncrement = dragEvent.getDocumentMovement();
+        const dragRectResize = this.createRectResize(movementIncrement);
+        previewFigure.resizeByRectResize(dragRectResize,this.affectInner);
+    }
+    getDefaultInteractions(){
+        return { 
+            cursor: "nwse-resize",
+            helpText: "resize figure, scaling inner figures",
+            draggable: true, 
+            clickable: false 
+        };
     }
 }
 
-// 20.2.26: Probably create a getResize and keep changeRect. ChangeRect is cumulative
-// so its not great for ongoing stuff. 
+abstract class ResizeCompositeFigureHandleNoInner extends ResizeFigureHandle{
+    affectInner:boolean = false
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
+        super(figure,drawingView)
+    }
+    getColor(): string{
+        return "#676ecfff";
+    }
+    createCommand(rectResize: RectResize): Command {
+        return new ResizeCompositeFigureCommand({
+            "figure":this.getFigure() as CompositeFigure,
+            "rectResize": rectResize,
+            "affectInner": this.affectInner
+        },this.getDrawingView());
+    }
+    onDrag(dragEvent:LocalDragEvent){
+        const drawingView = this.getDrawingView();
+        //const dragMovement = dragEvent.getDocumentDragMovement();
+        const previewFigure = drawingView.getPreviewFigure() as CompositeFigure;
+        const movementIncrement = dragEvent.getDocumentMovement();
+        const dragRectResize = this.createRectResize(movementIncrement);
+        previewFigure.resizeByRectResize(dragRectResize,this.affectInner);
+    }
+    getDefaultInteractions(){
+        return { 
+            cursor: "nwse-resize",
+            helpText: "resize figure, not affecting inner figures",
+            draggable: true, 
+            clickable: false 
+        };
+    }
+}
+
 class ResizeTopRightHandle extends ResizeCompositeFigureHandle{
+    affectInner: boolean = true;
     constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
@@ -275,6 +324,7 @@ class ResizeTopRightHandle extends ResizeCompositeFigureHandle{
 }
 
 class ResizeBottomRightHandle extends ResizeCompositeFigureHandle{
+    affectInner: boolean = true;
     constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
@@ -304,6 +354,7 @@ class ResizeBottomRightHandle extends ResizeCompositeFigureHandle{
 }
 
 class ResizeBottomLeftHandle extends ResizeCompositeFigureHandle{
+    affectInner: boolean = true;
     constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
@@ -334,6 +385,7 @@ class ResizeBottomLeftHandle extends ResizeCompositeFigureHandle{
 }
 
 class ResizeTopLeftHandle extends ResizeCompositeFigureHandle{
+    affectInner: boolean = true;
     constructor(figure:CompositeFigure,drawingView:DrawingView){
         super(figure,drawingView);
     }
@@ -363,8 +415,137 @@ class ResizeTopLeftHandle extends ResizeCompositeFigureHandle{
     }
 }
 
+class ResizeCompositeBottomHandle extends ResizeCompositeFigureHandleNoInner{
+    affectInner: boolean = false;
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
+        super(figure,drawingView);
+    }
 
+    getLocation(){
+        const figure = this.getFigure();
+        const rect = figure.getBoundingBox();
+        const center = rect.getCenter()
+        const bottomCenter = new Point({x:center.x, y:rect.bottom})
+        return bottomCenter;
+    }
 
+    createRectResize(dragDocumentMovement: Point): RectResize {
+        const rectResize = {
+            top:    0,
+            right:  0,
+            bottom: dragDocumentMovement.y,
+            left: 0
+        }
+        return rectResize;
+    }
+
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "s-resize"
+        };
+    }
+}
+
+class ResizeCompositeLeftHandle extends ResizeCompositeFigureHandleNoInner{
+    affectInner: boolean = false;
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
+        super(figure,drawingView);
+    }
+
+    getLocation(){
+        const figure = this.getFigure();
+        const rect = figure.getBoundingBox();
+        const center = rect.getCenter()
+        const leftCenter = new Point({x:rect.left, y:center.y})
+        return leftCenter;
+    }
+
+    createRectResize(dragDocumentMovement: Point): RectResize {
+        const rectResize = {
+            top:    0,
+            right:  0,
+            bottom: 0,
+            left: dragDocumentMovement.x
+        }
+        return rectResize;
+    }
+
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "w-resize"
+        };
+    }
+}
+
+class ResizeCompositeTopHandle extends ResizeCompositeFigureHandleNoInner{
+    affectInner: boolean = false;
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
+        super(figure,drawingView);
+    }
+
+    getLocation(){
+        const figure = this.getFigure();
+        const rect = figure.getBoundingBox();
+        const center = rect.getCenter()
+        const topCenter = new Point({x:center.x, y:rect.top})
+        return topCenter;
+    }
+
+    createRectResize(dragDocumentMovement: Point): RectResize {
+        const rectResize = {
+            top:    dragDocumentMovement.y,
+            right:  0,
+            bottom: 0,
+            left: 0
+        }
+        return rectResize;
+    }
+
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "n-resize"
+        };
+    }
+}
+
+class ResizeCompositeRightHandle extends ResizeCompositeFigureHandleNoInner{
+    affectInner: boolean = false;
+    constructor(figure:CompositeFigure,drawingView:DrawingView){
+        super(figure,drawingView);
+    }
+
+    getLocation(){
+        const figure = this.getFigure();
+        const rect = figure.getBoundingBox();
+        const center = rect.getCenter()
+        const rightCenter = new Point({x:rect.right, y:center.y})
+        return rightCenter;
+    }
+
+    createRectResize(dragDocumentMovement: Point): RectResize {
+        const rectResize = {
+            top:    0,
+            right:  dragDocumentMovement.x,
+            bottom: 0,
+            left: 0
+        }
+        return rectResize;
+    }
+
+    getInteractions(){
+        const defaultInteractions = this.getDefaultInteractions()
+        return { 
+            ...defaultInteractions,
+            cursor: "e-resize"
+        };
+    }
+}
 
 //Helper functions to create collections of handles
 
@@ -378,6 +559,13 @@ function createAllResizeHandles(figure: CompositeFigure,drawingView: DrawingView
     const tlHandle = new ResizeTopLeftHandle(figure,drawingView);
     return [brHandle,trHandle,blHandle,tlHandle];
 }
+function createCropHandles(figure:CompositeFigure, drawingView):ResizeCompositeFigureHandleNoInner[]{
+    const tHandle  = new ResizeCompositeTopHandle(figure,drawingView)
+    const rHandle  = new ResizeCompositeRightHandle(figure,drawingView)
+    const bHandle  = new ResizeCompositeBottomHandle(figure,drawingView)
+    const lHandle  = new ResizeCompositeLeftHandle(figure,drawingView)
+    return [tHandle,rHandle,bHandle,lHandle];
+}
 
 
 function createLeftRightResizeHandles(figure:Figure,drawingView:DrawingView): ResizeFigureHandle[]{
@@ -386,4 +574,4 @@ function createLeftRightResizeHandles(figure:Figure,drawingView:DrawingView): Re
     return [rHandle,lHandle];
 }
 
-export {ResizeCompositeFigureHandle as ResizeHandle, createAllResizeHandles, createLeftRightResizeHandles}
+export {ResizeCompositeFigureHandle as ResizeHandle, createAllResizeHandles, createLeftRightResizeHandles, createCropHandles}

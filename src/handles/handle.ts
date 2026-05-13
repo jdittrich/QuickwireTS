@@ -93,7 +93,7 @@ abstract class Handle implements Drawable, Highlightable, InteractionInfoProvide
     onMouseup(mouseEvent:LocalMouseEvent):void{ }
 
     //== announcer
-    getInteractions(){
+    getInteractions():InteractionAnnouncement{
         return {
             cursor:"pointer",
             helpText:"a handle",

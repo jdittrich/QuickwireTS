@@ -1,6 +1,6 @@
 import  {Point} from "../data/point.js"
 import { Rect, RectResize } from "../data/rect.js";
-import { FixedConstraint, ProportionalConstraint, RectConstraint, Segment } from "../data/constraint.js";
+import { ProportionalConstraint, RectConstraint, Segment } from "../data/constraint.js";
 
 import { DrawingView } from "../drawingView.js";
 import { Handle } from "../handles/handle.js";
@@ -95,7 +95,8 @@ class HorizontalLineFigure extends Figure{
 
         const constraint = RectConstraint.fromRects({
             innerRect:innerRect,
-            outerRect:outerRect
+            outerRect:outerRect,
+            type:"ProportionalConstraint"
         }); 
         //ProportionalConstraint.fromSegments(outerSegment,innerSegment);
         this.constraint = constraint;

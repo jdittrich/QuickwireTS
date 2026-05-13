@@ -75,6 +75,9 @@ class DuplicateFigureCommand implements Command, Undoable{
     }
     undo(): void {
         this.#drawingView.clearSelection(); 
+
+        const inverseMove = this.#moveDuplicateFigureBy.inverse();
+        this.#duplicateFigure.moveBy(inverseMove);
         this.#toContainer.detachFigure(this.#duplicateFigure);
 
         // this.#drawingView.clearSelection(); 

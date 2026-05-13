@@ -2,9 +2,12 @@ import { Handle } from "./handle.js";
 import { RemoveFigureAndContainedCommand } from "../commands/removeFigureCommand.js";
 import { Rect } from "../data/rect.js";
 import { Point } from "../data/point.js";
+import { LocalMouseEvent } from "../events.js";
+import { DrawingView } from "../drawingView.js";
+import { Figure } from "../figures/figure.js";
 
 class DeleteFigureHandle extends Handle{
-    #figureToDelete = null;
+    #figureToDelete:Figure = null;
     #size = 20;
 
     /**
@@ -12,7 +15,7 @@ class DeleteFigureHandle extends Handle{
      * @param {Figure} figure 
      * @param {DrawingView} drawingView 
      */
-    constructor(figure, drawingView){
+    constructor(figure:Figure, drawingView:DrawingView){
         super(figure,drawingView)    
     }
 
@@ -52,7 +55,7 @@ class DeleteFigureHandle extends Handle{
 
         return screenRect;
     }
-    onMousedown(localMouseEvent){
+    onMousedown(localMouseEvent:LocalMouseEvent){
         const drawingView = this.getDrawingView();
         const figure = this.getFigure();
         const deleteFigureAndContainedCommand = new RemoveFigureAndContainedCommand(
@@ -66,7 +69,7 @@ class DeleteFigureHandle extends Handle{
             cursor: "pointer",
             helpText: "delete figure",
             draggable: false, 
-            clickable: true 
+            clickable: true
         };
     }
 }

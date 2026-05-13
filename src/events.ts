@@ -6,10 +6,20 @@ import { DrawingView } from "./drawingView.js";
 import { Tool } from "./tools/tool.js";
 import { InteractionAnnouncement } from "./interfaces.js";
 
+
 type LocalMouseEventParam = { 
     screenPosition: Point; 
     previousPosition: Point; 
-    view: DrawingView; 
+    
+    shiftKey:boolean;
+    altKey:boolean;
+    ctrlKey:boolean
+    
+    leftButton:boolean
+    rightButton:boolean;
+    middleButton:boolean
+
+    view: DrawingView;
 }
 
 /**
@@ -26,6 +36,12 @@ type LocalMouseEventParam = {
 class LocalMouseEvent{ 
     #screenPosition:Point
     #previousPosition:Point
+    ctrlKey:boolean
+    altKey:boolean
+    shiftKey:boolean
+    leftButton: boolean
+    middleButton:boolean
+    rightButton:boolean
     drawingView:DrawingView
     /**
      * @param {Object}      param
@@ -39,7 +55,15 @@ class LocalMouseEvent{
         // }
         this.#screenPosition = param.screenPosition
         this.#previousPosition = param.previousPosition
-        this.drawingView = param.view; 
+        this.drawingView = param.view;
+        
+        this.ctrlKey  = param.ctrlKey;
+        this.shiftKey = param.shiftKey;
+        this.altKey   = param.altKey;
+
+        this.leftButton = param.leftButton;
+        this.middleButton = param.middleButton;
+        this.rightButton = param.rightButton;
     }
 
     getScreenPosition(): Point{
@@ -143,13 +167,17 @@ const interactionAnnouncementName = "interactionAnnouncement"
 const selectionEventName = "selection"
 
 class ToolChangeEvent extends Event{
-    toolName:string = null; 
+    toolName:string
     constructor(toolName:string){
         super(toolChangeEventName);
         this.toolName = toolName
     }
 }
 
+/**
+ * Can be fired on drawing view (managing all internal interactions), 
+ * so app (managing communication with the browser) can change the cursor.
+ */
 class InteractionAnnouncementEvent extends Event implements InteractionAnnouncement{
     cursor:string
     draggable: boolean
@@ -171,8 +199,14 @@ class SelectionEvent extends Event{
     }
 }
 
-export {LocalMouseEvent, LocalDragEvent, 
-        ToolChangeEvent, toolChangeEventName, 
-        InteractionAnnouncementEvent, interactionAnnouncementName,
-        SelectionEvent, selectionEventName
+export {LocalMouseEvent, 
+        LocalMouseEventParam, 
+        LocalDragEvent,
+        LocalDragEventParam, 
+        ToolChangeEvent, 
+        toolChangeEventName, 
+        InteractionAnnouncementEvent, 
+        interactionAnnouncementName,
+        SelectionEvent, 
+        selectionEventName
     }
