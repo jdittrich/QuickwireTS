@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="32"
+   height="32"
+   viewBox="0 0 8.4666665 8.4666666"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   sodipodi:docname="noPaintToolCursor.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="14.55056"
+     inkscape:cx="15.600774"
+     inkscape:cy="7.6629354"
+     inkscape:window-width="2560"
+     inkscape:window-height="1411"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       id="grid1"
+       units="mm"
+       originx="0"
+       originy="0"
+       spacingx="0.26458333"
+       spacingy="0.26458333"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       enabled="true"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       id="path3"
+       style="stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;paint-order:markers fill stroke"
+       d="m 3.3350605,4.1999298 c 0.5243752,0.5100253 1.3749943,1.3309182 1.4678699,1.3794739 0.1353088,0.07074 0.3404977,0.03791 0.4439005,-0.046509 C 5.3608248,5.4398282 5.4563803,5.2204636 5.393592,5.0709076 5.3502623,4.9677001 4.6646887,3.9932599 4.2439592,3.3991736 4.1510819,3.4787396 3.4226023,4.0902799 3.3350605,4.1999298 Z"
+       sodipodi:nodetypes="cssscc" />
+    <path
+       style="opacity:0.5;fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 0,0.92604182 H 0.9260418 V -3.336212e-8"
+       id="path1"
+       sodipodi:nodetypes="ccc" />
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.265112;stroke-linecap:round;stroke-linejoin:round"
+       id="rect1"
+       width="0.26458332"
+       height="0.26458332"
+       x="0.79374987"
+       y="0.79374987" />
+    <path
+       id="path2"
+       style="fill:#000000;fill-opacity:1;stroke-width:0.264999;stroke-linecap:round;stroke-linejoin:round;paint-order:markers fill stroke"
+       d="M 1.9871764,2.4503026 C 2.3136608,2.5345123 2.6465943,2.3381096 2.730804,2.0116251 2.8150136,1.6851405 2.5821172,1.4400112 2.2921264,1.2679974 2.1130145,1.1617537 1.3554553,0.96259163 1.1269948,1.0759755 0.97795966,1.1499411 1.5558445,1.4339899 1.5506521,1.7618173 1.5449074,2.1245088 1.6606917,2.366093 1.9871764,2.4503026 Z"
+       sodipodi:nodetypes="ssssss" />
+    <path
+       id="rect3"
+       style="stroke-width:0.265;stroke-linecap:round;stroke-linejoin:round;paint-order:markers fill stroke"
+       d="m 2.9203579,2.1765106 -0.012919,0.010852 v 5.167e-4 C 2.8854247,2.3858257 2.5568363,2.6857199 2.3415819,2.6746714 l -0.011886,0.00982 0.1047729,0.2123584 0.650509,-0.6075683 z"
+       sodipodi:nodetypes="cccccccc" />
+    <path
+       style="baseline-shift:baseline;display:inline;overflow:visible;opacity:1;vector-effect:none;fill:#000000;stroke-width:1;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke fill markers;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
+       d="m 1.1890394,4.6970389 a 0.41686143,0.41686143 0 0 0 -0.00126,0.5901906 l 0.00505,0.00505 a 0.41686143,0.41686143 0 0 0 0.5914545,0 L 5.2382257,1.8383408 a 0.41686143,0.41686143 0 0 0 1.6e-6,-0.5914528 l -0.00505,-0.00505 A 0.41686143,0.41686143 0 0 0 4.642985,1.243098 Z"
+       id="rect2" />
+  </g>
+</svg>
