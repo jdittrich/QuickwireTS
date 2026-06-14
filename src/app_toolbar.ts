@@ -161,13 +161,14 @@ class ToolButton{
         labelDom.classList.add(icon+"_icon");
         labelDom.textContent  = label ?? toolName;
 
-        radiobuttonDom.addEventListener("input",this.buttonClicked.bind(this))
+        labelDom.addEventListener("mouseup",this.buttonClicked.bind(this))
+        //radiobuttonDom.addEventListener("input",this.buttonClicked.bind(this))
 
         this.radiobuttonDom = radiobuttonDom;
         this.labelDom = labelDom;
         
     };
-    buttonClicked(e:InputEvent){
+    buttonClicked(e:MouseEvent){
         console.log("requested")
         e.preventDefault();
         this.#drawingView.changeToolByName(this.toolName)

@@ -6,6 +6,7 @@ import { createAllResizeHandles, createCropHandles } from '../handles/resizeHand
 import { DrawingView } from "../drawingView.js";
 import { InteractionAnnouncement } from "../interfaces.js";
 
+
 type CreateCompositeFigureParam = CreateFigureParam & {
     rect:Rect;
     containedFigures?:Figure[];
@@ -15,6 +16,7 @@ type CompositeFigureJson = FigureJson & {
     rect:RectJson;
     containedFigures:FigureJson[];   
 }
+
 
 class CompositeFigure extends Figure {
     readonly name:string = "CompositeFigure";

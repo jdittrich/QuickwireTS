@@ -5,19 +5,65 @@ import { CompositeFigure, CreateCompositeFigureParam, CompositeFigureJson } from
 import { Rect } from '../data/rect.js';
 import { DrawingView } from '../drawingView.js';
 import { Point } from '../data/point.js';
-import { FigurePainting } from './figurePainting.js';
+//import { FigurePainting } from '../../legacyStuff/legacyFigures/figurePainting.js';
 import { InteractionAnnouncement } from '../interfaces.js';
+import { FormElementFactory, FormElement } from '../app_formElements.js';
+import { ChangeAttributeCommand, ChangeAttributeCommandParam } from '../commands/changeAttributeCommand.js';
 
 type CreateRectFigureParam = CreateCompositeFigureParam & {
-    canvas?:OffscreenCanvas
+    //canvas?:OffscreenCanvas
+    rectStyle?:RectStyleTypes
 };
-type RectFigureJson = CompositeFigureJson;
+type RectFigureJson = CompositeFigureJson & {
+    rectStyle: RectStyleTypes
+};
+
+type RectStyleTypes = "default"|"accent"|"imagePlaceholder"
+type DrawRect = (ctx:CanvasRenderingContext2D,rect:Rect)=>void
 
 
-interface Paintable{
-    paintFromTo(from:Point,to:Point):void;
-    getCanvas():OffscreenCanvas,
-    setCanvas(canvas:OffscreenCanvas):void
+const drawImagePlaceholderCross = function(ctx:CanvasRenderingContext2D,rect:Rect){
+    const corners = rect.getCorners();
+    ctx.beginPath();
+    ctx.moveTo(corners.topLeft.x,corners.topLeft.y);
+    ctx.lineTo(corners.bottomRight.x,corners.bottomRight.y);
+    ctx.moveTo(corners.topRight.x, corners.topRight.y);
+    ctx.lineTo(corners.bottomLeft.x,corners.bottomLeft.y);
+    ctx.stroke();
+}
+
+const drawAccentBackground = function(ctx:CanvasRenderingContext2D, rect:Rect){
+    const {x,y,width,height} = rect;
+    const oldFillStyle = ctx.fillStyle;
+    ctx.fillStyle = "#9bbbde"
+    ctx.fillRect(x,y,width,height);
+    ctx.fillStyle = oldFillStyle;
+}
+
+const drawRectOutline  = function(ctx:CanvasRenderingContext2D, rect:Rect):void{
+    const {width,height,x,y} = rect;
+    ctx.strokeRect(x,y,width,height);
+}
+
+const drawAccentRect = function(ctx:CanvasRenderingContext2D, rect:Rect):void{
+    drawAccentBackground(ctx,rect);
+    drawRectOutline(ctx,rect);
+}
+
+const drawImagePlaceholderRect = function(ctx:CanvasRenderingContext2D, rect:Rect):void{
+    drawRectOutline(ctx,rect);
+    drawImagePlaceholderCross(ctx,rect);
+}
+
+const drawDefaultRect = function(ctx:CanvasRenderingContext2D, rect:Rect):void{
+    drawRectOutline(ctx,rect);
+}
+
+
+const rectStyleRegistry:Record<RectStyleTypes,DrawRect> = {
+    "default":   drawDefaultRect,
+    "accent":    drawAccentRect,
+    "imagePlaceholder": drawImagePlaceholderRect
 }
 
 
@@ -30,21 +76,25 @@ interface Paintable{
  * @param {number} param.width
  * @param {number} param.height
  */
-class RectFigure extends CompositeFigure implements Paintable{
+class RectFigure extends CompositeFigure{
     readonly name = "RectFigure";
-    #offscreenCanvas = new OffscreenCanvas(1,1);
-    #painting:FigurePainting
+
     constructor(param:CreateRectFigureParam){
         super(param);
-        this.#painting = new FigurePainting(this)
-        this.#painting.setCanvas(param.canvas ?? new OffscreenCanvas(param.rect.width,param.rect.height));
+        
+        this.attributes.register({
+            "rectStyle":String
+        });
+
+        const rectStyle:RectStyleTypes = param.rectStyle ||"default";
+        this.attributes.set("rectStyle",rectStyle);
     }
 
     drawFigure(ctx:CanvasRenderingContext2D){
-        const {width,height,x,y} = this.getBoundingBox();
-        ctx.drawImage(this.#offscreenCanvas,x,y);
-        this.#painting.draw(ctx);
-        ctx.strokeRect(x,y,width,height);
+        const rect = this.getRect();
+        const rectStyleAttribute = this.getAttribute("rectStyle") as RectStyleTypes;
+        const drawRect:DrawRect = rectStyleRegistry[rectStyleAttribute];
+        drawRect(ctx,rect);
     }
 
     getHandles(drawingView:DrawingView){
@@ -52,11 +102,31 @@ class RectFigure extends CompositeFigure implements Paintable{
         const resizeHandles = createAllResizeHandles(this,drawingView)
         return [...basicHandles, ...resizeHandles];
     }
+    getFormElements(drawingView: DrawingView, formElementFactory: FormElementFactory): FormElement<any>[] {
+        const rectStyleDropdown =  formElementFactory.createDropdown({
+            label:"style:",
+            selectedValue:this.getAttribute("rectStyle"),
+            values:Object.keys(rectStyleRegistry),
+            changeHandler:(changedTo:string)=>{
+                const changeAttributeParam:ChangeAttributeCommandParam = {
+                    figure:this,
+                    attribute:"rectStyle",
+                    value:changedTo
+             }
+             const rectStyleCommand = new ChangeAttributeCommand(changeAttributeParam,drawingView);
+             drawingView.do(rectStyleCommand);
+            }
+        });
+
+        return [rectStyleDropdown]
+
+    }
     getParameters():CreateRectFigureParam{
         const baseParameters = super.getParameters();
         const rectParameters = {
             ...baseParameters,
-            canvas: this.#painting.getCanvas()
+            "rectStyle":this.attributes.get("rectStyle")
+            // canvas: this.#painting.getCanvas()
         };
         return rectParameters;
     }
@@ -64,37 +134,34 @@ class RectFigure extends CompositeFigure implements Paintable{
         const oldRect = this.getRect();
         super.changeRect(updatedRect,affectInner);
         const rectResize = Rect.getDifference(oldRect,updatedRect);
-        this.#painting.crop(rectResize);
+        // this.#painting.crop(rectResize);
     }
 
-    getConstraintType(){
-        if(this.#painting.isPainted === false){
-            return "ProportionalConstraint"
-        } else {
-            return "MidpointProportionalConstraint"
-        }
+    //TODO: move to interfaces or other place to share constraint types.
+    getConstraintType():"ProportionalConstraint"|"MidpointProportionalConstraint"{
+        return "ProportionalConstraint"
     }
     //#region: Paintable
-    paintFromTo(from: Point, to: Point): void {
-        this.#painting.paintFromTo(from,to);
-    }
+    // paintFromTo(from: Point, to: Point): void {
+    //     this.#painting.paintFromTo(from,to);
+    // }
 
-    //get/set canvas is needed for undo/redo
-    getCanvas(): OffscreenCanvas {
-        return this.#painting.getCanvas();
-    }
-    setCanvas(canvas: OffscreenCanvas): void {
-        this.#painting.setCanvas(canvas)
-    }
-    clear(){
-        this.#painting.clear();
-    }
+    // //get/set canvas is needed for undo/redo
+    // getCanvas(): OffscreenCanvas {
+    //     return this.#painting.getCanvas();
+    // }
+    // setCanvas(canvas: OffscreenCanvas): void {
+    //     this.#painting.setCanvas(canvas)
+    // }
+    // clear(){
+    //     this.#painting.clear();
+    // }
   
     getInteractions(): InteractionAnnouncement {
         return {
             clickable: false,
             draggable: true,
-            paintable: true,
+            // paintable: true,
             cursor:"default",
             helpText: "a figure"
         }
@@ -134,7 +201,10 @@ class RectFigure extends CompositeFigure implements Paintable{
     
     toJSON():RectFigureJson{
         const baseFigureJson = super.toJSON();
-        const rectFigureJson = baseFigureJson;
+        const rectFigureJson = {
+            ...baseFigureJson,
+            rectStyle:this.attributes.get("rectStyle")
+        }
         return rectFigureJson;
     }
 
@@ -145,10 +215,11 @@ class RectFigure extends CompositeFigure implements Paintable{
                 "y":0,
                 "width":100,
                 "height":50
-            })
+            }),
+            rectStyle:"default"
         });
         return rectFigure;
     }
 }
 
-export {RectFigure, CreateRectFigureParam, Paintable}
+export {RectFigure, CreateRectFigureParam, RectFigureJson}

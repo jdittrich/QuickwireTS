@@ -184,7 +184,7 @@ class InteractionAnnouncementEvent extends Event implements InteractionAnnouncem
     clickable: boolean
     helpText: string
 
-    constructor(interactions:InteractionAnnouncement){
+       constructor(interactions:InteractionAnnouncement){
         super(interactionAnnouncementName);
         this.cursor =    interactions.cursor ?? "default"
         this.draggable = interactions.draggable ?? true 

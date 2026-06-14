@@ -1,5 +1,5 @@
-import {HorizontalLine} from '../src/data/horizontalLine.js'
-import { Point  } from '../src/data/point.js';
+import { HorizontalLine } from '../built/data/horizontalLine.js'
+import { Point  } from '../built/data/point.js';
 
 export const test_horizontalLine = QUnit.module('horizontalLine', function() {
     //creation
@@ -13,9 +13,18 @@ export const test_horizontalLine = QUnit.module('horizontalLine', function() {
         const point1 = new Point({x:10,y:20});
         const point2 = new Point({x:30,y:40});
         const hLine = HorizontalLine.createFromPoints(point1,point2);
-        assert.equal(hline.left,  10);
-        assert.equal(hline.right, 30);
-        assert.equal(hline.top,   40);
+        assert.equal(hLine.left,  10);
+        assert.equal(hLine.right, 30);
+        assert.equal(hLine.top,   40);
+    });
+    QUnit.test('create a hline from points, strange order', function(assert) {
+        // deliberate numbers, javascript standard sort does 100 before 30. I learned that the hard way.
+        const point1 = new Point({x:100,y:20}); 
+        const point2 = new Point({x:30,y:40});
+        const hLine = HorizontalLine.createFromPoints(point1,point2);
+        assert.equal(hLine.left,  30);
+        assert.equal(hLine.right, 100);
+        assert.equal(hLine.top,   40);
     });
     QUnit.test('copy a hline', function(assert) {
         const hLine = new HorizontalLine({top:10, horizontal1:40, horizontal2:20});

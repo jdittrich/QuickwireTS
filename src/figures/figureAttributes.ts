@@ -1,11 +1,11 @@
-
 /**
  * Manages Key/Value pairs.
  * Any possible key and its type must be registered before setting it via register, like this: register({"isSelected":Boolean})
  */
+
 class FigureAttributes{
     #keyTypes = new Map()
-    #attributes = new Map();
+    #attributes:Record<string,any> = new Map();
 
     constructor(){}
     set(key:string,value:any){

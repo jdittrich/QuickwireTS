@@ -10,7 +10,6 @@ import { InteractionAnnouncementEvent, interactionAnnouncementName, LocalMouseEv
 
 import { FigureBar, FormElementFactory } from "./app_formElements.js";
 import { CreateFigureMultiTool } from "./tools/createFigureMultiTool.js";
-import { PaintTool } from "./tools/paintTool.js"
 
 
 
@@ -122,13 +121,6 @@ class App{
                 icon:"multiTool",
                 name:"multiTool"
             },
-            {
-                tool: new PaintTool(),
-                label:"paint",
-                description:"paint on rect figures",
-                icon:"paintTool",
-                name:"paintTool",
-            }
         ]
         
         
@@ -141,7 +133,8 @@ class App{
         
         this.#horizontalBarContainer.append(toolbar.domElement);
         this.#horizontalBarContainer.append(actionbar.domElement);
-        this.#appContainer.append(figureBar.domElement);
+        //this.#appContainer.append(figureBar.domElement);
+        this.#horizontalBarContainer.append(figureBar.domElement);
         
         this.#setCanvasSize(); //ensures pixel alignment on higher resolution displays.
 
@@ -391,7 +384,7 @@ class App{
     }
     /**Takes css cursor names*/
     setCursor(cursorName:string){
-        console.log("set cursor to ", cursorName);
+        //console.log("set cursor to ", cursorName);
         this.#appContainer.classList.add(cursorName);
         if(this.#previousCursorClass && (this.#previousCursorClass !== cursorName)){ //delete old cursor class, except if the new is the same as the old one
             this.#appContainer.classList.remove(this.#previousCursorClass);

@@ -386,4 +386,4 @@ class RectConstraint{
     }
 }
 
-export {ProportionalConstraint, RectConstraint, Segment, FromRectsParam}
+export {ProportionalConstraint, MidpointProportionalConstraint, RectConstraint, Segment, FromRectsParam}

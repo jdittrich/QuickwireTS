@@ -8,7 +8,9 @@ import { findFiguresBelowPoint, findInnermostEnclosingFigure, findInnerMatches} 
 
 type CreateDrawingParam = CreateCompositeFigureParam;
 
-type DrawingJson = CompositeFigureJson;
+type DrawingJson = CompositeFigureJson & {
+    type:Drawing["name"]
+};
 
 class Drawing extends CompositeFigure{
     name = "Drawing";
@@ -108,6 +110,6 @@ class Drawing extends CompositeFigure{
     }
 }
 
-export {Drawing, CreateDrawingParam}
+export {Drawing, CreateDrawingParam, DrawingJson}
 
 

@@ -1,5 +1,4 @@
 
-interface FormBooleanChangeCallback { (changedValue:boolean):void};
 import { Point } from "./data/point.js";
 import { Drawing } from "./drawing.js";
 import { DrawingView } from "./drawingView.js";
@@ -7,59 +6,132 @@ import { DrawingView } from "./drawingView.js";
 import { selectionEventName } from "./events.js";
 import { Figure } from "./figures/figure.js";
 
-abstract class FormElement{
-    domElement:HTMLElement
-    label:string
-    abstract removeEventHandler():void
-    abstract addEventHandler():void
+abstract class FormElement<HandledType>{
+    abstract domElement:HTMLElement;
+    label:string;
+    changeHandler:(changedTo:HandledType)=>void;
+    abstract removeHandler():void;
+    abstract addHandler(handler:(changedTo:HandledType)=>void):void;
+    abstract getCurrentValue():HandledType;
     remove(){
-        this.removeEventHandler();
+        this.removeHandler();
         this.domElement.remove();
     }
 }
 
-class FormElementCheckbox extends FormElement{
-    changeHandler:FormBooleanChangeCallback
-    domElement:HTMLElement = null; 
-    label:string = null; 
-    #checkbox:HTMLInputElement
-    constructor(label:string,startValue:boolean,changeHandler:FormBooleanChangeCallback, document:HTMLDocument){
-        super();
-        this.changeHandler = changeHandler;
+// type CreateHorizontalLineFigureParam = CreateFigureParam & {
+    //     horizontalLine:HorizontalLine
+    //     lineStart?:EndingTypes
+    //     lineEnd?:EndingTypes
+    // }
+    
+interface FormBooleanChangeCallback { (changedTo:boolean):void};
+
+type CreateFormElementParam = {
+    changeHandler:unknown;
+    label:string;
+}
+
+type CreateDropdownParam = CreateFormElementParam & {
+    changeHandler: (changedTo:string)=>void
+    values:string[],
+    selectedValue:string
+}
+
+// class FormElementCheckbox extends FormElement<boolean>{
+//     domElement:HTMLElement = null; 
+//     label:string = null; 
+//     #checkbox:HTMLInputElement
+//     constructor(label:string,startValue:boolean,changeHandler:FormBooleanChangeCallback, document:HTMLDocument){
+//         super();
+//         this.changeHandler = changeHandler;
+//         this.label = label;
+//         this.#createDomElement(document);
+//         this.addHandler(changeHandler);
+//     }
+//     addHandler(changeHandler){
+//         //call the passed handler
+//         this.#checkbox.onchange = (event)=> {
+//             const isChecked = this.#checkbox.checked;
+//             this.changeHandler(isChecked);
+//         }
+//     }
+//     removeHandler(){
+//         this.#checkbox.onchange = null; 
+//     }
+//     #createDomElement(document:HTMLDocument){
+//         const checkbox = document.createElement("input");
+//         checkbox.type="checkbox";
+//         const labelElement = document.createElement("label");
+//         const labelText = document.createTextNode(this.label);
+//         //assemble!
+//         labelElement.append(labelText);
+//         labelElement.append(checkbox);
+//         this.domElement= labelElement;
+//         this.#checkbox = checkbox; 
+//     }
+//     /**
+//      * Bridges between the UI element 
+//      * and the internal interface
+//      */
+//     getCurrentValue(){
+//         const isChecked:boolean = this.#checkbox.checked;
+//         return isChecked;
+//     }
+// }
+
+class FormElementDropdown extends FormElement<string>{
+    values:string[]
+    domElement: HTMLElement;
+    #selectElement: HTMLSelectElement;
+    constructor(param:CreateDropdownParam, document:HTMLDocument){
+        super()
+        const {label,changeHandler, values,selectedValue} = param;
+        if(!values.includes(selectedValue)){
+            throw TypeError(`SelectedValue »${selectedValue}« is not part of values, which consists of ›${values.join("‹,›")}‹`);
+        }
+        this.changeHandler = changeHandler
+        this.values = values;
         this.label = label;
-        this.#createDomElement(document);
-        this.addEventHandler();
+        this.#createDomElement(document,param);
+        this.addHandler(changeHandler)
+
     }
-    addEventHandler(){
-        //call the passed handler
-        this.#checkbox.onchange = (event)=> {
-            const isChecked = this.#checkbox.checked;
-            this.changeHandler(isChecked);
+    addHandler(changeHandler:(changedTo:string)=>void): void {
+        this.#selectElement.oninput = () => {
+            const currentValue = this.getCurrentValue();
+            changeHandler(currentValue);
         }
     }
-    removeEventHandler(){
-        this.#checkbox.onchange = null; 
+    removeHandler(): void {
+        this.#selectElement.oninput = null;
     }
-    #createDomElement(document:HTMLDocument){
-        const checkbox = document.createElement("input");
-        checkbox.type="checkbox";
+    getCurrentValue(){
+        const selected = this.#selectElement.value;
+        return selected;
+    }
+    #createDomElement(document:HTMLDocument,param:CreateDropdownParam){
+        const select = document.createElement("select");
+        const options = param.values.map(value=>{
+            let option = document.createElement("option");
+            option.value = value;
+            option.textContent = value;
+            //select value that the figure  currently on has.
+            if(option.value === param.selectedValue){
+                option.selected = true;
+            }
+            return option;
+        })
         const labelElement = document.createElement("label");
-        const labelText = document.createTextNode(this.label);
-        //assemble!
-        labelElement.append(labelText);
-        labelElement.append(checkbox);
-        this.domElement= labelElement;
-        this.#checkbox = checkbox; 
-    }
-    /**
-     * Bridges between the UI element 
-     * and the internal interface
-     */
-    getCurrentValue():boolean{
-        const isChecked:boolean = this.#checkbox.checked;
-        return isChecked;
-    }
+        labelElement.textContent = param.label;
 
+        //assemble!
+        select.append(...options);
+        //labelElement.append(labelText);
+        labelElement.append(select);
+        this.domElement= labelElement;
+        this.#selectElement = select;
+    }
 }
 
 /*Displays form controls for the currently selected figure */
@@ -68,7 +140,7 @@ class FigureBar{
     #drawingView:DrawingView;
     #formElementFactory:FormElementFactory = null; 
     #canvasContainer:HTMLElement = null; 
-    #currentFormElements:FormElement[] = []
+    #currentFormElements:FormElement<unknown>[] = []
     constructor(document:HTMLDocument,drawingView:DrawingView, canvasContainer:HTMLElement){
         this.#drawingView = drawingView;
         this.#canvasContainer = canvasContainer; //needed for relative positioning
@@ -76,10 +148,12 @@ class FigureBar{
         
         this.#formElementFactory = new FormElementFactory(document);
 
-        this.domElement = document.createElement("nav");
-        this.domElement.className = "figureBar";
-        this.domElement.style.position = "absolute";
-        this.domElement.style.backgroundColor = "green";
+        this.domElement = document.createElement("div");
+        this.domElement.classList.add("qwToolbar")
+        this.domElement.classList.add("figureBar")
+        // this.domElement.className = "figureBar";
+        // this.domElement.style.position = "absolute";
+        // this.domElement.style.backgroundColor = "green";
     }
     hide(){
         this.domElement.style.visibility = "hidden";
@@ -118,7 +192,7 @@ class FigureBar{
             this.hide();
         } else {
             this.#updateControls(selectedElement);
-            this.#updatePosition(selectedElement)
+            //this.#updatePosition(selectedElement)
             this.show();
         } 
         //NOTE: on pan, zoom and change of figure, the position of the toolbar might change.
@@ -131,12 +205,15 @@ class FormElementFactory{
     constructor(doc:HTMLDocument){
         this.#doc = doc;
     }
-    createCheckbox(label:string,startValue:boolean,changeHandler:FormBooleanChangeCallback){
-        this.#doc;
-        const checkbox = new FormElementCheckbox(label,startValue,changeHandler, this.#doc);
-        return checkbox;
+    // createCheckbox(label:string,startValue:boolean,changeHandler:FormBooleanChangeCallback){
+    //     const checkbox = new FormElementCheckbox(label,startValue,changeHandler, this.#doc);
+    //     return checkbox;
+    // }
+    createDropdown(param:CreateDropdownParam){
+        const dropdown = new FormElementDropdown(param, this.#doc)
+        return dropdown;  
     }
     
 }
 
-export {FormElementFactory, FigureBar,FormElementCheckbox, FormElement}
+export {FormElementFactory, FigureBar, FormElement}

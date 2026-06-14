@@ -559,7 +559,7 @@ function createAllResizeHandles(figure: CompositeFigure,drawingView: DrawingView
     const tlHandle = new ResizeTopLeftHandle(figure,drawingView);
     return [brHandle,trHandle,blHandle,tlHandle];
 }
-function createCropHandles(figure:CompositeFigure, drawingView):ResizeCompositeFigureHandleNoInner[]{
+function createCropHandles(figure:CompositeFigure, drawingView:DrawingView):ResizeCompositeFigureHandleNoInner[]{
     const tHandle  = new ResizeCompositeTopHandle(figure,drawingView)
     const rHandle  = new ResizeCompositeRightHandle(figure,drawingView)
     const bHandle  = new ResizeCompositeBottomHandle(figure,drawingView)

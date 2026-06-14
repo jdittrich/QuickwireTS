@@ -102,7 +102,7 @@ class HorizontalLine{
     }
     static #sort(point1:number,point2:number){
         const unsorted = [point1,point2]
-        const sorted = unsorted.toSorted()
+        const sorted = unsorted.toSorted((a, b) => a - b) //sorted without the parameter gives strange bugs that look like modula, cause 10<2
         return sorted;
     }
     

@@ -11,23 +11,25 @@ import { DrawingView } from '../drawingView.js';
 import { Drawable, Highlightable, InteractionAnnouncement, InteractionInfoProvider } from '../interfaces.js';
 import { CompositeFigure } from './compositeFigure.js';
 import { FormElement, FormElementFactory } from '../app_formElements.js';
+import {FigureTypes} from './figureTypes.js';
 
 type CreateFigureParam = {}
 
 type FigureJson = {
-    type: String;
+    type: string;
 }
+
 
 abstract class Figure implements Drawable, Highlightable, InteractionInfoProvider{
 
-    #attributes = new FigureAttributes();
+    attributes:FigureAttributes
 
     #containedBy:CompositeFigure = null;
 
     /**
      * Identify Figure type. Used e.g. in Deserialization.
      */
-    readonly name:string = "baseFigure";
+    readonly name:FigureTypes["name"] = null//"baseFigure";
     
     /**
      * 
@@ -35,7 +37,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @param { } param
      */
     constructor(param: CreateFigureParam){
-        
+        this.attributes = new FigureAttributes();
     }
     
     /**
@@ -86,8 +88,8 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * Get the attribute by key
      * @param {String} key 
      */
-    getAttribute(key: string){
-        const value  = this.#attributes.get(key);
+    getAttribute(key:string){
+        const value  = this.attributes.get(key);
         return value; 
     }
 
@@ -96,17 +98,24 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * @param {String} key 
      * @param {*} value 
      */
-    setAttribute(key: string,value: any){
-        this.#attributes.set(key,value);
+    setAttribute(key:string,value:any){
+        this.attributes.set(key,value);
+        this.onAttributeUpdate(key, value, this.attributes)
     }
     /**
      * Registers additional allowed keys.
      * Usually called in constructor.
      * @param {object}   {"Keyname":"ConstructorName"}
      */
-    registerAttributes(keyConstructorObject:any){
-        this.#attributes.register(keyConstructorObject)
-    };
+    // registerAttributes(keyConstructorObject:any){
+    //     this.#attributes.register(keyConstructorObject)
+    // };
+
+    /*
+    overwrite in subclasses, e.g. to made drawing figure change
+    based on attributes
+    */ 
+    onAttributeUpdate(key:string,value:any,attributes:FigureAttributes){}
     
     //#region: Composite interface
     /**
@@ -228,7 +237,7 @@ abstract class Figure implements Drawable, Highlightable, InteractionInfoProvide
      * but FormElements are handled by App and attached to a toolbar
      * to change figure properties.
      */
-    getFormElements(drawingView:DrawingView, formElementFactory:FormElementFactory):FormElement[]{
+    getFormElements(drawingView:DrawingView, formElementFactory:FormElementFactory):FormElement<any>[]{
         return[];
     }
 
