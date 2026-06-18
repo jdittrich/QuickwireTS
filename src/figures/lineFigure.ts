@@ -11,6 +11,7 @@ import { Drawable } from "../interfaces.js";
 import { FigureAttributes } from "./figureAttributes.js";
 import { FormElementFactory, FormElement } from "../app_formElements.js";
 import { ChangeAttributeCommand, ChangeAttributeCommandParam } from "../commands/changeAttributeCommand.js";
+import { DropdownOption } from "../app_formElements.js";
 
 type EndingTypes = "default"|"emptyCheckbox"|"fullCheckbox"|"emptyRadio"|"fullRadio"
 
@@ -134,63 +135,15 @@ const lineEndingRegistry:Record<EndingTypes,DrawElementAt> = {
 }
 
 
+type LineStyleKeys = keyof typeof lineEndingRegistry;
 
-
-// /**
-//  * Define style on creation.
-//  * Pass it a line and get a line drawn 
-//  * */
-// class LineDrawer{ 
-//     startType:EndingTypes
-//     lineStart:DrawElementAt = drawBoxAt
-
-//     lineMiddle:DrawLineFromTo= drawStraightLineFromTo
-//     dimensions:Point
-//     thickness = 4
-//     endingsWidth = 20
-//     constructor(param:{start?:DrawElementAt}){
-//         this.lineStart = param.start;
-//     }
-//     draw(ctx:CanvasRenderingContext2D, line:HorizontalLine){
-//         ctx.lineWidth = 2;
-//         this.lineStart(ctx,line.leftPoint)
-//         //lineEnd.draw(ctx,line.rightPoint)
-
-//         ctx.lineWidth = this.thickness;
-//         const middleLine = new HorizontalLine({
-//             horizontal1: line.left  + this.endingsWidth,
-//             horizontal2: line.right,
-//             top:line.top
-//         });
-
-//         this.lineMiddle(ctx,middleLine)
-//     }
-//     toJSON(){
-
-//     }
-//     static fromJSON(){
-
-//     }
-//     static createFromNames(param:{start:EndingTypes}){
-//         let start = null; 
-//         switch (param.start){
-//             case "default":
-//                 start = drawDefaultStartAt
-//                 break;
-//             case "emptyCheckbox":
-//                 start = drawBoxAt
-//                 break
-//             default:
-//                 start = drawDefaultStartAt
-//         }
-//         const lineDrawer = new LineDrawer({start:start})
-//         return lineDrawer;
-//     }
-// }
-
-
-
-
+const selectParams:DropdownOption<LineStyleKeys>[] = [
+    {value:"default", label:"default", iconName:"line_default"},
+    {value:"emptyCheckbox",  label:"empty checkbox", iconName:"line_box_empty"},
+    {value:"fullCheckbox",  label:"selected checkbox", iconName:"line_box_full"},
+    {value:"emptyRadio",  label:"empty radio", iconName:"line_circle_empty"},
+    {value:"fullRadio", label:"selected radio", iconName:"line_circle_full"}
+]
 
 
 class HorizontalLineFigure extends Figure{
@@ -337,7 +290,7 @@ class HorizontalLineFigure extends Figure{
         const lineLeftEndDropdown =  formElementFactory.createDropdown({
             label:"left end",
             selectedValue:this.getAttribute("lineLeftEnd"),
-            values:Object.keys(lineEndingRegistry),
+            options:selectParams,
             changeHandler:(changedTo:string)=>{
                 const changeAttributeParam:ChangeAttributeCommandParam = {
                     figure:this,
@@ -351,7 +304,7 @@ class HorizontalLineFigure extends Figure{
         const lineRightEndDropdown = formElementFactory.createDropdown({
             label:"right end",
             selectedValue:this.getAttribute("lineRightEnd"),
-            values:Object.keys(lineEndingRegistry),
+            options:selectParams,
             changeHandler:(changedTo:string)=>{
                 const changeAttributeParam:ChangeAttributeCommandParam = {
                     figure:this,

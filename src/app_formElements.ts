@@ -32,10 +32,16 @@ type CreateFormElementParam = {
     label:string;
 }
 
-type CreateDropdownParam = CreateFormElementParam & {
+type DropdownOption<possibleValues> = {
+    iconName:string, // what the user sees
+    label:string,    //what the user sees
+    value:possibleValues     //what the program gets
+}
+type CreateDropdownParam<possibleValues> = CreateFormElementParam & {
     changeHandler: (changedTo:string)=>void
-    values:string[],
+    options:DropdownOption<possibleValues>[],
     selectedValue:string
+    mirrorIcons?:boolean
 }
 
 // class FormElementCheckbox extends FormElement<boolean>{
@@ -81,17 +87,18 @@ type CreateDropdownParam = CreateFormElementParam & {
 // }
 
 class FormElementDropdown extends FormElement<string>{
-    values:string[]
+    options:string[]
     domElement: HTMLElement;
     #selectElement: HTMLSelectElement;
-    constructor(param:CreateDropdownParam, document:HTMLDocument){
+    constructor(param:CreateDropdownParam<string>, document:HTMLDocument){
         super()
-        const {label,changeHandler, values,selectedValue} = param;
+        const {label,changeHandler, options,selectedValue} = param;
+        const values = options.map(option => option.value)
         if(!values.includes(selectedValue)){
             throw TypeError(`SelectedValue »${selectedValue}« is not part of values, which consists of ›${values.join("‹,›")}‹`);
         }
-        this.changeHandler = changeHandler
-        this.values = values;
+        this.changeHandler = changeHandler;
+        this.options = values;
         this.label = label;
         this.#createDomElement(document,param);
         this.addHandler(changeHandler)
@@ -110,27 +117,44 @@ class FormElementDropdown extends FormElement<string>{
         const selected = this.#selectElement.value;
         return selected;
     }
-    #createDomElement(document:HTMLDocument,param:CreateDropdownParam){
-        const select = document.createElement("select");
-        const options = param.values.map(value=>{
-            let option = document.createElement("option");
-            option.value = value;
-            option.textContent = value;
+    #createDomElement(document:HTMLDocument,param:CreateDropdownParam<string>){
+        const selectElem = document.createElement("select");
+       
+        
+        const optionElems = param.options.map(option=>{
+            let optionElem = document.createElement("option");
+            optionElem.value = option.value;
             //select value that the figure  currently on has.
-            if(option.value === param.selectedValue){
-                option.selected = true;
+            if(optionElem.value === param.selectedValue){
+                optionElem.selected = true;
             }
-            return option;
+            optionElem.setAttribute("aria-label",option.label);
+            
+            const spanElem = document.createElement("span");
+            spanElem.className = "selecttextlabel";
+            spanElem.textContent = option.label;
+
+            const imgElem = document.createElement("img");
+            imgElem.src ="/static/properties/"+option.iconName+".svg"
+            imgElem.setAttribute("aria-hidden","true")
+            //assemble!
+            optionElem.append(imgElem,spanElem);
+
+            return optionElem;
         })
         const labelElement = document.createElement("label");
         labelElement.textContent = param.label;
 
-        //assemble!
-        select.append(...options);
+        const buttonElem = document.createElement("button");
+        const selectedContentElem = document.createElement("selectedcontent")
+
+        buttonElem.append(selectedContentElem);
+
+        selectElem.append(buttonElem,...optionElems);
         //labelElement.append(labelText);
-        labelElement.append(select);
+        labelElement.append(selectElem);
         this.domElement= labelElement;
-        this.#selectElement = select;
+        this.#selectElement = selectElem;
     }
 }
 
@@ -149,8 +173,7 @@ class FigureBar{
         this.#formElementFactory = new FormElementFactory(document);
 
         this.domElement = document.createElement("div");
-        this.domElement.classList.add("qwToolbar")
-        this.domElement.classList.add("figureBar")
+        this.domElement.classList.add("qwBar","figureBar");
         // this.domElement.className = "figureBar";
         // this.domElement.style.position = "absolute";
         // this.domElement.style.backgroundColor = "green";
@@ -209,11 +232,11 @@ class FormElementFactory{
     //     const checkbox = new FormElementCheckbox(label,startValue,changeHandler, this.#doc);
     //     return checkbox;
     // }
-    createDropdown(param:CreateDropdownParam){
+    createDropdown(param:CreateDropdownParam<string>){
         const dropdown = new FormElementDropdown(param, this.#doc)
         return dropdown;  
     }
     
 }
 
-export {FormElementFactory, FigureBar, FormElement}
+export {FormElementFactory, FigureBar, FormElement, DropdownOption}

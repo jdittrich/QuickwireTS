@@ -5,12 +5,13 @@
         border-bottom: 1px solid gray;
 }
 
-.qwToolbar{
+.qwBar{
     display: flex; 
     user-select: none; 
+    margin-right:0.3rem;
 }
 
-.qwToolbar > input + label{
+.qwToolBar > input + label{
     background-color: rgb(237, 237, 237);
     width:32px;
     height:32px;
@@ -21,43 +22,93 @@
     box-sizing: border-box;
     margin-right:3px;
 }
-.qwToolbar > input + label:hover{
+.qwToolBar > input + label:hover{
     border-color:rgb(249, 186, 99);
     background-color:#fbfbfb;
 }
 
 
-.qwToolbar > input:focus:active {
+.qwToolBar > input:focus:active {
     outline:none;
 }
 
-.qwToolbar > input:checked + label{
+.qwToolBar > input:checked + label{
     background-color: #fbfbfb;
     border-color:rgb(243, 142, 0);
 }
 
-.qwToolbar > input[type=radio]{
+.qwToolBar > input[type=radio]{
     appearance: none;
     width:0;
     margin:0
 
 }
 
-.qwToolbar select {
+
+.qwBar select {
  height:2rem;
  margin-right:1rem;
  margin-left:0.2rem;
 }
 
-.qwToolbar label {
- font-family: sans-serif;
- font-size:0.85rem;
+.figureBar select,
+.figureBar ::picker(select) {
+    appearance: base-select;
 }
 
-.qwToolbar > input[type=file]{
+
+.figureBar select .selecttextlabel {
+    display: none;
 }
 
-.qwToolbar > input[type=file]::file-selector-button{
+.figureBar select selectedcontent img,.qwBar select::picker-icon{
+    position:relative;
+    top:2px
+}
+
+.figureBar label {
+    font-family: sans-serif;
+    font-size:0.85rem;
+}
+
+.figureBar > input[type=file]::file-selector-button{
     height:2rem;
 }
+
+/*custom upload button*/
+.qwBar label.hiddenUpload{
+    position: relative;
+    color: #000;
+    border:1px solid gray;
+    background-color: rgb(237, 237, 237);
+    height: 32px;
+    background-color: #ededed;
+    border-radius: 3px;
+    box-sizing: border-box;
+    margin-right: 3px;
+    font-family: sans-serif;
+    font-size: 0.85rem;
+    display:flex;
+    align-items: center;
+    padding:0.3rem;
+}
+.qwBar label.hiddenUpload:has(>input:focus){ /*with a focused child element*/
+    outline:rgb(0, 42, 255) 2px solid;
+}
+.qwBar label.hiddenUpload:hover{
+    background-color:#CCC;
+}
+.qwBar label.hiddenUpload:active{
+    background-color:#3f50be;
+}
+
+.qwBar > .hiddenUpload .qwBarButton{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    opacity:0;
+}
+  
 

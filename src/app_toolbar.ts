@@ -27,7 +27,7 @@ class Actionbar{
 
     constructor(drawingView:DrawingView){
         this.domElement = document.createElement("div");
-        this.domElement.className = "qwToolbar";
+        this.domElement.classList.add("qwBar","qwActionBar");
         this.drawingView = drawingView;
     }
     addAction(label:string,callback:AddActionCallback, tooltip:string){
@@ -48,7 +48,7 @@ class ActionBarButton{
         htmlButton.setAttribute("type","button");
         htmlButton.setAttribute("value",label);
         htmlButton.setAttribute("title",tooltip);
-        htmlButton.className = "qwToolbarButton";
+        htmlButton.className = "qwBarButton";
         this.domElement = htmlButton;
     }
 }   
@@ -63,10 +63,24 @@ class ActionBarActionButton extends ActionBarButton{
     }
 }
 
-class ActionbarLoadFileAsJsonButton extends ActionBarButton{
+class ActionbarLoadFileAsJsonButton{
+    domElement:HTMLLabelElement;
     constructor(label:string, drawingView:DrawingView, callback:AddLoadFileCallback, tooltip:string){
-        super(label, tooltip);
-        this.domElement.setAttribute("type","file");
+        const uploadButton = document.createElement("input");
+        const uploadLabel  = document.createElement("label");
+        const textWrapper = document.createElement("span")
+        
+        uploadButton.setAttribute("type","file");
+        uploadButton.setAttribute("value",label);
+        uploadButton.setAttribute("title",tooltip);
+        uploadButton.className = "qwBarButton";
+
+        uploadLabel.className = "hiddenUpload";
+
+        textWrapper.textContent = label;
+
+        uploadLabel.append(textWrapper,uploadButton)
+
         const callAction = function(event:any){
             //guards
             if(event.target.files === undefined) {return};
@@ -85,7 +99,8 @@ class ActionbarLoadFileAsJsonButton extends ActionBarButton{
                callback(drawingView,resultJSON);
             }
         }
-        this.domElement.addEventListener("change", callAction,false);
+        uploadButton.addEventListener("change", callAction,false);
+        this.domElement = uploadLabel;
     }
 }
 
@@ -108,7 +123,7 @@ class Toolbar{
     buttons:Array<ToolButton> = []
     constructor(drawingView:DrawingView){
         this.domElement = document.createElement("div");
-        this.domElement.className = "qwToolbar";
+        this.domElement.classList.add("qwBar","qwToolBar");
         this.drawingView = drawingView;
         this.drawingView.addEventListener("toolChange",this.updateToolbar.bind(this) as EventListenerOrEventListenerObject)
     }

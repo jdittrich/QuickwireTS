@@ -9,11 +9,13 @@ import { Point } from '../data/point.js';
 import { InteractionAnnouncement } from '../interfaces.js';
 import { FormElementFactory, FormElement } from '../app_formElements.js';
 import { ChangeAttributeCommand, ChangeAttributeCommandParam } from '../commands/changeAttributeCommand.js';
+import {DropdownOption} from '../app_formElements.js';
 
 type CreateRectFigureParam = CreateCompositeFigureParam & {
     //canvas?:OffscreenCanvas
     rectStyle?:RectStyleTypes
 };
+
 type RectFigureJson = CompositeFigureJson & {
     rectStyle: RectStyleTypes
 };
@@ -66,6 +68,13 @@ const rectStyleRegistry:Record<RectStyleTypes,DrawRect> = {
     "imagePlaceholder": drawImagePlaceholderRect
 }
 
+type RectStyleKeys = keyof typeof rectStyleRegistry
+
+const selectParams:DropdownOption<RectStyleKeys>[] = [
+    {value:"default", label:"default", iconName:"rect_default"},
+    {value:"accent",  label:"accent", iconName:"rect_accent"},
+    {value:"imagePlaceholder",  label:"image placeholder", iconName:"rect_placeholder"}
+]
 
 /**
  * Creates figure representing a simple rectangle
@@ -106,7 +115,7 @@ class RectFigure extends CompositeFigure{
         const rectStyleDropdown =  formElementFactory.createDropdown({
             label:"style:",
             selectedValue:this.getAttribute("rectStyle"),
-            values:Object.keys(rectStyleRegistry),
+            options:selectParams,
             changeHandler:(changedTo:string)=>{
                 const changeAttributeParam:ChangeAttributeCommandParam = {
                     figure:this,
